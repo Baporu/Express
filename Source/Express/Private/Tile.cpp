@@ -2,11 +2,14 @@
 
 
 #include "Tile.h"
+<<<<<<< HEAD
 #include "Tile_FSM.h"
 #include "Exp_GameMode.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Chaos/Vector.h"
+=======
+>>>>>>> parent of ac112c5 (게임모드 생성)
 
 // Sets default values
 ATile::ATile()
@@ -14,6 +17,7 @@ ATile::ATile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+<<<<<<< HEAD
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tile Mesh"));
 	RootComponent = TileMesh;
 	TileFSM = CreateDefaultSubobject<UTile_FSM>(TEXT("Tile FSM"));
@@ -24,6 +28,8 @@ ATile::ATile()
 		HeightDataTable = DataTableFinder.Object;
 	}
 
+=======
+>>>>>>> parent of ac112c5 (게임모드 생성)
 }
 
 // Called when the game starts or when spawned

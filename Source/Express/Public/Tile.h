@@ -31,6 +31,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+<<<<<<< HEAD
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
@@ -54,4 +55,6 @@ public:
 
 	void GenerateMap();
 	
+=======
+>>>>>>> parent of ac112c5 (게임모드 생성)
 };
