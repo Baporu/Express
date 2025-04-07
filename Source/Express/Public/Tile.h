@@ -4,8 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Exp_GameMode.h"
 #include "Tile.generated.h"
-
+USTRUCT() // 구조체 정의
+struct FTileHeightData : public FTableRowBase // 상속 UDatatable의 행 데이터 구조를 표준화
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Height; // 높이값 문자열
+};
 UCLASS()
 class EXPRESS_API ATile : public AActor
 {
@@ -25,13 +33,25 @@ public:
 
 public:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMeshComponent* TileMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
 	class UTile_FSM* TileFSM;
 
+	TArray<TArray<int>> TileHeights; // 높이값 2d 배열
+	
+	UPROPERTY(EditAnywhere, Category="Data")
+	UDataTable* HeightDataTable;
 
+	int Width;
+	int Height;
 
+public:
+
+	FTileHeightData ReadHeightDataFromCSV(const FString& FilePath);
+	void GenerateTiles(const FTileHeightData& HeightData);
+
+	void GenerateMap();
 	
 };

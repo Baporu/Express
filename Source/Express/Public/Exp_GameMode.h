@@ -4,14 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Engine/DataTable.h"
 #include "Exp_GameMode.generated.h"
 
 /**
  * 
  */
+
+
 UCLASS()
 class EXPRESS_API AExp_GameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 	
 };
+
