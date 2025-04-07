@@ -2,6 +2,7 @@
 
 
 #include "Tile_FSM.h"
+#include "Components/SceneComponent.h"
 
 // Sets default values for this component's properties
 UTile_FSM::UTile_FSM()
@@ -30,5 +31,51 @@ void UTile_FSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+	switch (CurrentState)
+	{
+	case ETileState::Empty: EmptyState();
+		break;
+	case ETileState::Unmined: UnminedState();
+		break;
+	case ETileState::HasItem: HasItemState();
+		break;
+	default:
+		break;
+	}
+}
+
+void UTile_FSM::EmptyState()
+{
+	//if()
+}
+
+void UTile_FSM::UnminedState()
+{
+
+}
+
+void UTile_FSM::HasItemState()
+{
+	if (HasChildWithTag("Item"))
+	{
+		//Item가 자식이면
+	}
+	else
+	{
+		CurrentState = ETileState::Empty;
+	}
+}
+
+bool UTile_FSM::HasChildWithTag(FName Tag)
+{
+	//for (USceneComponent* Child : GetAttachChildren())
+	//{
+	//	if (Child->ComponentHasTag(Tag))
+	//	{
+	//		return true;
+	//	}
+	//}
+	//return false;
+	return false;
 }
 

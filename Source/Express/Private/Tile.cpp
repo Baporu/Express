@@ -2,6 +2,7 @@
 
 
 #include "Tile.h"
+#include "Tile_FSM.h"
 
 // Sets default values
 ATile::ATile()
@@ -9,6 +10,9 @@ ATile::ATile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tile Mesh"));
+	RootComponent = TileMesh;
+	TileFSM = CreateDefaultSubobject<UTile_FSM>(TEXT("Tile FSM"));
 }
 
 // Called when the game starts or when spawned

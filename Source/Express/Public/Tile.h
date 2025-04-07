@@ -23,4 +23,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMeshComponent* TileMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
+	class UTile_FSM* TileFSM;
+
+
+
+	
 };
