@@ -39,19 +39,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
 	class UTile_FSM* TileFSM;
 
-	TArray<TArray<int>> TileHeights; // 높이값 2d 배열
-	
-	UPROPERTY(EditAnywhere, Category="Data")
-	UDataTable* HeightDataTable;
+	UPROPERTY(EditAnywhere, Category ="Data")
+	class UDataTable* HeightDataTable;
 
+	TArray<TArray<int>> TileHeights; // 높이값 2d 배열
 	int Width;
 	int Height;
 
 public:
 
 	FTileHeightData ReadHeightDataFromCSV(const FString& FilePath);
-	void GenerateTiles(const FTileHeightData& HeightData);
-
 	void GenerateMap();
 	
 };

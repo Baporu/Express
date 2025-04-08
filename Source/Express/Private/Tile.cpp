@@ -17,27 +17,13 @@ ATile::ATile()
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tile Mesh"));
 	RootComponent = TileMesh;
 	TileFSM = CreateDefaultSubobject<UTile_FSM>(TEXT("Tile FSM"));
-
-	static ConstructorHelpers::FObjectFinder<UDataTable> DataTableFinder(TEXT("/Game/SBS/Source/TileHeightData.TileHeightData"));
-	if (DataTableFinder.Succeeded())
-	{
-		HeightDataTable = DataTableFinder.Object;
-	}
-
 }
 
 // Called when the game starts or when spawned
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	//FString FilePath = FPaths::ProjectContentDir() / TEXT("/SBS/Source/TileHeightData.csv");
 
-	//FTileHeightData HeightData = ReadHeightDataFromCSV(FilePath);
-	//if (HeightData.Height.Num() > 0)
-	//{
-	//	//UE_LOG(LogTemp, Warning, TEXT("Height Data: %d x %d"), HeightData.Height.Num());
-	//}
-	 
 	GenerateMap(); // 맵 생성
 
 	//Height = HeightDataTable->GetRowNames().Num(); // 행갯수
@@ -49,6 +35,7 @@ void ATile::BeginPlay()
 		{
 			FVector Location(Row * 100.f, Col * 100.f, TileHeights[Row][Col] * 100.f);  // X, Y, Z 위치 설정
 			GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), Location, FRotator::ZeroRotator);  // 기본 액터 스폰
+			UE_LOG(LogTemp, Warning, TEXT("%d  %d", Row, Col));
 		}
 	}
 
@@ -82,27 +69,6 @@ FTileHeightData ATile::ReadHeightDataFromCSV(const FString& FilePath)
 		}
 	}
 return HeightData;
-}
-
-void ATile::GenerateTiles(const FTileHeightData& HeightData)
-{
-	//const int32 NumRows = static_cast<int32>(FMath::Sqrt(static_cast<float>(HeightData.Height.Num())));
-	//const int32 NumCols = NumRows;
-	//
-	//// Iterate through each cell in the height data
-	//for (int32 X = 0; X < NumRows; ++X)
-	//{
-	//	for (int32 Y = 0; Y < NumCols; ++Y)
-	//	{
-	//		int index = X * NumCols + Y;
-	//		float Z = HeightData.Height[index];
-	//		FVector Location(X * 100.0f, Y * 100.0f, Z* 100);
-	//		FRotator Rotation(0.0f, 0.0f, 0.0f);
-	//
-	//		// Spawn a new tile actor at the specified location and rotation
-	//		GetWorld()->SpawnActor<ATile>(ATile::StaticClass(), Location, Rotation);
-	//	}
-	//}
 }
 
 void ATile::GenerateMap()
