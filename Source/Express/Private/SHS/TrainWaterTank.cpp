@@ -2,8 +2,9 @@
 
 
 #include "SHS/TrainWaterTank.h"
-#include "Components/BoxComponent.h"
+#include "Express/Express.h"
 #include "SHS/TrainEngine.h"
+#include "Exp_GameMode.h"
 
 // Called when the game starts or when spawned
 void ATrainWaterTank::BeginPlay()
@@ -11,6 +12,20 @@ void ATrainWaterTank::BeginPlay()
 	Super::BeginPlay();
 
 	TankMaterial = MeshComp->CreateDynamicMaterialInstance(0);
+
+	AExp_GameMode* gm = Cast<AExp_GameMode>(GetWorld()->GetAuthGameMode());
+	if (gm) gm->WaterTank = this;
+
+	if (!TrainEngine) {
+		UE_LOG(LogTrain, Log, TEXT("Train Engine Not Found"));
+
+		return;
+	}
+
+	UE_LOG(LogTrain, Log, TEXT("Try Attach WaterTank To Engine"));
+	TrainEngine->AttachModule(this);
+
+	UE_LOG(LogTrain, Log, TEXT("Try Add Fire Time To Engine"));
 	TrainEngine->AddFireTime(FireTime);
 }
 

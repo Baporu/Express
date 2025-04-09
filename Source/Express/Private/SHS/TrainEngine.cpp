@@ -2,7 +2,7 @@
 
 
 #include "SHS/TrainEngine.h"
-#include "Components/BoxComponent.h"
+#include "Express/Express.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -10,6 +10,8 @@ ATrainEngine::ATrainEngine()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	TrainModules.Add(this);
+	ModuleNumber = 0;
 }
 
 // Called when the game starts or when spawned
@@ -39,10 +41,10 @@ void ATrainEngine::Tick(float DeltaTime)
 
 bool ATrainEngine::CheckModule(int32 ModuleIndex)
 {
-	if (TrainModules[ModuleIndex])
-		return true;
+	if (TrainModules.Num() == ModuleIndex)
+		return false;
 
-	return false;
+	return true;
 }
 
 ATrainModule* ATrainEngine::GetFrontModule(int32 ModuleIndex)
@@ -64,6 +66,7 @@ ATrainModule* ATrainEngine::GetBackModule(int32 ModuleIndex)
 void ATrainEngine::AddFireTime(float WaterTankTime)
 {
 	FireTime += WaterTankTime;
+	UE_LOG(LogTrain, Log, TEXT("Fire Time Added"));
 }
 
 void ATrainEngine::OnFire(float DeltaTime)
@@ -84,6 +87,8 @@ void ATrainEngine::GetTileLocation()
 		NextRot = 90.0;
 		rotA = 0.0;
 	}
+
+	UE_LOG(LogTrain, Log, TEXT("Next Position Changed"));
 }
 
 void ATrainEngine::RotateTrain(float DeltaTime)

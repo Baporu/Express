@@ -33,7 +33,7 @@ ATrainModule::ATrainModule()
 void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	TrainEngine = Cast<ATrainEngine>(UGameplayStatics::GetActorOfClass(GetWorld(), TrainEngineFactory));
 }
 
@@ -60,6 +60,8 @@ void ATrainModule::AttachModule(ATrainModule* TrainModule)
 // 	}
 
 	TrainModule->AttachToComponent(ModuleComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	TrainEngine->TrainModules.Add(TrainModule);
+	TrainModule->ModuleNumber = ModuleNumber + 1;
 }
 
 void ATrainModule::StartFire()
