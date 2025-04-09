@@ -11,7 +11,7 @@ void ATrainWaterTank::BeginPlay()
 	Super::BeginPlay();
 
 	TankMaterial = MeshComp->CreateDynamicMaterialInstance(0);
-	//TrainEngine->FireTime += FireTime;
+	TrainEngine->AddFireTime(FireTime);
 }
 
 // Called every frame
@@ -19,8 +19,20 @@ void ATrainWaterTank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Material 색상 변경하는 함수, 머티리얼에 파라미터 추가한 후 작동시켜야 함
-	//ChangeTankColor();
+	FireTimer += DeltaTime;
+
+	ChangeTankColor();
+}
+
+void ATrainWaterTank::EndFire()
+{
+	if (bOnFire) {
+		Super::EndFire();
+
+		return;
+	}
+
+	FireTimer = 0.0f;
 }
 
 void ATrainWaterTank::ChangeTankColor()

@@ -61,6 +61,16 @@ ATrainModule* ATrainEngine::GetBackModule(int32 ModuleIndex)
 	return TrainModules[ModuleIndex + 1];
 }
 
+void ATrainEngine::AddFireTime(float WaterTankTime)
+{
+	FireTime += WaterTankTime;
+}
+
+void ATrainEngine::OnFire(float DeltaTime)
+{
+	TrainModules[ModuleNumber + 1]->FireTimer += DeltaTime;
+}
+
 // ================================ 임시 함수들 ================================
 void ATrainEngine::GetTileLocation()
 {	

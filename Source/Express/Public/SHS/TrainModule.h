@@ -24,10 +24,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	float FireTimer = 0.0f;
+
 	void AttachModule(ATrainModule* TrainModule);
 	void StartFire();
-	void OnFire(float DeltaTime);
-	void EndFire();
+	virtual void EndFire();
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -38,7 +39,9 @@ protected:
 	class UBoxComponent* ModuleComp;
 
 	// 열차의 모듈 배열을 가진 클래스
-	UPROPERTY(EditAnywhere, Category = "Train")
+	UPROPERTY(EditDefaultsOnly, Category = "Train")
+	TSubclassOf<class ATrainEngine> TrainEngineFactory;
+	UPROPERTY(VisibleAnywhere, Category = "Train")
 	class ATrainEngine* TrainEngine;
 	// 모듈 배열의 내 인덱스
 	UPROPERTY(EditAnywhere, Category = "Train")
@@ -47,7 +50,6 @@ protected:
 	// 화재 로직 관련
 	UPROPERTY(EditAnywhere, Category = "Fire")
 	float FireTime = 15.0f;
-	float FireTimer = 0.0f;
 	// 불 붙었으면 기능 정지
 	UPROPERTY(EditAnywhere, Category = "Fire")
 	bool bOnFire = false;
@@ -56,5 +58,8 @@ protected:
 	class UParticleSystem* FireEffect;
 	// 화재 이펙트 인스턴스 담아둘 변수
 	class UParticleSystemComponent* FireComp;
+
+
+	virtual void OnFire(float DeltaTime);
 
 };

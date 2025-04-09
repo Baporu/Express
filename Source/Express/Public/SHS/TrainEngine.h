@@ -33,11 +33,16 @@ public:
 	ATrainModule* GetFrontModule(int32 ModuleIndex);
 	ATrainModule* GetBackModule(int32 ModuleIndex);
 
+	void AddFireTime(float WaterTankTime);
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
 	float TrainSpeed = 25.0f;
 	UPROPERTY(EditAnywhere, Category = "Train")
 	FVector NextPos = FVector::ZeroVector;
+
+	
+	virtual void OnFire(float DeltaTime) override;
 
 private:
 	// 임시 함수들
