@@ -28,6 +28,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Data")
     UDataTable* HeightDataTable;  // CSV 데이터 테이블
 
+	//UPROPERTY(EditAnywhere, Category = "Data")
+	//UDataTable* TypeDataTable;  // CSV 데이터 테이블
+
 	UPROPERTY(EditAnywhere, Category = "Tile")
     TSubclassOf<ATile> TileActorClass;  // 스폰할 Tile
 

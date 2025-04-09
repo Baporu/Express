@@ -37,7 +37,7 @@ void ATileGenerator::BeginPlay()
                 }
                 else
                 {
-                    UE_LOG(LogTemp, Warning, TEXT("TileActorClass is not set!"));
+                    UE_LOG(LogTemp, Warning, TEXT("TileActor null"));
                 }
             }
         }
