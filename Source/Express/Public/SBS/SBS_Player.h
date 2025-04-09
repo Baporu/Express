@@ -42,6 +42,13 @@ public:
 	float MoveSpeed = 600.0f;
 	UPROPERTY(EditDefaultsOnly)
 	float RotationLerpRate = 10;
+	UPROPERTY(EditDefaultsOnly)
+	float InteractRadius = 150;
+
+	float TileSize = 100;
+
+	class AItem* OwnedItem;
+
 public:
 
 	

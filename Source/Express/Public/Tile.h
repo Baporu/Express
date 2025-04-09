@@ -6,6 +6,15 @@
 #include "GameFramework/Actor.h"
 #include "Exp_GameMode.h"
 #include "Tile.generated.h"
+
+enum class ETileType : uint8
+{
+	Ground UMETA(DisplayName = "Ground"), // 바닥
+	Wood UMETA(DisplayName = "Wood"), // 채취 가능 자원
+	Stone UMETA(DisplayName = "Stone") // 채취 가능 자원
+};
+
+
 USTRUCT() // 구조체 정의
 struct FTileHeightData : public FTableRowBase // 상속 UDatatable의 행 데이터 구조를 표준화
 {
@@ -14,6 +23,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Height; // 높이값 문자열
 };
+
+
 UCLASS()
 class EXPRESS_API ATile : public AActor
 {
@@ -39,4 +50,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
 	class UTile_FSM* TileFSM;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
+	ETileType TileType;
+
+public:
+	
+	bool CanHarvest() const;
+	
+	void HarvestTile();
+
+	void InitializeTile(ETileType Type) {TileType = Type;}
 };

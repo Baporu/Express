@@ -7,6 +7,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Chaos/Vector.h"
+#include "SBS/Item.h"
 
 // Sets default values
 ATile::ATile()
@@ -32,5 +33,28 @@ void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+bool ATile::CanHarvest() const
+{
+	return TileType != ETileType::Ground; // 바닥이 아닌 경우에만 수확 가능
+}
+
+void ATile::HarvestTile()
+{
+	if(!CanHarvest() || !IsValid(this)) // 수확할수 없으면
+	{
+		return;
+	}
+	// ETileType을 EItemType으로 변환
+	EItemType ItemType = (TileType == ETileType::Wood) ? EItemType::Wood : EItemType::Stone;
+
+	FVector SpawnLocation = GetActorLocation();
+	AItem* NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+	if (NewItem)
+	{
+		NewItem->CreateItem(ItemType, 1); // 아이템 생성
+	}
+	Destroy(); // 타일 파괴
 }
 

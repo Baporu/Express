@@ -5,6 +5,8 @@
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
 #include "Interface_Tile.h"
+#include "SBS/Item.h"
+#include "EngineUtils.h"
 
 // Sets default values
 ASBS_Player::ASBS_Player()
@@ -51,7 +53,7 @@ void ASBS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EIC->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ASBS_Player::Move);
-		EIC->BindAction(IA_Interact, ETriggerEvent::Triggered, this, &ASBS_Player::Interact);
+		EIC->BindAction(IA_Interact, ETriggerEvent::Started, this, &ASBS_Player::Interact);
 	}
 }
 
@@ -84,9 +86,65 @@ void ASBS_Player::Move(const FInputActionValue& Value)
 
 void ASBS_Player::Interact(const FInputActionValue& Value)
 {
-	//
-	//if()
+
+	FVector CurLoc = GetActorLocation();
+	FVector Forward = GetActorForwardVector();// 전방방향
+
+	int CurrentTileX = FMath::FloorToInt(CurLoc.X / TileSize); // 정수로 내림(나누기)
+	int CurrentTileY = FMath::FloorToInt(CurLoc.Y / TileSize);
+	UE_LOG(LogTemp, Log, TEXT("CurrentTile: (%d, %d)"),CurrentTileX, CurrentTileY);
+
+	AItem* TargetItem = nullptr;
 	
-	//IInterface_Tile.PressKey();
+	for (TActorIterator<AItem> Ite(GetWorld()); Ite; ++Ite)
+	{
+		AItem* Item = *Ite;
+		if (Item)
+		{
+			FVector ItemLoc = Item->GetActorLocation();
+			int ItemTileX = FMath::FloorToInt(ItemLoc.X / TileSize); // 정수로 내림(나누기)
+			int ItemTileY = FMath::FloorToInt(ItemLoc.Y / TileSize); // 정수로 내림(나누기)
+			if (ItemTileX == CurrentTileX && ItemTileY == CurrentTileY)
+			{
+				TargetItem = Item;
+				break;
+			}
+		}
+	}
+	if (!TargetItem)
+	{
+		float ClosestDistance = InteractRadius * InteractRadius;
+		for (TActorIterator<AItem> Ite(GetWorld()); Ite; ++Ite)
+		{
+			AItem* Item = *Ite;
+			if (Item)
+			{
+				FVector ItemLoc = Item->GetActorLocation();
+				float Distance = FVector::DistSquaredXY(CurLoc, ItemLoc);
+
+				if (Distance <= ClosestDistance)
+				{
+					FVector DirectionToItem = (ItemLoc - CurLoc).GetSafeNormal();
+					float DotProduct = FVector::DotProduct(Forward, DirectionToItem); //cos 값이기 때문에 0보다 크다 = +- 90도 
+
+					if (DotProduct > 0.5) // -60~60
+					{
+						TargetItem = Item;
+						ClosestDistance = Distance; // 더 가까운 아이템 우선
+					}
+				}
+			}
+		}
+	}
+	if (TargetItem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TargetItem: %s"), *TargetItem->GetName());
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Item Found"));
+	}
+
 }
 
