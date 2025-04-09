@@ -26,14 +26,23 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	UPROPERTY(VisibleAnywhere)
-	TArray<ATrainModule*> TrainModules;
+	UPROPERTY(EditDefaultsOnly, Category = "Train")
+	TSubclassOf<class ATrainWaterTank> BP_WaterTank;
+	UPROPERTY(EditDefaultsOnly, Category = "Train")
+	TSubclassOf<class ATrainCargo> BP_Cargo;
+	UPROPERTY(EditDefaultsOnly, Category = "Train")
+	TSubclassOf<class ATrainCrafter> BP_Crafter;
 
 	bool CheckModule(int32 ModuleIndex);
 	ATrainModule* GetFrontModule(int32 ModuleIndex);
 	ATrainModule* GetBackModule(int32 ModuleIndex);
+	void AttachModule(ATrainModule* TrainModule);
+	void AttachModule(ATrainModule* TrainModule, int32 AttachIndex);
 
 	void AddFireTime(float WaterTankTime);
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<ATrainModule*> TrainModules;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
@@ -52,5 +61,6 @@ private:
 	double NextRot;
 	double rotA;
 
+	void SpawnDefaultModules();
 
 };

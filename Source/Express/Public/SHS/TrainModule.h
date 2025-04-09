@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "TrainModule.generated.h"
 
+class ATrainEngine;
+class UBoxComponent;
+
 UCLASS()
 class EXPRESS_API ATrainModule : public AActor
 {
@@ -26,7 +29,9 @@ public:
 public:
 	float FireTimer = 0.0f;
 
-	void AttachModule(ATrainModule* TrainModule);
+	void Init(ATrainEngine* EngineModule);
+	void SetModuleIndex(int32 ModuleIndex);
+	UBoxComponent* GetModuleComp();
 	void StartFire();
 	virtual void EndFire();
 
@@ -36,13 +41,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* MeshComp;
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* ModuleComp;
+	UBoxComponent* ModuleComp;
 
 	// 열차의 모듈 배열을 가진 클래스
-	UPROPERTY(EditDefaultsOnly, Category = "Train")
-	TSubclassOf<class ATrainEngine> TrainEngineFactory;
 	UPROPERTY(VisibleAnywhere, Category = "Train")
-	class ATrainEngine* TrainEngine;
+	ATrainEngine* TrainEngine;
 	// 모듈 배열의 내 인덱스
 	UPROPERTY(EditAnywhere, Category = "Train")
 	int32 ModuleNumber = -1;

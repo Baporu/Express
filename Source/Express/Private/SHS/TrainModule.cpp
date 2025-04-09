@@ -4,6 +4,7 @@
 #include "SHS/TrainModule.h"
 #include "Components/BoxComponent.h"
 #include "SHS/TrainEngine.h"
+#include "Express/Express.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -34,7 +35,6 @@ void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TrainEngine = Cast<ATrainEngine>(UGameplayStatics::GetActorOfClass(GetWorld(), TrainEngineFactory));
 }
 
 // Called every frame
@@ -49,19 +49,19 @@ void ATrainModule::Tick(float DeltaTime)
 	if (bOnFire) OnFire(DeltaTime);
 }
 
-void ATrainModule::AttachModule(ATrainModule* TrainModule)
+void ATrainModule::Init(ATrainEngine* EngineModule)
 {
-	// 모듈 바꿔끼는 거 구상하던 거
-// 	int32 ModuleIndex = ModuleNumber + 1;
-// 
-// 	// 이미 내 뒤에 모듈이 있으면
-// 	if (TrainEngine->TrainModules[ModuleIndex]) {
-// 
-// 	}
+	TrainEngine = EngineModule;
+}
 
-	TrainModule->AttachToComponent(ModuleComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	TrainEngine->TrainModules.Add(TrainModule);
-	TrainModule->ModuleNumber = ModuleNumber + 1;
+void ATrainModule::SetModuleIndex(int32 ModuleIndex)
+{
+	ModuleNumber = ModuleIndex;
+}
+
+UBoxComponent* ATrainModule::GetModuleComp()
+{
+	return ModuleComp;
 }
 
 void ATrainModule::StartFire()

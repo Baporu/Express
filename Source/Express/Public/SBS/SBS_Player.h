@@ -42,11 +42,14 @@ public:
 	float MoveSpeed = 600.0f;
 	UPROPERTY(EditDefaultsOnly)
 	float RotationLerpRate = 10;
+
 public:
-
-	
-
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
+
+public:
+	// SHS 임시 추가
+	UPROPERTY(EditAnywhere)
+	bool bHasWater = false;
 
 };

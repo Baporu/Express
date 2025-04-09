@@ -3,6 +3,10 @@
 
 #include "SHS/TrainEngine.h"
 #include "Express/Express.h"
+#include "Components/BoxComponent.h"
+#include "SHS/TrainWaterTank.h"
+#include "SHS/TrainCargo.h"
+#include "SHS/TrainCrafter.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -10,6 +14,7 @@ ATrainEngine::ATrainEngine()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	TrainEngine = this;
 	TrainModules.Add(this);
 	ModuleNumber = 0;
 }
@@ -18,6 +23,8 @@ ATrainEngine::ATrainEngine()
 void ATrainEngine::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SpawnDefaultModules();
 
 	// 처음에 타일 정보 받아와서 계산
 	NextPos = GetActorLocation();
@@ -63,6 +70,20 @@ ATrainModule* ATrainEngine::GetBackModule(int32 ModuleIndex)
 	return TrainModules[ModuleIndex + 1];
 }
 
+void ATrainEngine::AttachModule(ATrainModule* TrainModule)
+{
+	TrainModule->AttachToComponent(ModuleComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	TrainModules.Add(TrainModule);
+}
+
+void ATrainEngine::AttachModule(ATrainModule* TrainModule, int32 AttachIndex)
+{
+	USceneComponent* AttachComp = TrainModules[AttachIndex]->GetModuleComp();
+
+	TrainModule->AttachToComponent(AttachComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	TrainModules.Add(TrainModule);
+}
+
 void ATrainEngine::AddFireTime(float WaterTankTime)
 {
 	FireTime += WaterTankTime;
@@ -99,5 +120,27 @@ void ATrainEngine::RotateTrain(float DeltaTime)
 	curRot = FMath::Lerp(curRot, NextRot, rotA / 4);
 
 	SetActorRotation(FRotator(0.0, curRot, 0.0));
+}
+
+void ATrainEngine::SpawnDefaultModules()
+{
+	ATrainWaterTank* WaterTank = GetWorld()->SpawnActorDeferred<ATrainWaterTank>(BP_WaterTank, GetActorTransform());
+	WaterTank->Init(this);
+	WaterTank->FinishSpawning(GetActorTransform());
+
+	ATrainCargo* Cargo = GetWorld()->SpawnActorDeferred<ATrainCargo>(BP_Cargo, GetActorTransform());
+	Cargo->Init(this);
+	Cargo->FinishSpawning(GetActorTransform());
+
+	ATrainCrafter* Crafter = GetWorld()->SpawnActorDeferred<ATrainCrafter>(BP_Crafter, GetActorTransform());
+	Crafter->Init(this, Cargo);
+	Crafter->FinishSpawning(GetActorTransform());
+
+	AttachModule(WaterTank);
+	WaterTank->SetModuleIndex(1);
+	AttachModule(Cargo, 1);
+	Cargo->SetModuleIndex(2);
+	AttachModule(Crafter, 2);
+	Crafter->SetModuleIndex(3);
 }
 
