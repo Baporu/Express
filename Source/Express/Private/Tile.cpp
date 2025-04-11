@@ -26,7 +26,7 @@ void ATile::BeginPlay()
 
 	
 }
-
+//test
 // Called every frame
 void ATile::Tick(float DeltaTime)
 {
