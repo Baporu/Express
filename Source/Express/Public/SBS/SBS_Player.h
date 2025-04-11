@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputActionValue.h"
+#include "Item.h"
+#include "Tile.h"
 #include "SBS_Player.generated.h"
 
 UCLASS()
@@ -32,12 +34,18 @@ public:
 
 public:
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
+	class UStaticMeshComponent* TempHandMesh;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* IMC_Player;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Move;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Interact;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Release;
+
 	UPROPERTY(EditAnywhere)
 	float MoveSpeed = 600.0f;
 	UPROPERTY(EditDefaultsOnly)
@@ -47,7 +55,9 @@ public:
 
 	float TileSize = 100;
 
-	class AItem* OwnedItem;
+	AItem* HeldItem = nullptr;
+	bool bIsholdingitem = false;
+
 
 public:
 
@@ -55,5 +65,6 @@ public:
 
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
-
+	void Release(const FInputActionValue& Value);
+	void GetGroundTile(ATile*& GroundTile) const;
 };

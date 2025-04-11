@@ -54,6 +54,7 @@ void ATile::HarvestTile()
 	if (NewItem)
 	{
 		NewItem->CreateItem(ItemType, 1); // 아이템 생성
+		ContainedItem = NewItem; // 타일에 아이템 할당
 	}
 	Destroy(); // 타일 파괴
 }

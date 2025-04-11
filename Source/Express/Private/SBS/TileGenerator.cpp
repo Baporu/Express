@@ -19,10 +19,14 @@ void ATileGenerator::BeginPlay()
 
     if (TileHeights.Num() == 0 || TileHeights[0].Num() == 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("TileHeights is empty!"));
+        UE_LOG(LogTemp, Warning, TEXT("TileHeights empty"));
         return;
     }
-
+	if (TileTypes.Num() == 0 || TileTypes[0].Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TileTypes empty"));
+		return;
+	}
     for (int32 Row = 0; Row < NumRows; Row++)
     {
         for (int32 Col = 0; Col < NumCols; Col++)
@@ -53,54 +57,81 @@ void ATileGenerator::Tick(float DeltaTime)
 
 void ATileGenerator::GenerateMap()
 {
-    if (!HeightDataTable)
+    if (!HeightDataTable || !TypeDataTable)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HeightData Null"));
-        NumRows = 5; NumCols = 5;  // 기본값
+        UE_LOG(LogTemp, Warning, TEXT("HeightDataTable or TypeDataTable is null, using default"));
+        NumRows = 5; NumCols = 5;
         TileHeights.SetNum(NumRows);
+        TileTypes.SetNum(NumRows);
         for (int32 Row = 0; Row < NumRows; Row++)
         {
             TileHeights[Row].SetNum(NumCols);
+            TileTypes[Row].SetNum(NumCols);
             for (int32 Col = 0; Col < NumCols; Col++)
             {
-                TileHeights[Row][Col] = 0;  // 기본 높이 0
+                TileHeights[Row][Col] = 0;
+                TileTypes[Row][Col] = ETileType::Ground;
             }
         }
         return;
     }
 
-    TArray<FName> RowNames = HeightDataTable->GetRowNames();  // CSV 행 이름
-    NumRows = RowNames.Num();  // 높이는 ㅎ
-    TileHeights.Empty();  // 초기화
-    TileHeights.SetNum(NumRows);  // 행 수 설정
+    // 높이 데이터 파싱
+    TArray<FName> HeightRowNames = HeightDataTable->GetRowNames();
+    NumRows = HeightRowNames.Num();
+    TileHeights.SetNum(NumRows);
 
-    FTileHeightData* FirstRow = HeightDataTable->FindRow<FTileHeightData>(RowNames[0], "");
-    if (FirstRow)
+    for (int32 Row = 0; Row < NumRows; Row++)
     {
-        TArray<FString> ColData;
-        FirstRow->Height.ParseIntoArray(ColData, TEXT(","), true);  // 첫 행 열 수 계산
-        NumCols = ColData.Num();  // 열 수 설정
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("FirstRow not found!"));
-        NumCols = 5;  // 기본값
-    }
-
-    for (const FName& RowName : RowNames)
-    {
-        FTileHeightData* Row = HeightDataTable->FindRow<FTileHeightData>(RowName, "");
-        if (Row)
+        FTileHeightData* RowData = HeightDataTable->FindRow<FTileHeightData>(HeightRowNames[Row], "");
+        if (RowData)
         {
             TArray<FString> ColData;
-            Row->Height.ParseIntoArray(ColData, TEXT(","), true);  // 높이값 분리
-            int32 RowIdx = FCString::Atoi(*RowName.ToString());  // 행 인덱스 (0~4)
-            if (TileHeights.IsValidIndex(RowIdx))
+            RowData->Height.ParseIntoArray(ColData, TEXT(","), true); // 쉼표로 분리
+            if (Row == 0) NumCols = ColData.Num();
+            if (ColData.Num() != NumCols)
             {
-                TileHeights[RowIdx].SetNum(NumCols);  // 열 수 설정
-                for (int32 Col = 0; Col < ColData.Num() && Col < NumCols; Col++)
+                UE_LOG(LogTemp, Warning, TEXT("Height row %d has inconsistent column count!"), Row);
+                continue;
+            }
+            TileHeights[Row].SetNum(NumCols);
+            for (int32 Col = 0; Col < NumCols; Col++)
+            {
+                TileHeights[Row][Col] = FCString::Atoi(*ColData[Col]);
+            }
+        }
+    }
+
+    // 타입 데이터 파싱
+    TArray<FName> TypeRowNames = TypeDataTable->GetRowNames();
+    if (TypeRowNames.Num() != NumRows)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("TypeDataTable row count (%d) doesn't match HeightDataTable (%d)!"), TypeRowNames.Num(), NumRows);
+        return;
+    }
+    TileTypes.SetNum(NumRows);
+
+    for (int32 Row = 0; Row < NumRows; Row++)
+    {
+        FTileTypeData* RowData = TypeDataTable->FindRow<FTileTypeData>(TypeRowNames[Row], "");
+        if (RowData)
+        {
+            TArray<FString> ColData;
+            RowData->Type.ParseIntoArray(ColData, TEXT(","), true); // 쉼표로 분리
+            if (ColData.Num() != NumCols)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Type row %d has inconsistent column count!"), Row);
+                continue;
+            }
+            TileTypes[Row].SetNum(NumCols);
+            for (int32 Col = 0; Col < NumCols; Col++)
+            {
+                if (ColData[Col] == TEXT("W")) TileTypes[Row][Col] = ETileType::Wood;
+                else if (ColData[Col] == TEXT("G")) TileTypes[Row][Col] = ETileType::Ground;
+                else
                 {
-                    TileHeights[RowIdx][Col] = FCString::Atoi(*ColData[Col]);  // 높이값 저장
+                    UE_LOG(LogTemp, Warning, TEXT("Unknown TileType '%s' at Row %d, Col %d, setting to Ground"), *ColData[Col], Row, Col);
+                    TileTypes[Row][Col] = ETileType::Ground;
                 }
             }
         }
