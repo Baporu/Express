@@ -18,10 +18,12 @@ ATrainModule::ATrainModule()
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetupAttachment(RootComponent);
+	MeshComp->SetRelativeScale3D(FVector(1.0, 0.65, 0.8));
 
 	ModuleComp = CreateDefaultSubobject<UBoxComponent>(TEXT("ModuleComp"));
 	ModuleComp->SetupAttachment(RootComponent);
 	ModuleComp->SetBoxExtent(FVector(50.0));
+	ModuleComp->SetRelativeLocation(FVector(-100.0, 0.0, 0.0));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	if (tempMesh.Succeeded()) MeshComp->SetStaticMesh(tempMesh.Object);
@@ -31,13 +33,17 @@ ATrainModule::ATrainModule()
 void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	TrainEngine = Cast<ATrainEngine>(UGameplayStatics::GetActorOfClass(GetWorld(), TrainEngineFactory));
 }
 
 // Called every frame
 void ATrainModule::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 시간 다 채우면 화재 시작
+	if (FireTimer > FireTime) StartFire();
 
 	// 불 붙은 상태면 화재 확산 시작
 	if (bOnFire) OnFire(DeltaTime);
@@ -54,14 +60,27 @@ void ATrainModule::AttachModule(ATrainModule* TrainModule)
 // 	}
 
 	TrainModule->AttachToComponent(ModuleComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	TrainEngine->TrainModules.Add(TrainModule);
+	TrainModule->ModuleNumber = ModuleNumber + 1;
 }
 
 void ATrainModule::StartFire()
 {
+	// 이미 불 붙은 상태면 return
+	if (bOnFire) return;
+
 	bOnFire = true;
 
 	// 화재 이펙트 소환
 	FireComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, GetActorTransform());
+}
+
+void ATrainModule::EndFire()
+{
+	FireComp->Deactivate();
+
+	bOnFire = false;
+	FireTimer = 0.0f;
 }
 
 void ATrainModule::OnFire(float DeltaTime)
@@ -72,13 +91,5 @@ void ATrainModule::OnFire(float DeltaTime)
 
 	// 엔진을 제외하면 앞에 모듈이 없을 수 없음
 	TrainEngine->TrainModules[ModuleNumber - 1]->FireTimer += DeltaTime;
-}
-
-void ATrainModule::EndFire()
-{
-	FireComp->Deactivate();
-
-	bOnFire = false;
-	FireTimer = 0.0f;
 }
 

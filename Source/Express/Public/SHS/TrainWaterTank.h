@@ -19,6 +19,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+public:
+	virtual void EndFire() override;
+
 protected:
 	UPROPERTY()
 	class UMaterialInstanceDynamic* TankMaterial;
