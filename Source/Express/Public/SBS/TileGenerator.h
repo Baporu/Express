@@ -5,23 +5,22 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Tile.h"
+#include "Engine/DataTable.h"
 #include "TileGenerator.generated.h"
 
 USTRUCT(BlueprintType)
 struct FTileHeightData : public FTableRowBase
 {
     GENERATED_BODY()
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FString Height; // "5,5,5,5,5" 형식
+    FString Height; // "5,5,5,5,5"
 };
 USTRUCT(BlueprintType)
 struct FTileTypeData : public FTableRowBase
 {
     GENERATED_BODY()
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FString Type; // "W,W,W,W,W" 형식
+    FString Type; // "W,W,W,W,W" 
 };
 
 UCLASS()
@@ -55,12 +54,11 @@ public:
     int32 NumRows = 5;
 
     UPROPERTY(VisibleAnywhere, Category = "Tile")
-    int32 NumCols = 5;
+    int NumCols = 5;
+    bool bHasGenerated = false;
 
-    UPROPERTY(VisibleAnywhere, Category = "Tile")
-    TArray<TArray<int32>> TileHeights;
 
-    UPROPERTY(VisibleAnywhere, Category = "Tile")
+    TArray<TArray<int>> TileHeights;
     TArray<TArray<ETileType>> TileTypes;
 
 	void GenerateMap();

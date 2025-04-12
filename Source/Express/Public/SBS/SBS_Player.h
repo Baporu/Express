@@ -36,7 +36,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
 	class UStaticMeshComponent* TempHandMesh;
-
+	UPROPERTY(EditDefaultsOnly, Category = "Collision")
+	class UBoxComponent* FrontBoxcomp;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* IMC_Player;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -61,10 +62,9 @@ public:
 
 public:
 
-	
-
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Release(const FInputActionValue& Value);
 	void GetGroundTile(ATile*& GroundTile) const;
+	void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

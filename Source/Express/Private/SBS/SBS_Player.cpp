@@ -8,6 +8,7 @@
 #include "SBS/Item.h"
 #include "EngineUtils.h"
 #include "Tile.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ASBS_Player::ASBS_Player()
@@ -16,6 +17,8 @@ ASBS_Player::ASBS_Player()
 	PrimaryActorTick.bCanEverTick = true;
 	TempHandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TempHandMesh"));
 	TempHandMesh->SetupAttachment(GetMesh());
+	FrontBoxcomp = CreateDefaultSubobject<UBoxComponent>(TEXT("FrontBoxcomp"));
+	FrontBoxcomp->SetupAttachment(GetMesh());
 
 }
 
@@ -23,7 +26,7 @@ ASBS_Player::ASBS_Player()
 void ASBS_Player::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	FrontBoxcomp->OnComponentBeginOverlap.AddDynamic(this, &ASBS_Player::HarvestTile);
 }
 
 // Called every frame
@@ -81,8 +84,8 @@ void ASBS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EIC->BindAction(IA_Move, ETriggerEvent::Triggered, this, &ASBS_Player::Move);
-		EIC->BindAction(IA_Interact, ETriggerEvent::Started, this, &ASBS_Player::Interact);
-		EIC->BindAction(IA_Release, ETriggerEvent::Started, this, &ASBS_Player::Release);
+		EIC->BindAction(IA_Interact, ETriggerEvent::Completed, this, &ASBS_Player::Interact);
+		EIC->BindAction(IA_Release, ETriggerEvent::Completed, this, &ASBS_Player::Release);
 	}
 }
 
@@ -190,6 +193,7 @@ void ASBS_Player::Release(const FInputActionValue& Value)
 	{
 		HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		HeldItem->SetActorLocation(GroundTile->GetActorLocation());
+		GroundTile->SetContainedItem(HeldItem);
 		HeldItem = nullptr;
 		bIsholdingitem = false;
 	}
@@ -215,7 +219,7 @@ void ASBS_Player::GetGroundTile(ATile*& GroundTile) const
 			if (TileX == CurrentTileX && TileY == CurrentTileY) // 내 위치와 타일 위치가 같으면
 			{
 				GroundTile = Tile; // 타일 할당
-				UE_LOG(LogTemp, Log, TEXT("GroundTile: (%d, %d)"), TileX, TileY);
+				//UE_LOG(LogTemp, Log, TEXT("GroundTile: (%d, %d)"), TileX, TileY);
 				break;
 			}
 		}
@@ -246,5 +250,18 @@ void ASBS_Player::GetGroundTile(ATile*& GroundTile) const
 	}
 
 	
+}
+
+void ASBS_Player::HarvestTile(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ATile* Tile = Cast<ATile>(OtherActor);
+	if (!(Tile->TileType == ETileType::Ground))
+	{
+		return;
+	}
+	else
+	{
+		Tile->HarvestTile();
+	}
 }
 
