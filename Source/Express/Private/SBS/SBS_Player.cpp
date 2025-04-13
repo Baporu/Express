@@ -192,7 +192,7 @@ void ASBS_Player::Release(const FInputActionValue& Value)
 	if (HeldItem)
 	{
 		HeldItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		HeldItem->SetActorLocation(GroundTile->GetActorLocation());
+		HeldItem->SetActorTransform(GroundTile->GetActorTransform());
 		GroundTile->SetContainedItem(HeldItem);
 		HeldItem = nullptr;
 		bIsholdingitem = false;
@@ -224,6 +224,7 @@ void ASBS_Player::GetGroundTile(ATile*& GroundTile) const
 			}
 		}
 	}
+
 	if (!GroundTile)
 	{
 		float ClosestDistance = InteractRadius * InteractRadius;
@@ -255,13 +256,10 @@ void ASBS_Player::GetGroundTile(ATile*& GroundTile) const
 void ASBS_Player::HarvestTile(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ATile* Tile = Cast<ATile>(OtherActor);
-	if (!(Tile->TileType == ETileType::Ground))
+	if (!Tile || !(Tile->TileType == ETileType::Ground))
 	{
 		return;
 	}
-	else
-	{
-		Tile->HarvestTile();
-	}
+	Tile->HarvestTile();
 }
 
