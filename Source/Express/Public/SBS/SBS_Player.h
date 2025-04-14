@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputActionValue.h"
+#include "Item.h"
+#include "Tile.h"
 #include "SBS_Player.generated.h"
 
 UCLASS()
@@ -32,24 +34,37 @@ public:
 
 public:
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
+	class UStaticMeshComponent* TempHandMesh;
+	UPROPERTY(EditDefaultsOnly, Category = "Collision")
+	class UBoxComponent* FrontBoxcomp;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputMappingContext* IMC_Player;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Move;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	class UInputAction* IA_Interact;
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	class UInputAction* IA_Release;
+
 	UPROPERTY(EditAnywhere)
 	float MoveSpeed = 600.0f;
 	UPROPERTY(EditDefaultsOnly)
 	float RotationLerpRate = 10;
+	UPROPERTY(EditDefaultsOnly)
+	float InteractRadius = 150;
+
+	float TileSize = 100;
+
+	AItem* HeldItem = nullptr;
+	bool bIsholdingitem = false;
+
 
 public:
+
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
-
-public:
-	// SHS 임시 추가
-	UPROPERTY(EditAnywhere)
-	bool bHasWater = false;
-
+	void Release(const FInputActionValue& Value);
+	void GetGroundTile(ATile*& GroundTile) const;
+	void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
