@@ -33,9 +33,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Train")
 	TSubclassOf<class ATrainCrafter> BP_Crafter;
 
+	void Init();
+
 	bool CheckModule(int32 ModuleIndex);
-	ATrainModule* GetFrontModule(int32 ModuleIndex);
-	ATrainModule* GetBackModule(int32 ModuleIndex);
+	ATrainModule* GetFrontModule(int32 CurrentModuleIndex);
+	ATrainModule* GetBackModule(int32 CurrentModuleIndex);
 	void AttachModule(ATrainModule* TrainModule);
 	void AttachModule(ATrainModule* TrainModule, int32 AttachIndex);
 
@@ -47,20 +49,16 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
 	float TrainSpeed = 25.0f;
-	UPROPERTY(EditAnywhere, Category = "Train")
-	FVector NextPos = FVector::ZeroVector;
 
 	
+	virtual void MoveTrain(float DeltaTime) override;
+//	virtual void RotateTrain(float DeltaTime) override;
+
 	virtual void OnFire(float DeltaTime) override;
 
 private:
 	// 임시 함수들
 	void GetTileLocation();
-	void RotateTrain(float DeltaTime);
-
-	double NextRot;
-	double rotA;
-
 	void SpawnDefaultModules();
 
 };

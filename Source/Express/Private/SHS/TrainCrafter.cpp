@@ -20,9 +20,11 @@ void ATrainCrafter::Tick(float DeltaTime)
 		MakeRail();
 }
 
-void ATrainCrafter::Init(ATrainEngine* EngineModule, ATrainCargo* CargoModule)
+void ATrainCrafter::Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination, ATrainCargo* CargoModule)
 {
 	TrainEngine = EngineModule;
+	ModuleSpeed = TrainSpeed;
+	NextPos = Destination;
 	TrainCargo = CargoModule;
 }
 

@@ -29,17 +29,23 @@ public:
 public:
 	float FireTimer = 0.0f;
 
-	void Init(ATrainEngine* EngineModule);
+	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination);
 	void SetModuleIndex(int32 ModuleIndex);
 	UBoxComponent* GetModuleComp();
+
 	void StartFire();
 	virtual void EndFire();
+
+	void SetModuleLocation(FVector CurrentLocation);
+	void SetModuleRotation(double CurrentYaw);
 
 protected:
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* SceneComp;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* MeshComp;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* ChainComp;
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* ModuleComp;
 
@@ -49,6 +55,14 @@ protected:
 	// 모듈 배열의 내 인덱스
 	UPROPERTY(EditAnywhere, Category = "Train")
 	int32 ModuleNumber = -1;
+
+	// 다음 이동 좌표
+	UPROPERTY(EditAnywhere, Category = "Train")
+	FVector NextPos = FVector::ZeroVector;
+	double NextRot = 90.0;
+	// 모듈 이동 속도, 엔진에서 초기화
+	UPROPERTY(VisibleAnywhere, Category = "Train")
+	float ModuleSpeed = 25.0f;
 
 	// 화재 로직 관련
 	UPROPERTY(EditAnywhere, Category = "Fire")
@@ -62,6 +76,9 @@ protected:
 	// 화재 이펙트 인스턴스 담아둘 변수
 	class UParticleSystemComponent* FireComp;
 
+
+	virtual void MoveTrain(float DeltaTime);
+	void RotateTrain(float DeltaTime);
 
 	virtual void OnFire(float DeltaTime);
 

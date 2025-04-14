@@ -14,6 +14,9 @@ ATrainWaterTank::ATrainWaterTank()
 	IAComp->SetupAttachment(RootComponent);
 	IAComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
 	IAComp->OnComponentBeginOverlap.AddDynamic(this, &ATrainWaterTank::OnPlayerBeginOverlap);
+
+	ConstructorHelpers::FObjectFinder<UMaterial> tempMat(TEXT("/Script/Engine.Material'/Game/SHS/Designs/M_WaterTank.M_WaterTank'"));
+	if (tempMat.Succeeded()) MeshComp->SetMaterial(0, tempMat.Object);
 }
 
 // Called when the game starts or when spawned

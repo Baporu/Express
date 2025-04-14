@@ -27,7 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Craft")
 	int32 MaxStackSize = 3;
 
-	void Init(ATrainEngine* EngineModule, ATrainCargo* CargoModule);
+	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination, ATrainCargo* CargoModule);
 
 protected:
 
