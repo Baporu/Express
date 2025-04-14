@@ -57,14 +57,24 @@ public:
 	float TileSize = 100;
 
 	AItem* HeldItem = nullptr;
-	bool bIsholdingitem = false;
+	ATile* GroundTile;
+	ATile* FrontTile;
 
+	bool bIsholdingitem = false;
+	float HarvestTimer = 0;
+	int HarvestCount = 0;
+	ATile* LastHarvestTile = nullptr;
 
 public:
 
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Release(const FInputActionValue& Value);
-	void GetGroundTile(ATile*& GroundTile) const;
-	void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//void GetGroundTile_Location(ATile*& GroundTile) const;
+	void GetGroundTile();
+	void GetFrontTile();
+	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+public:
+	bool bHasWater = false;
 };

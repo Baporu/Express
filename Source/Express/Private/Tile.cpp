@@ -9,6 +9,7 @@
 #include "Chaos/Vector.h"
 #include "SBS/Item.h"
 #include "EngineUtils.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ATile::ATile()
@@ -20,6 +21,11 @@ ATile::ATile()
 	RootComponent = TileMesh;
 	TileFSM = CreateDefaultSubobject<UTile_FSM>(TEXT("Tile FSM"));
 	TileType = ETileType::Ground;
+	TileCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Tile Collision"));
+	TileCollision->SetupAttachment(TileMesh);
+
+	MaxTileHP = 3;
+	CurTileHP = MaxTileHP;
 }
 
 // Called when the game starts or when spawned
@@ -45,6 +51,19 @@ void ATile::Tick(float DeltaTime)
 bool ATile::CanHarvest() const
 {
 	return TileType != ETileType::Ground; // 바닥이 아닌 경우에만 수확 가능
+}
+
+void ATile::ReduceHP()
+{
+	if (TileType == ETileType::Ground && TileType == ETileType::Rock) // 바닥일때
+	{
+		return;
+	}
+	CurTileHP--;
+	if (CurTileHP <= 0)
+	{
+		HarvestTile();
+	}
 }
 
 void ATile::HarvestTile()
@@ -83,7 +102,10 @@ void ATile::HarvestTile()
 		NewItem->CreateItem(ItemType, 1); // 아이템 생성
 		GroundTile->ContainedItem = NewItem; // 타일에 아이템 할당
 	}
+
+
 	Destroy(); // 타일 파괴
+	CurTileHP = MaxTileHP;
 }
 
 void ATile::UpdateMeshMat()

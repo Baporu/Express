@@ -34,11 +34,19 @@ void ASBS_Player::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//수확
+	HarvestTimer -= DeltaTime;
+	if (HarvestTimer <= 0.f)
+	{
+		GetFrontTile();
+		if (FrontTile && FrontTile->TileType != ETileType::Ground)
+		{
+			FrontTile->ReduceHP();
+			HarvestTimer = 0.5f;
+		}
+	}
 	if (!HeldItem) return; // 안들고있을때
-
-	ATile* GroundTile = nullptr; //발밑 타일 아직 할당 안됐으면
-	GetGroundTile(GroundTile);
-
+	GroundTile = nullptr; //발밑 타일 아직 할당 안됐으면
 	if (GroundTile)
 	{
 		AItem* TargetItem = GroundTile->GetContainedItem(); // 바닥에 있는 아이템찾기
@@ -126,9 +134,9 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 	int CurrentTileY = FMath::FloorToInt(CurLoc.Y / TileSize);
 	UE_LOG(LogTemp, Log, TEXT("CurrentTile: (%d, %d)"),CurrentTileX, CurrentTileY);
 
-	ATile* GroundTile = nullptr; 
-	GetGroundTile(GroundTile);
-	
+	GroundTile = nullptr; 
+	//GetGroundTile_Location(GroundTile);
+	GetGroundTile();
 	//암것도 없으면 로그출력
 	if (!GroundTile)
 	{
@@ -150,11 +158,6 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 			HeldItem = TargetItem; 
 			UE_LOG(LogTemp, Warning, TEXT("Swapped Item: %s"), *HeldItem->GetName());
 		}
-		////바닥에 아이템이 없으면
-		//else if (!TargetItem)
-		//{
-		//	
-		//}
 	}
 	//아이템 안들고있고, 바닥에 아이템 있으면 "들기"
 	else if (TargetItem)
@@ -178,8 +181,9 @@ void ASBS_Player::Release(const FInputActionValue& Value)
 		return; // 안들고있으면 안함
 	}
 
-	ATile* GroundTile = nullptr;
-	GetGroundTile(GroundTile);
+	GroundTile = nullptr;
+	GetGroundTile();
+	//GetGroundTile_Location(GroundTile);
 	if (!GroundTile)
 	{
 		return;
@@ -198,8 +202,8 @@ void ASBS_Player::Release(const FInputActionValue& Value)
 		bIsholdingitem = false;
 	}
 }
-
-void ASBS_Player::GetGroundTile(ATile*& GroundTile) const
+/*
+void ASBS_Player::GetGroundTile_Location(ATile*& GroundTile) const
 {
 	GroundTile = nullptr; // 초기화
 	FVector CurLoc = GetActorLocation();
@@ -251,7 +255,57 @@ void ASBS_Player::GetGroundTile(ATile*& GroundTile) const
 
 	
 }
+*/
 
+void ASBS_Player::GetGroundTile()
+{
+	FrontTile = nullptr;
+	FVector CurLoc = GetActorLocation();
+	FVector Forward = GetActorForwardVector();
+
+	FVector ForwardLoc = CurLoc + Forward * TileSize;
+	int ForwardTileX = FMath::RoundToInt(ForwardLoc.X / TileSize) * TileSize;
+	int ForwardTileY = FMath::RoundToInt(ForwardLoc.Y / TileSize) * TileSize;
+	FVector Start = FVector(ForwardTileX, ForwardTileY, CurLoc.Z + 200.f);
+	FVector End = FVector(ForwardTileX, ForwardTileY, CurLoc.Z - 100.f);
+	FHitResult Hit;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+	{
+		ATile* Tile = Cast<ATile>(Hit.GetActor());
+		if (Tile)
+		{
+			FrontTile = Tile;
+		}
+	}
+
+	if (!FrontTile)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
+	}
+}
+
+void ASBS_Player::GetFrontTile()
+{
+	GroundTile = nullptr;
+	FVector CurLoc = GetActorLocation();
+
+	FVector Start = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z + 200.f);
+	FVector End = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z - 100.f);
+	FHitResult Hit;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+	{
+		ATile* Tile = Cast<ATile>(Hit.GetActor());
+		if (Tile)
+		{
+			GroundTile = Tile;
+		}
+	}
+	if (!GroundTile)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
+	}
+}
+/*
 void ASBS_Player::HarvestTile(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ATile* Tile = Cast<ATile>(OtherActor);
@@ -264,4 +318,4 @@ void ASBS_Player::HarvestTile(UPrimitiveComponent* OverlappedComponent, AActor* 
 		Tile->HarvestTile();
 	}
 }
-
+*/
