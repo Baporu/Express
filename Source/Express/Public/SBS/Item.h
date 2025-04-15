@@ -37,19 +37,25 @@ public:
 	UStaticMeshComponent* MeshComp;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	TArray<UStaticMesh*> WoodMeshes;
+	TArray<class UStaticMesh*> WoodMeshes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	TArray<UStaticMesh*> StoneMeshes;
+	TArray<class UStaticMesh*> StoneMeshes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-	TArray<UMaterialInterface*> Materials;
+	TArray<class UMaterialInterface*> Materials;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemType ItemType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int ItemStack = 1;
+
+	UPROPERTY(EditAnywhere, Category = "Mesh")
+    class UStaticMesh* DefaultMesh;
+
+    UPROPERTY(EditAnywhere, Category = "Material")
+    class UMaterialInterface* DefaultMaterial;
 
 public:
 	void UpdateMeshMat();
