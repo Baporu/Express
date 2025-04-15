@@ -122,7 +122,7 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 {
 
     TArray<AItem*> TargetItem;
-    TargetItem.IsEmpty();
+    TargetItem.Empty();
     GetCurrentTile();
     // 1순위: CurrentTile
     if (CurrentTile)
@@ -156,8 +156,8 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
             {
                 HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
                 // 놓을 타일 선택: CurrentTile 우선, 없으면 FrontTile
-                ATile* PlaceTile = CurrentTile ? CurrentTile : (FrontTile && FrontTile->TileType == ETileType::Ground ? FrontTile : nullptr);
-                if (PlaceTile)
+                ATile* PlaceTile = CurrentTile;
+                if (PlaceTile && PlaceTile->TileType == ETileType::Ground)
                 {   
                     //위치 교체.
                     TargetItem[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -228,28 +228,19 @@ void ASBS_Player::GetCurrentTile()
     FVector CurLoc = GetActorLocation();
 
     FVector Start = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z + 200.f);
-    FVector End = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z - 100.f);
+    FVector End = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z - 200.f);
     FHitResult Hit;
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility,params))
     {
-        ATile* Tile = Cast<ATile>(Hit.GetActor());
-        if (Tile && Tile->TileType == ETileType::Ground && Tile->TileType == ETileType::Stone) //타일이 채취 불가능일때
+        ATile* HitTile = Cast<ATile>(Hit.GetActor());
+		UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 5, 30);
+        if (HitTile) //타일이 채취 불가능일때
         {
-            CurrentTile = Tile;
-           //if (bDebugTiles)
-           //{
-           //
-			//	UKismetSystemLibrary::DrawDebugBox(GetWorld(), Tile->GetActorLocation(), FVector(TileSize, TileSize, 10.f), FColor::Red, /FRotator::ZeroRotator, /1);
-           //}
+            CurrentTile = HitTile;
+            UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
         }
-		// else if (bDebugTiles) //타일이 채취 가능일때
-		// {
-		//     UKismetSystemLibrary::DrawDebugBox(GetWorld(), Tile->GetActorLocation(), FVector(TileSize, TileSize, 10.f), FColor::Green, /FRotator::ZeroRotator, /1);
-		// }
-    }
-    else if (bDebugTiles)
-    {
-        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FColor::Blue, 0.1f, 1.f); //아무것도 못치면
     }
 
     if (!CurrentTile)
@@ -270,8 +261,11 @@ void ASBS_Player::GetFrontTile()
     FVector Start = FVector(ForwardTileX, ForwardTileY, CurLoc.Z + 200.f);
     FVector End = FVector(ForwardTileX, ForwardTileY, CurLoc.Z - 100.f);
     FHitResult Hit;
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+    FCollisionQueryParams params;
+    params.AddIgnoredActor(this);
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
+        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 5, 30);
         ATile* Tile = Cast<ATile>(Hit.GetActor());
         if (Tile)
         {
@@ -280,6 +274,6 @@ void ASBS_Player::GetFrontTile()
     }
     if (!FrontTile)
     {
-        UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
+        //UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
     }
 }

@@ -33,7 +33,7 @@ public:
 
 public:
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	UStaticMeshComponent* MeshComp; //½ºÅÂÆ½¸Å½¬
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
