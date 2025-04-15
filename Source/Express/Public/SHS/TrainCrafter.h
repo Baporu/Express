@@ -7,6 +7,7 @@
 #include "TrainCrafter.generated.h"
 
 class ATrainCargo;
+class AItem;
 
 /**
  * 
@@ -21,9 +22,9 @@ public:
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Craft")
-	TSubclassOf<AActor> BP_Rail;
+	TSubclassOf<AItem> BP_Rail;
 	UPROPERTY(VisibleAnywhere, Category = "Craft")
-	TArray<AActor*> Rails;
+	TArray<AItem*> Rails;
 	UPROPERTY(EditAnywhere, Category = "Craft")
 	float MakeTime = 3.2f;
 	UPROPERTY(EditAnywhere, Category = "Craft")
@@ -31,6 +32,7 @@ public:
 
 	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination, ATrainCargo* CargoModule);
 	bool CheckMakeRail();
+	AItem* GetRail();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Craft")

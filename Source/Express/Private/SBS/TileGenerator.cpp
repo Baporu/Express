@@ -2,6 +2,7 @@
 
 
 #include "SBS/TileGenerator.h"
+#include "Express/Express.h"
 
 // Sets default values
 ATileGenerator::ATileGenerator()
@@ -37,6 +38,8 @@ void ATileGenerator::BeginPlay()
 	}
     for (int Row = 0; Row < NumRows; Row++)
     {
+        TArray<ATile*> ColTiles;
+
         for (int Col = 0; Col < NumCols; Col++)
         {
             int MaxHeight = TileHeights[Row][Col]; 
@@ -51,7 +54,7 @@ void ATileGenerator::BeginPlay()
                     {
                         NewTile->CreateTile(ETileType::Ground);
 
-                        TileGrid.Add(NewTile);
+                        ColTiles.Add(NewTile);
                     }
                     else
                     {
@@ -65,6 +68,13 @@ void ATileGenerator::BeginPlay()
                 }
             }
         }
+
+        tileGrid.Add(ColTiles);
+    }
+
+    for (int i = 0; i < tileGrid.Num(); i++) {
+        for (int j = 0; j < tileGrid[i].Num(); j++)
+            UE_LOG(LogTrain, Log, TEXT("Row: %d, Col: %d, Name: %s"), i, j, *tileGrid[i][j]->GetActorNameOrLabel())
     }
 }
 

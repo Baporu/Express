@@ -76,4 +76,9 @@ public:
 
 	void SetContainedItem(AItem* Item) {ContainedItem = Item;} //Set item
 	AItem* GetContainedItem() const{ return ContainedItem;} // Get Item
+
+
+public:
+	// true면 선로 해체 불가능
+	bool bIsPassed = false;
 };

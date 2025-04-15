@@ -50,19 +50,28 @@ protected:
 	UBoxComponent* ModuleComp;
 
 	// 열차의 모듈 배열을 가진 클래스
-	UPROPERTY(VisibleAnywhere, Category = "Train")
+	UPROPERTY(VisibleAnywhere, Category = "Module")
 	ATrainEngine* TrainEngine;
 	// 모듈 배열의 내 인덱스
-	UPROPERTY(EditAnywhere, Category = "Train")
+	UPROPERTY(EditAnywhere, Category = "Module")
 	int32 ModuleNumber = -1;
 
 	// 다음 이동 좌표
-	UPROPERTY(EditAnywhere, Category = "Train")
+	UPROPERTY(EditAnywhere, Category = "Move")
 	FVector NextPos = FVector::ZeroVector;
+	TQueue<FVector> TileQueue;
+	TQueue<double> RotatorQueue;
 	double NextRot = 90.0;
 	// 모듈 이동 속도, 엔진에서 초기화
-	UPROPERTY(VisibleAnywhere, Category = "Train")
+	UPROPERTY(VisibleAnywhere, Category = "Move")
 	float ModuleSpeed = 25.0f;
+	UPROPERTY(EditAnywhere, Category = "Move")
+	class ATileGenerator* TileGenerator;
+	class ATile* CurrentTile;
+	// 현재 목표 타일의 Row 인덱스
+	int32 RowIndex = -1;
+	// 현재 목표 타일의 Column 인덱스
+	int32 ColIndex = -1;
 
 	// 화재 로직 관련
 	UPROPERTY(EditAnywhere, Category = "Fire")
@@ -76,6 +85,8 @@ protected:
 	// 화재 이펙트 인스턴스 담아둘 변수
 	class UParticleSystemComponent* FireComp;
 
+
+	void CheckNextTile();
 
 	virtual void MoveTrain(float DeltaTime);
 	void RotateTrain(float DeltaTime);

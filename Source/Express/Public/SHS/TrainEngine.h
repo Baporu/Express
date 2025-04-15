@@ -43,6 +43,8 @@ public:
 
 	void AddFireTime(float WaterTankTime);
 
+	void CheckMakeRail();
+
 	UPROPERTY(VisibleAnywhere)
 	TArray<ATrainModule*> TrainModules;
 

@@ -105,6 +105,13 @@ void ATrainEngine::AddFireTime(float WaterTankTime)
 	UE_LOG(LogTrain, Log, TEXT("Fire Time Added"));
 }
 
+void ATrainEngine::CheckMakeRail()
+{
+	for (int32 i = 0; i < TrainModules.Num(); i++)
+		if (ATrainCrafter* crafter = Cast<ATrainCrafter>(TrainModules[i]))
+			crafter->CheckMakeRail();
+}
+
 void ATrainEngine::MoveTrain(float DeltaTime)
 {
 	FVector dir = NextPos - GetActorLocation();
@@ -132,14 +139,30 @@ void ATrainEngine::GetTileLocation()
 	TrainModules[1]->SetModuleLocation(NextPos);
 	TrainModules[1]->SetModuleRotation(NextRot);
 
-	// 다음 위치를 타일한테서 받아옴
-	if (FMath::RandBool()) {
-		NextPos.X += 100.0f;
-		NextRot = 0.0;
-	}
-	else {
-		NextPos.Y += 100.0f;
-		NextRot = 90.0;
+	int rand = FMath::RandRange(1, 4);
+
+	switch (rand)
+	{
+		// 전
+		case 1:
+			NextPos.X += 100.0f;
+			NextRot = 0.0;
+			break;
+		// 후
+		case 2:
+			NextPos.X -= 100.0f;
+			NextRot = 180.0;
+			break;
+		// 좌
+		case 3:
+			NextPos.Y += 100.0f;
+			NextRot = 90.0;
+			break;
+		// 우
+		case 4:
+			NextPos.Y -= 100.0f;
+			NextRot = -90.0;
+			break;
 	}
 
 	UE_LOG(LogTrain, Log, TEXT("Next Position Changed"));

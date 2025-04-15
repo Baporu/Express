@@ -3,6 +3,7 @@
 
 #include "SHS/TrainCrafter.h"
 #include "SHS/TrainCargo.h"
+#include "SBS/Item.h"
 
 void ATrainCrafter::Tick(float DeltaTime)
 {
@@ -11,16 +12,9 @@ void ATrainCrafter::Tick(float DeltaTime)
 	// 만드는 중 아니면 return
 	if (!bIsMaking) return;
 
-
-	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Stones.IsEmpty())
-		return;
-
-	if (Rails.Num() == MaxStackSize)
-		return;
-
 	MakeTimer += DeltaTime;
 
-	if (MakeTimer >= DeltaTime)
+	if (MakeTimer >= MakeTime)
 		MakeRail();
 }
 
@@ -32,20 +26,53 @@ void ATrainCrafter::Init(ATrainEngine* EngineModule, float TrainSpeed, FVector D
 	TrainCargo = CargoModule;
 }
 
-void ATrainCrafter::MakeRail()
+bool ATrainCrafter::CheckMakeRail()
 {
-	// 만드는 중에 또 만들면 안 되니까 true로 설정
+	// 재료가 부족하거나
+	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Stones.IsEmpty())
+		return false;
+
+	// 이미 레일을 다 만들었으면 return false
+	if (Rails.Num() == MaxStackSize)
+		return false;
+
+	AItem* wood = TrainCargo->Woods.Top();
+	TrainCargo->Woods.Pop();
+	wood->Destroy();
+
+	AItem* stone = TrainCargo->Stones.Top();
+	TrainCargo->Stones.Pop();
+	stone->Destroy();
+
 	bIsMaking = true;
 
-	TrainCargo->Woods.Pop();
-	TrainCargo->Stones.Pop();
+	return true;
+}
 
+AItem* ATrainCrafter::GetRail()
+{
+	if (Rails.IsEmpty()) return nullptr;
+
+	AItem* rail = Rails.Top();
+	rail->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	Rails.Pop();
+
+	return rail;
+}
+
+void ATrainCrafter::MakeRail()
+{
 	FVector SpawnLocation = GetActorLocation();
 	SpawnLocation.Z += 10.0f * Rails.Num();
 
-	AActor* rail = GetWorld()->SpawnActor<AActor>(BP_Rail, SpawnLocation, FRotator::ZeroRotator);
+	AItem* rail = GetWorld()->SpawnActor<AItem>(BP_Rail, SpawnLocation, FRotator::ZeroRotator);
+	rail->CreateItem(EItemType::Rail, 1);
 	rail->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	Rails.Add(rail);
 
+	bIsMaking = false;
 	MakeTimer = 0.0f;
+
+	// 더 만들 수 있으면 계속 만듦
+	CheckMakeRail();
 }

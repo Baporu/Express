@@ -4,6 +4,7 @@
 #include "SHS/TrainCargo.h"
 #include "Components/BoxComponent.h"
 #include "SBS/Item.h"
+#include "SHS/TrainEngine.h"
 
 ATrainCargo::ATrainCargo()
 {
@@ -43,6 +44,8 @@ void ATrainCargo::AddResource(AItem* Resource)
 		// 방어 코드
 		default: break;
 	}
+
+	TrainEngine->CheckMakeRail();
 }
 
 AItem* ATrainCargo::GetResource(EItemType ResourceType)

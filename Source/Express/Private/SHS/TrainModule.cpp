@@ -7,6 +7,8 @@
 #include "Express/Express.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Tile.h"
+#include "SBS/TileGenerator.h"
 
 // Sets default values
 ATrainModule::ATrainModule()
@@ -53,6 +55,15 @@ void ATrainModule::Tick(float DeltaTime)
 	MoveTrain(DeltaTime);
 	RotateTrain(DeltaTime);
 
+	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5) {
+		if (!TileQueue.IsEmpty())
+			TileQueue.Dequeue(NextPos);
+
+		if (!RotatorQueue.IsEmpty())
+			RotatorQueue.Dequeue(NextRot);
+	}
+	
+
 	// 시간 다 채우면 화재 시작
 	if (FireTimer > FireTime) StartFire();
 
@@ -98,12 +109,19 @@ void ATrainModule::EndFire()
 
 void ATrainModule::SetModuleLocation(FVector CurrentLocation)
 {
-	// 현재 모듈이 가던 타일의 위치를 다음 모듈로 넘겨주고
 	if (TrainEngine->CheckModule(ModuleNumber + 1))
 		TrainEngine->GetBackModule(ModuleNumber)->SetModuleLocation(NextPos);
-	
-	// 이전 모듈이 넘겨준 타일의 위치를 다음 목적지로 설정
-	NextPos = CurrentLocation;
+
+	TileQueue.Enqueue(CurrentLocation);
+
+	UE_LOG(LogTrain, Log, TEXT("%s: Set Next Location - X: %f, Y: %f, Z: %f"), *GetActorNameOrLabel(), NextPos.X, NextPos.Y, NextPos.Z);
+
+// 	// 현재 모듈이 가던 타일의 위치를 다음 모듈로 넘겨주고
+// 	if (TrainEngine->CheckModule(ModuleNumber + 1))
+// 		TrainEngine->GetBackModule(ModuleNumber)->SetModuleLocation(NextPos);
+// 	
+// 	// 이전 모듈이 넘겨준 타일의 위치를 다음 목적지로 설정
+// 	NextPos = CurrentLocation;
 }
 
 void ATrainModule::SetModuleRotation(double CurrentYaw)
@@ -113,7 +131,60 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 		TrainEngine->GetBackModule(ModuleNumber)->SetModuleRotation(NextRot);
 	
 	// 이전 모듈이 넘겨준 회전값 받기
-	NextRot = CurrentYaw;
+	RotatorQueue.Enqueue(CurrentYaw);
+}
+
+void ATrainModule::CheckNextTile()
+{
+	TArray<TArray<ATile*>> grid = TileGenerator->tileGrid;
+
+	// 좌우 탐색
+	if (RowIndex - 1 > 0)
+		if (grid[RowIndex - 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
+			CurrentTile = grid[RowIndex - 1][ColIndex];
+
+			NextPos = CurrentTile->GetActorLocation();
+			// 왼쪽으로 가야 하니까 왼쪽으로 회전
+			NextRot = 270.0;
+
+			RowIndex--;
+			return;
+		}
+	if (RowIndex + 1 < grid.Num() && grid[RowIndex + 1][ColIndex]->bIsPassed == false)
+		if (grid[RowIndex + 1][ColIndex]->TileType == ETileType::Rail) {
+			CurrentTile = grid[RowIndex + 1][ColIndex];
+			
+			NextPos = CurrentTile->GetActorLocation();
+			// 오른쪽으로 회전
+			NextRot = 90.0;
+
+			RowIndex++;
+			return;
+		}
+	
+	// 전후 탐색
+	if (ColIndex - 1 > 0)
+		if (grid[RowIndex][ColIndex - 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
+			CurrentTile = grid[RowIndex][ColIndex - 1];
+
+			NextPos = CurrentTile->GetActorLocation();
+			// 앞으로 회전
+			NextRot = 0.0;
+
+			ColIndex--;
+			return;
+		}
+	if (ColIndex + 1 < grid[RowIndex].Num() && grid[RowIndex][ColIndex + 1]->bIsPassed == false)
+		if (grid[RowIndex][ColIndex + 1]->TileType == ETileType::Rail) {
+			CurrentTile = grid[RowIndex][ColIndex + 1];
+
+			NextPos = CurrentTile->GetActorLocation();
+			// 뒤로 회전
+			NextRot = 180.0;
+
+			ColIndex++;
+			return;
+		}
 }
 
 void ATrainModule::MoveTrain(float DeltaTime)
