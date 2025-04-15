@@ -5,6 +5,19 @@
 #include "Express/Express.h"
 #include "SHS/TrainEngine.h"
 #include "Exp_GameMode.h"
+#include "Components/BoxComponent.h"
+#include "SBS/SBS_Player.h"
+
+ATrainWaterTank::ATrainWaterTank()
+{
+	IAComp = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionComp"));
+	IAComp->SetupAttachment(RootComponent);
+	IAComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
+	IAComp->OnComponentBeginOverlap.AddDynamic(this, &ATrainWaterTank::OnPlayerBeginOverlap);
+
+	ConstructorHelpers::FObjectFinder<UMaterial> tempMat(TEXT("/Script/Engine.Material'/Game/SHS/Designs/M_WaterTank.M_WaterTank'"));
+	if (tempMat.Succeeded()) MeshComp->SetMaterial(0, tempMat.Object);
+}
 
 // Called when the game starts or when spawned
 void ATrainWaterTank::BeginPlay()
@@ -22,10 +35,6 @@ void ATrainWaterTank::BeginPlay()
 		return;
 	}
 
-	UE_LOG(LogTrain, Log, TEXT("Try Attach WaterTank To Engine"));
-	TrainEngine->AttachModule(this);
-
-	UE_LOG(LogTrain, Log, TEXT("Try Add Fire Time To Engine"));
 	TrainEngine->AddFireTime(FireTime);
 }
 
@@ -48,6 +57,16 @@ void ATrainWaterTank::EndFire()
 	}
 
 	FireTimer = 0.0f;
+}
+
+void ATrainWaterTank::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
+
+	if (!player || !player->bHasWater) return;
+
+	player->bHasWater = false;
+	EndFire();
 }
 
 void ATrainWaterTank::ChangeTankColor()

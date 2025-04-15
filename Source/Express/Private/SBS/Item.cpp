@@ -35,27 +35,79 @@ void AItem::Tick(float DeltaTime)
 
 void AItem::UpdateMeshMat()
 {
-	TArray<UStaticMesh*>* TargetMeshes;
-	int MeshIndex = FMath::Clamp(ItemStack - 1, 0, 4); //아이템스텍 1~5를 0~4 인덱스로 변환
-	int MaterialIndex = static_cast<int>(ItemType); //아이템타입을 0~1인덱스로 변환
+    if (!MeshComp)
+    {
+        UE_LOG(LogTemp, Error, TEXT("MeshComp is null"));
+        return;
+    }
 
-	if (ItemType == EItemType::Wood)
-	{
-		TargetMeshes = &WoodMeshes;
-	}
-	else
-	{
-		TargetMeshes = &StoneMeshes;
-	}
+    // 1. 메쉬 설정
+    UStaticMesh* SelectedMesh = nullptr;
+    int32 MeshIndex = ItemStack - 1; // StackSize가 1일 때 인덱스 0
 
-	MeshComp->SetStaticMesh((*TargetMeshes)[MeshIndex]);
-	MeshComp->SetMaterial(0, Materials[MaterialIndex]);
+    if (ItemType == EItemType::Wood)
+    {
+        if (MeshIndex >= 0 && MeshIndex < WoodMeshes.Num())
+        {
+            SelectedMesh = WoodMeshes[MeshIndex];
+        }
+    }
+    else if (ItemType == EItemType::Stone)
+    {
+        if (MeshIndex >= 0 && MeshIndex < StoneMeshes.Num())
+        {
+            SelectedMesh = StoneMeshes[MeshIndex];
+        }
+    }
+
+    // 메쉬가 없으면 기본 메쉬 사용
+    if (SelectedMesh)
+    {
+        MeshComp->SetStaticMesh(SelectedMesh);
+    }
+    else
+    {
+        MeshComp->SetStaticMesh(DefaultMesh);
+        UE_LOG(LogTemp, Warning, TEXT("No valid mesh found for %s with StackSize %d. Using DefaultMesh."),
+            *UEnum::GetValueAsString(ItemType), ItemStack);
+    }
+
+    // 2. 재질 설정
+    UMaterialInterface* SelectedMaterial = nullptr;
+    int32 MaterialIndex = static_cast<int32>(ItemType); // Wood=0, Stone=1
+
+    if (MaterialIndex >= 0 && MaterialIndex < Materials.Num())
+    {
+        SelectedMaterial = Materials[MaterialIndex];
+    }
+
+    // 재질이 없으면 기본 재질 사용
+    if (SelectedMaterial)
+    {
+        MeshComp->SetMaterial(0, SelectedMaterial);
+    }
+    else
+    {
+        MeshComp->SetMaterial(0, DefaultMaterial);
+        UE_LOG(LogTemp, Warning, TEXT("No valid material found for %s. Using DefaultMaterial."),
+            *UEnum::GetValueAsString(ItemType));
+    }
+    UE_LOG(LogTemp, Log, TEXT("WoodMeshes 크기: %d"), WoodMeshes.Num());
+    UE_LOG(LogTemp, Log, TEXT("Materials 크기: %d"), Materials.Num());
+    if (WoodMeshes.Num() > 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("WoodMeshes[0]: %s"), WoodMeshes[0] ? *WoodMeshes[0]->GetName() : TEXT("null"));
+    }
+    if (Materials.Num() > 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Materials[0]: %s"), Materials[0] ? *Materials[0]->GetName() : TEXT("null"));
+    }
 }
 
 void AItem::CreateItem(EItemType Type, int StackSize)
 {
 	ItemType = Type;
-	ItemStack = StackSize;
+	ItemStack = 1;
 	UpdateMeshMat();
 }
 

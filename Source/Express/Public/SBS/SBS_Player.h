@@ -53,18 +53,30 @@ public:
 	float RotationLerpRate = 10;
 	UPROPERTY(EditDefaultsOnly)
 	float InteractRadius = 150;
+	UPROPERTY(EditAnywhere)
+	bool bDebugTiles = true;
 
 	float TileSize = 100;
 
 	AItem* HeldItem = nullptr;
-	bool bIsholdingitem = false;
+	ATile* CurrentTile;
+	ATile* FrontTile;
 
+	bool bIsholdingitem = false;
+	float HarvestTimer = 0;
+	int HarvestCount = 0;
+	ATile* LastHarvestTile = nullptr;
 
 public:
 
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Release(const FInputActionValue& Value);
-	void GetGroundTile(ATile*& GroundTile) const;
-	void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//void GetGroundTile_Location(ATile*& GroundTile) const;
+	void GetCurrentTile();
+	void GetFrontTile();
+	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+public:
+	bool bHasWater = false;
 };
