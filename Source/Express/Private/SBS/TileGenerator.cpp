@@ -50,6 +50,8 @@ void ATileGenerator::BeginPlay()
                     if (Z == 0)
                     {
                         NewTile->CreateTile(ETileType::Ground);
+
+                        TileGrid.Add(NewTile);
                     }
                     else
                     {
@@ -85,7 +87,7 @@ void ATileGenerator::GenerateMap()
     // 높이 데이터 받기
     TArray<FName> HeightRowNames = HeightDataTable->GetRowNames(); //행 이름 순회 1~10
     NumRows = HeightRowNames.Num(); //10
-    TileHeights.SetNum(NumRows); //Tilehiehgt는 10개의 빈 배열을 가짐
+    TileHeights.SetNum(NumRows); //Tileheight는 10개의 빈 배열을 가짐
 
     for (int Row = 0; Row < NumRows; Row++)
     {

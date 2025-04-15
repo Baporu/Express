@@ -10,8 +10,9 @@
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-	Wood UMETA(DisplayName = "Wood"), //0
-	Stone UMETA(DisplayName = "Stone"), //1
+	Wood	UMETA(DisplayName = "Wood"),	// 0
+	Stone	UMETA(DisplayName = "Stone"),	// 1
+	Rail	UMETA(DisplayName = "Rail")	// 2
 };
 
 UCLASS()

@@ -22,14 +22,15 @@ public:
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Craft")
 	TSubclassOf<AActor> BP_Rail;
+	UPROPERTY(VisibleAnywhere, Category = "Craft")
+	TArray<AActor*> Rails;
 	UPROPERTY(EditAnywhere, Category = "Craft")
 	float MakeTime = 3.2f;
 	UPROPERTY(EditAnywhere, Category = "Craft")
 	int32 MaxStackSize = 3;
 
 	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination, ATrainCargo* CargoModule);
-
-protected:
+	bool CheckMakeRail();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Craft")
@@ -38,8 +39,6 @@ private:
 	bool bIsMaking = false;
 	UPROPERTY(VisibleAnywhere, Category = "Craft")
 	float MakeTimer = 0.0f;
-	UPROPERTY(VisibleAnywhere, Category = "Craft")
-	int32 StackSize = 0;
 
 	void MakeRail();
 

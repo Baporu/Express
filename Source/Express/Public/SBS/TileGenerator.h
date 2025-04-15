@@ -61,5 +61,8 @@ public:
     TArray<TArray<int>> TileHeights;
     TArray<TArray<ETileType>> TileTypes;
 
+    UPROPERTY(VisibleAnywhere, Category = "Tile")
+    TArray<ATile*> TileGrid;
+
 	void GenerateMap();
 };

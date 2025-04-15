@@ -67,4 +67,9 @@ public:
 	void Release(const FInputActionValue& Value);
 	void GetGroundTile(ATile*& GroundTile) const;
 	void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+
+public:	// 임시로 작성
+	UPROPERTY(EditAnywhere, Category = "Fire")
+	bool bHasWater = true;
 };

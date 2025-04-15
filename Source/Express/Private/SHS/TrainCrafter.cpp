@@ -8,10 +8,14 @@ void ATrainCrafter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Irons.IsEmpty())
+	// 만드는 중 아니면 return
+	if (!bIsMaking) return;
+
+
+	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Stones.IsEmpty())
 		return;
 
-	if (StackSize == MaxStackSize)
+	if (Rails.Num() == MaxStackSize)
 		return;
 
 	MakeTimer += DeltaTime;
@@ -30,15 +34,18 @@ void ATrainCrafter::Init(ATrainEngine* EngineModule, float TrainSpeed, FVector D
 
 void ATrainCrafter::MakeRail()
 {
-	TrainCargo->Woods.Pop();
-	TrainCargo->Irons.Pop();
+	// 만드는 중에 또 만들면 안 되니까 true로 설정
+	bIsMaking = true;
 
-	StackSize++;
+	TrainCargo->Woods.Pop();
+	TrainCargo->Stones.Pop();
 
 	FVector SpawnLocation = GetActorLocation();
-	SpawnLocation.Z += 10.0f * StackSize;
+	SpawnLocation.Z += 10.0f * Rails.Num();
 
-	GetWorld()->SpawnActor<AActor>(BP_Rail, SpawnLocation, FRotator::ZeroRotator);
+	AActor* rail = GetWorld()->SpawnActor<AActor>(BP_Rail, SpawnLocation, FRotator::ZeroRotator);
+	rail->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	Rails.Add(rail);
 
 	MakeTimer = 0.0f;
 }

@@ -6,6 +6,9 @@
 #include "SHS/TrainModule.h"
 #include "TrainCargo.generated.h"
 
+class AItem;
+enum class EItemType : uint8;
+
 /**
  * 
  */
@@ -20,12 +23,13 @@ public:
 public:
 	// 나무 컨테이너
 	UPROPERTY(VisibleAnywhere, Category = "Resource")
-	TArray<class AActor*> Woods;
+	TArray<AItem*> Woods;
 	// 철 컨테이너
 	UPROPERTY(VisibleAnywhere, Category = "Resource")
-	TArray<class AActor*> Irons;
+	TArray<AItem*> Stones;
 
-	void AddResource(class AActor* Resource);
+	void AddResource(AItem* Resource);
+	AItem* GetResource(EItemType ResourceType);
 
 protected:
 	// 화물차가 담을 수 있는 최대 수량
@@ -35,7 +39,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* WoodComp;
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* IronComp;
+	class UBoxComponent* StoneComp;
 
 private:
 
