@@ -94,15 +94,17 @@ void ATile::HarvestTile()
 			break;
 		}
 	}
-	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), CurrentTile->GetActorLocation(), FRotator::ZeroRotator);
+	FVector SpawnLocation = CurrentTile->GetActorLocation();
+	SpawnLocation.Z += 100;
+	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
 	if (!NewItem)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spaw Item Fail"));
+		UE_LOG(LogTemp, Warning, TEXT("Spaw Fail"));
 	}
 	else
 	{
-		NewItem->CreateItem(ItemType, 1); // 아이템 생성
-		CurrentTile->ContainedItem = NewItem; // 타일에 아이템 할당
+		NewItem->CreateItem(ItemType); // 아이템 생성
+		CurrentTile->ContainedItem.Add(NewItem); // 타일에 아이템 할당
 	}
 
 
@@ -134,5 +136,7 @@ void ATile::CreateTile(ETileType Type)
 {
 	TileType = Type;
 	UpdateMeshMat();
+	UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
+
 }
 

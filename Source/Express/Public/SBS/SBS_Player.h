@@ -58,7 +58,7 @@ public:
 
 	float TileSize = 100;
 
-	AItem* HeldItem = nullptr;
+	TArray<AItem*> HoldItems;
 	ATile* CurrentTile;
 	ATile* FrontTile;
 

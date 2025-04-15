@@ -33,33 +33,28 @@ public:
 
 public:
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh")
-	UStaticMeshComponent* MeshComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	UStaticMeshComponent* MeshComp; //스태틱매쉬
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	TArray<class UStaticMesh*> WoodMeshes;
+	class UStaticMesh* WoodMesh; //나무 mesh
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
-	TArray<class UStaticMesh*> StoneMeshes;
+	class UStaticMesh*  StoneMesh; //돌 mesh
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
-	TArray<class UMaterialInterface*> Materials;
+	class UMaterialInterface* WoodMaterial; //나무 material
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
+	class UMaterialInterface* StoneMaterial; //돌 material
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EItemType ItemType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int ItemStack = 1;
-
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-    class UStaticMesh* DefaultMesh;
-
-    UPROPERTY(EditAnywhere, Category = "Material")
-    class UMaterialInterface* DefaultMaterial;
+	EItemType ItemType; //아이템 타입
 
 public:
 	void UpdateMeshMat();
-	void CreateItem(EItemType Type, int StackSize);
+	void CreateItem(EItemType Type);
 
-	void SetStack(int StackSize);
+	void StackItem();
+	
 };
