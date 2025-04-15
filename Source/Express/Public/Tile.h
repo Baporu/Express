@@ -63,7 +63,7 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	AItem* ContainedItem; //타일 위 아이템
+	TArray<AItem*> ContainedItem; //타일 위 아이템
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
 	ETileType TileType;
@@ -88,6 +88,6 @@ public:
 
 
 
-	void SetContainedItem(AItem* Item) {ContainedItem = Item;} //Set item
-	AItem* GetContainedItem() const{ return ContainedItem;} // Get Item
+	void SetContainedItem(TArray<AItem*> Item) {ContainedItem = Item;} //Set item
+	TArray<AItem*> GetContainedItem() const{ return ContainedItem;} // Get Item
 };

@@ -101,8 +101,8 @@ void ATile::HarvestTile()
 	}
 	else
 	{
-		NewItem->CreateItem(ItemType, 1); // 아이템 생성
-		CurrentTile->ContainedItem = NewItem; // 타일에 아이템 할당
+		NewItem->CreateItem(ItemType); // 아이템 생성
+		CurrentTile->ContainedItem.Add(NewItem); // 타일에 아이템 할당
 	}
 
 
