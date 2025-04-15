@@ -14,9 +14,9 @@ AItem::AItem()
 	RootComponent = MeshComp;
     MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
     MeshComp->SetMaterial(0, nullptr); // 초기 재질 비우기
-
+    MeshComp->SetCollisionProfileName(TEXT("Item"));
 	ItemType = EItemType::Wood;
-    //ConstructorHelpers::FObjectFinder<UStaticMesh>
+
     static ConstructorHelpers::FObjectFinder<UStaticMesh> WoodMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Wood.Item_Wood"));
     if (WoodMeshFinder.Succeeded())
     {
