@@ -14,7 +14,6 @@ AItem::AItem()
 	RootComponent = MeshComp;
 
 	ItemType = EItemType::Wood;
-	ItemStack = 1;
 
 }
 
@@ -35,33 +34,39 @@ void AItem::Tick(float DeltaTime)
 
 void AItem::UpdateMeshMat()
 {
-	TArray<UStaticMesh*>* TargetMeshes;
-	int MeshIndex = FMath::Clamp(ItemStack - 1, 0, 4); //아이템스텍 1~5를 0~4 인덱스로 변환
-	int MaterialIndex = static_cast<int>(ItemType); //아이템타입을 0~1인덱스로 변환
+   
+    if (ItemType == EItemType::Wood)
+    {
+        MeshComp->SetStaticMesh(WoodMesh);
 
-	if (ItemType == EItemType::Wood)
-	{
-		TargetMeshes = &WoodMeshes;
-	}
-	else
-	{
-		TargetMeshes = &StoneMeshes;
-	}
+        UE_LOG(LogTemp, Warning, TEXT("UpdateMesh Success"));
 
-	MeshComp->SetStaticMesh((*TargetMeshes)[MeshIndex]);
-	MeshComp->SetMaterial(0, Materials[MaterialIndex]);
+    }
+    else if (ItemType == EItemType::Stone)
+    {
+        MeshComp->SetStaticMesh(StoneMesh);
+    }
+
+    //재질 설정
+    if (ItemType == EItemType::Wood)
+    {
+        MeshComp->SetMaterial(0, WoodMaterial);
+        UE_LOG(LogTemp, Warning, TEXT("UpdateMaterial Success"));
+
+    }
+    else if (ItemType == EItemType::Stone)
+    {
+        MeshComp->SetMaterial(0, StoneMaterial);
+    }
+    
 }
-
-void AItem::CreateItem(EItemType Type, int StackSize)
+void AItem::CreateItem(EItemType Type)
 {
 	ItemType = Type;
-	ItemStack = StackSize;
 	UpdateMeshMat();
 }
 
-void AItem::SetStack(int StackSize)
+void AItem::StackItem()
 {
-	ItemStack = StackSize;
-	UpdateMeshMat();
+    //AttachToActor()
 }
-

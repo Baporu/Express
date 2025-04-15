@@ -11,10 +11,10 @@
 UENUM(BlueprintType)
 enum class ETileType : uint8
 {
-	Ground	UMETA(DisplayName = "Ground"),	// 바닥
-	Wood	UMETA(DisplayName = "Wood"),	// 채취 가능 자원
-	Stone	UMETA(DisplayName = "Stone"),	// 채취 가능 자원
-	Rail	UMETA(DisplayName = "Rail")		// 선로
+	Ground UMETA(DisplayName = "Ground"), // 바닥
+	Wood UMETA(DisplayName = "Wood"), // 채취 가능 자원
+	Stone UMETA(DisplayName = "Stone"), // 채취 가능 자원
+	Rock UMETA(DisplayName = "Rock") // 채취 불가능
 };
 UCLASS()
 class EXPRESS_API ATile : public AActor
@@ -31,18 +31,22 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMeshComponent* TileMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Collision)
+	class UBoxComponent* TileCollision;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* GroundMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* StoneMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* WoodMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* RockMesh;
 	
 
 	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
@@ -59,26 +63,31 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	AItem* ContainedItem; //타일 위 아이템
+	TArray<AItem*> ContainedItem; //타일 위 아이템
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
 	ETileType TileType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bTrigger = false;
+	
+
+	int MaxTileHP;
+	int CurTileHP;
+
+
 public:
 	
 	bool CanHarvest() const;
+	void ReduceHP();
+	
 	void HarvestTile();
 
 	void UpdateMeshMat();
 	void CreateTile(ETileType Type);
 
-	void SetContainedItem(AItem* Item) {ContainedItem = Item;} //Set item
-	AItem* GetContainedItem() const{ return ContainedItem;} // Get Item
 
 
-public:
-	// true면 선로 해체 불가능
-	bool bIsPassed = false;
+	void SetContainedItem(TArray<AItem*> Item) {ContainedItem = Item;} //Set item
+	TArray<AItem*> GetContainedItem() const{ return ContainedItem;} // Get Item
 };

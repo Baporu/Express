@@ -132,6 +132,7 @@ void ATileGenerator::GenerateMap()
     		if (ColData[Col] == TEXT("W")) TileTypes[Row][Col] = ETileType::Wood; //W¸é wood
 			else if (ColData[Col] == TEXT("G")) TileTypes[Row][Col] = ETileType::Ground;
 			else if (ColData[Col] == TEXT("S")) TileTypes[Row][Col] = ETileType::Stone;
+            else if (ColData[Col] == TEXT("R")) TileTypes[Row][Col] = ETileType::Rock;
 			else
 		    {
 				UE_LOG(LogTemp, Warning, TEXT("TYPE Wrong"));

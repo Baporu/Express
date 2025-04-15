@@ -9,6 +9,7 @@
 #include "Chaos/Vector.h"
 #include "SBS/Item.h"
 #include "EngineUtils.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ATile::ATile()
@@ -20,6 +21,11 @@ ATile::ATile()
 	RootComponent = TileMesh;
 	TileFSM = CreateDefaultSubobject<UTile_FSM>(TEXT("Tile FSM"));
 	TileType = ETileType::Ground;
+	TileCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("Tile Collision"));
+	TileCollision->SetupAttachment(TileMesh);
+
+	MaxTileHP = 3;
+	CurTileHP = MaxTileHP;
 }
 
 // Called when the game starts or when spawned
@@ -31,30 +37,39 @@ void ATile::BeginPlay()
 }
 //test
 // Called every frame
-void ATile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	//UpdateMeshMat();
-	if (bTrigger)
-	{
-		HarvestTile();
-		//Destroy();
-	}
-}
+//void ATile::Tick(float DeltaTime)
+//{
+//	Super::Tick(DeltaTime);
+//
+//}
 
 bool ATile::CanHarvest() const
 {
-	return TileType != ETileType::Ground; // 바닥이 아닌 경우에만 수확 가능
+	bool temp = !(TileType == ETileType::Ground || TileType == ETileType::Rock);
+	return temp; // 바닥이 아닌 경우에만 수확 가능
+}
+
+void ATile::ReduceHP()
+{
+	if (TileType == ETileType::Ground || TileType == ETileType::Rock) // 바닥일때
+	{
+		return;
+	}
+	CurTileHP--;
+	if (CurTileHP <= 0)
+	{
+		HarvestTile();
+	}
 }
 
 void ATile::HarvestTile()
 {
-	if(!CanHarvest() || !IsValid(this)) // 수확할수 없으면
-	{
-		return;
-	}
+	//if(!CanHarvest()) // 수확할수 없으면
+	//{
+	//	return;
+	//}
 
-	ATile* GroundTile = nullptr;
+	ATile* CurrentTile = nullptr;
 	AItem* NewItem;
 
 	EItemType ItemType = EItemType::Wood;
@@ -66,24 +81,33 @@ void ATile::HarvestTile()
 	{
 		ItemType = EItemType::Stone;
 	}
-
-
+	else
+	{
+		return;
+	}
 	FVector GroundLocation = FVector(GetActorLocation().X, GetActorLocation().Y, 0.f);
 	for (TActorIterator<ATile> It(GetWorld()); It; ++It)
 	{
 		if (It->GetActorLocation() == GroundLocation && It->TileType == ETileType::Ground)
 		{
-			GroundTile = *It;
+			CurrentTile = *It;
 			break;
 		}
 	}
-	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), GroundTile->GetActorLocation(), FRotator::ZeroRotator);
-	if (NewItem)
+	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), CurrentTile->GetActorLocation(), FRotator::ZeroRotator);
+	if (!NewItem)
 	{
-		NewItem->CreateItem(ItemType, 1); // 아이템 생성
-		GroundTile->ContainedItem = NewItem; // 타일에 아이템 할당
+		UE_LOG(LogTemp, Warning, TEXT("Spaw Item Fail"));
 	}
+	else
+	{
+		NewItem->CreateItem(ItemType); // 아이템 생성
+		CurrentTile->ContainedItem.Add(NewItem); // 타일에 아이템 할당
+	}
+
+
 	Destroy(); // 타일 파괴
+	CurTileHP = MaxTileHP;
 }
 
 void ATile::UpdateMeshMat()

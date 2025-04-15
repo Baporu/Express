@@ -51,7 +51,7 @@ public:
     UDataTable* TypeDataTable;   // CSV 데이터 테이블 (타입)
 
     UPROPERTY(VisibleAnywhere, Category = "Tile")
-    int32 NumRows = 5;
+    int NumRows = 5;
 
     UPROPERTY(VisibleAnywhere, Category = "Tile")
     int NumCols = 5;
