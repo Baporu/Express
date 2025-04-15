@@ -52,24 +52,27 @@ void ASBS_Player::Tick(float DeltaTime)
     }
     //손에 물건 안들고있으면 암것도 안함
     if (HoldItems.IsEmpty()) return;
-
-    //손에 물건 들고있을 때 바닥타일 확인
-    GetCurrentTile();
-    TArray<AItem*> TargetItem;
-    //helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
-    if (CurrentTile && HoldItems.Num()<=5)
+    else
     {
-        if(!(CurrentTile->GetContainedItem().IsEmpty()))//바닥에 아이템이 있으면
-        TargetItem = CurrentTile->GetContainedItem();
-       
-        if (HoldItems.Top()->ItemType == TargetItem[0]->ItemType) //들고있는 아이템이 바닥 아이템과 같으면
+        //손에 물건 들고있을 때 바닥타일 확인
+        GetCurrentTile();
+        TArray<AItem*> TargetItem;
+        //helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
+        if (CurrentTile && HoldItems.Num()<=5)
         {
-           //attach
-           TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
-           //배열에 추가
-           HoldItems.Append(TargetItem);
+            if(!(CurrentTile->GetContainedItem().IsEmpty()))//바닥에 아이템이 있으면
+            TargetItem = CurrentTile->GetContainedItem();
+       
+            if (HoldItems[0]->ItemType == TargetItem[0]->ItemType) //들고있는 아이템이 바닥 아이템과 같으면
+            {
+               //attach
+               TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+               //배열에 추가
+               HoldItems.Append(TargetItem);
+            }
         }
     }
+
 }
 
 void ASBS_Player::NotifyControllerChanged()
