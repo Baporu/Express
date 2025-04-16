@@ -31,20 +31,20 @@ void ASBS_Player::Tick(float DeltaTime)
     //접촉시 0.5초마다 수확
     if (true) //TODO: 도구를 들고 있으면
     {
-		HarvestTimer -= DeltaTime;
-		if (HarvestTimer <= 0.f)
-		{
-			GetFrontTile();
-			if (FrontTile && FrontTile->CanHarvest())
-			{
-				FrontTile->ReduceHP();
-				HarvestTimer = 0.5f;
-			}
-			else
-			{
-				HarvestTimer = 0.5f;
-			}
-		}
+        HarvestTimer -= DeltaTime;
+        if (HarvestTimer <= 0.f)
+        {
+            GetFrontTile();
+            if (FrontTile && FrontTile->CanHarvest())
+            {
+                FrontTile->ReduceHP();
+                HarvestTimer = 0.5f;
+            }
+            else
+            {
+                HarvestTimer = 0.5f;
+            }
+        }
     }
     else
     {
@@ -52,24 +52,27 @@ void ASBS_Player::Tick(float DeltaTime)
     }
     //손에 물건 안들고있으면 암것도 안함
     if (HoldItems.IsEmpty()) return;
-
-    //손에 물건 들고있을 때 바닥타일 확인
-    GetCurrentTile();
-    TArray<AItem*> TargetItem;
-    //helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
-    if (CurrentTile && HoldItems.Num()<=5)
+    else
     {
-        if(!(CurrentTile->GetContainedItem().IsEmpty()))//바닥에 아이템이 있으면
-        TargetItem = CurrentTile->GetContainedItem();
-       
-        if (HoldItems.Top()->ItemType == TargetItem[0]->ItemType) //들고있는 아이템이 바닥 아이템과 같으면
+        //손에 물건 들고있을 때 바닥타일 확인
+        GetCurrentTile();
+        TArray<AItem*> TargetItem;
+        //helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
+        if (CurrentTile)
         {
-           //attach
-           TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
-           //배열에 추가
-           HoldItems.Append(TargetItem);
+            if (!(CurrentTile->GetContainedItem().IsEmpty())) {
+                TargetItem = CurrentTile->GetContainedItem();
+                if (!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
+                {
+                    //attach
+                    TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+                    //배열에 추가
+                    HoldItems.Append(TargetItem);
+                }
+            }
         }
     }
+
 }
 
 void ASBS_Player::NotifyControllerChanged()
@@ -122,7 +125,7 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 {
 
     TArray<AItem*> TargetItem;
-    TargetItem.IsEmpty();
+    TargetItem.Empty();
     GetCurrentTile();
     // 1순위: CurrentTile
     if (CurrentTile)
@@ -150,21 +153,28 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
     {
         if (!HoldItems.IsEmpty()) //물건 들고있으면
         {
-            //====교체====
             //바닥에 있는 아이템과 들고 있는 아이템 타입이 같지 않으면. 
+            //====교체====
             if (HoldItems.Top()->ItemType != TargetItem[0]->ItemType)
             {
-                HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-                // 놓을 타일 선택: CurrentTile 우선, 없으면 FrontTile
-                ATile* PlaceTile = CurrentTile ? CurrentTile : (FrontTile && FrontTile->TileType == ETileType::Ground ? FrontTile : nullptr);
-                if (PlaceTile)
-                {   
-                    //위치 교체.
-                    TargetItem[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-                    HoldItems[0]->SetActorLocation(PlaceTile->GetActorLocation());
-                    //종속 교체.
+                ATile* PlaceTile = CurrentTile;
+                TArray<AItem*> temp = TargetItem;
+                if (PlaceTile && PlaceTile->TileType == ETileType::Ground)
+                {
+                    //손에서 땐다.
+                    HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+                  
+                    FVector TargetPos = PlaceTile->GetActorLocation();
+                    TargetPos.Z += 100;
+                    HoldItems[0]->SetActorLocation(TargetPos);
+                    //temp[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+                    temp[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
                     PlaceTile->SetContainedItem(HoldItems);
-                    HoldItems=TargetItem;
+                    HoldItems.Empty();
+                    HoldItems.Append(temp);
+                    
+                    //HoldItems = TargetItem;
                     //UE_LOG(LogTemp, Warning, TEXT("Swapped Item: %s"), *TargetItem->ItemType);
                 }
             }
@@ -195,30 +205,37 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 
 void ASBS_Player::Release(const FInputActionValue& Value)
 {
-    //Q로 내려놓기
-    if (HoldItems.Num()== 0) //안들고있으면 안함
+    //내려놓기
+    if (HoldItems.Num() == 0) //안들고있으면 안함
     {
+        UE_LOG(LogTemp, Warning, TEXT("have no Item"));
         return;
     }
-    GetCurrentTile();
-    if (!CurrentTile)
+    else
     {
-        UE_LOG(LogTemp, Warning, TEXT("No CurrentTile")); 
-        return;
-    }
-    if ((CurrentTile->GetContainedItem().IsEmpty()))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("CurrentTile already has item"));
-        // TODO: 교체처리 추가
-        return;
-    }
-    if (HoldItems.Num()>0) //들고있다면
-    {
-        HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        HoldItems[0]->SetActorTransform(CurrentTile->GetActorTransform());
-        CurrentTile->SetContainedItem(HoldItems);
-        HoldItems.Empty();
-        bIsholdingitem = false;
+        if (!CurrentTile)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("No CurrentTile"));
+            return;
+        }
+        else
+        {
+            if (!(CurrentTile->GetContainedItem().IsEmpty()))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("CurrentTile already has item"));
+                // TODO: 교체처리 추가
+                return;
+            }
+            GetCurrentTile();
+            HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+            HoldItems[0]->SetActorRotation(FRotator(0,0,0));
+            FVector TargetPos = CurrentTile->GetActorLocation();
+            TargetPos.Z += 100;
+            HoldItems[0]->SetActorLocation(TargetPos);
+            CurrentTile->SetContainedItem(HoldItems);
+            HoldItems.Empty();
+            bIsholdingitem = false;
+        }
     }
 }
 
@@ -228,28 +245,21 @@ void ASBS_Player::GetCurrentTile()
     FVector CurLoc = GetActorLocation();
 
     FVector Start = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z + 200.f);
-    FVector End = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z - 100.f);
+    FVector End = FVector(CurLoc.X, CurLoc.Y, CurLoc.Z - 200.f);
     FHitResult Hit;
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+    FCollisionQueryParams params;
+    params.AddIgnoredActor(this);
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
-        ATile* Tile = Cast<ATile>(Hit.GetActor());
-        if (Tile && Tile->TileType == ETileType::Ground && Tile->TileType == ETileType::Stone) //타일이 채취 불가능일때
+        UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
+        ATile* HitTile = Cast<ATile>(Hit.GetActor());
+        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        if (HitTile) //타일이 채취 불가능일때
         {
-            CurrentTile = Tile;
-           //if (bDebugTiles)
-           //{
-           //
-			//	UKismetSystemLibrary::DrawDebugBox(GetWorld(), Tile->GetActorLocation(), FVector(TileSize, TileSize, 10.f), FColor::Red, /FRotator::ZeroRotator, /1);
-           //}
+            CurrentTile = HitTile;
+            UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
+
         }
-		// else if (bDebugTiles) //타일이 채취 가능일때
-		// {
-		//     UKismetSystemLibrary::DrawDebugBox(GetWorld(), Tile->GetActorLocation(), FVector(TileSize, TileSize, 10.f), FColor::Green, /FRotator::ZeroRotator, /1);
-		// }
-    }
-    else if (bDebugTiles)
-    {
-        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FColor::Blue, 0.1f, 1.f); //아무것도 못치면
     }
 
     if (!CurrentTile)
@@ -270,8 +280,11 @@ void ASBS_Player::GetFrontTile()
     FVector Start = FVector(ForwardTileX, ForwardTileY, CurLoc.Z + 200.f);
     FVector End = FVector(ForwardTileX, ForwardTileY, CurLoc.Z - 100.f);
     FHitResult Hit;
-    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility))
+    FCollisionQueryParams params;
+    params.AddIgnoredActor(this);
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
+        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 1, 15);
         ATile* Tile = Cast<ATile>(Hit.GetActor());
         if (Tile)
         {
@@ -280,6 +293,6 @@ void ASBS_Player::GetFrontTile()
     }
     if (!FrontTile)
     {
-        UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
+        //UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
     }
 }

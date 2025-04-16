@@ -12,9 +12,34 @@ AItem::AItem()
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
-
+    MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
+    MeshComp->SetMaterial(0, nullptr); // 초기 재질 비우기
+    MeshComp->SetCollisionProfileName(TEXT("Item"));
 	ItemType = EItemType::Wood;
 
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> WoodMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Wood.Item_Wood"));
+    if (WoodMeshFinder.Succeeded())
+    {
+        WoodMesh = WoodMeshFinder.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> StoneMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Stone.Item_Stone"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        StoneMesh = StoneMeshFinder.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> WoodMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Wood.M_Wood"));
+    if (WoodMaterialFinder.Succeeded())
+    {
+        WoodMaterial = WoodMaterialFinder.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> StoneMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Stone.M_Stone"));
+    if (StoneMaterialFinder.Succeeded())
+    {
+        StoneMaterial = StoneMaterialFinder.Object;
+    }
 }
 
 // Called when the game starts or when spawned
@@ -38,9 +63,6 @@ void AItem::UpdateMeshMat()
     if (ItemType == EItemType::Wood)
     {
         MeshComp->SetStaticMesh(WoodMesh);
-
-        UE_LOG(LogTemp, Warning, TEXT("UpdateMesh Success"));
-
     }
     else if (ItemType == EItemType::Stone)
     {
@@ -51,8 +73,6 @@ void AItem::UpdateMeshMat()
     if (ItemType == EItemType::Wood)
     {
         MeshComp->SetMaterial(0, WoodMaterial);
-        UE_LOG(LogTemp, Warning, TEXT("UpdateMaterial Success"));
-
     }
     else if (ItemType == EItemType::Stone)
     {
