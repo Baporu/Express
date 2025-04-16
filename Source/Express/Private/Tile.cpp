@@ -130,6 +130,10 @@ void ATile::UpdateMeshMat()
 		TileMesh->SetStaticMesh(WoodMesh);
 		//TileMesh->SetMaterial(0, WoodMat);
 	}
+	else if (TileType == ETileType::Rock)
+	{
+		TileMesh->SetStaticMesh(RockMesh);
+	}
 }
 
 void ATile::CreateTile(ETileType Type)
