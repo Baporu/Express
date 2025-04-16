@@ -25,14 +25,38 @@ ASBS_Player::ASBS_Player()
 void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
+
+    //현재타일에 도끼 놓기
+    GetCurrentTile();
+	AItem* AxeItem;
+    FVector SpawnLocation = CurrentTile->GetActorLocation();
+    TArray<AItem*> TempItem;
+    SpawnLocation.Z += 100;
+    AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+    AxeItem->CreateItem(EItemType::Axe);
+    TempItem.Add(AxeItem);
+    CurrentTile->SetContainedItem(TempItem);
+    TempItem.Empty();
+
+    //앞 타일에 곡괭이 놓기
+    GetFrontTile();
+    AItem* PickaxeItem;
+    SpawnLocation = FrontTile->GetActorLocation();
+    SpawnLocation.Z += 100;
+    PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+    AxeItem->CreateItem(EItemType::Pickaxe);
+    TempItem.Add(PickaxeItem);
+    FrontTile->SetContainedItem(TempItem);
 }
 
 void ASBS_Player::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    //접촉시 0.5초마다 수확
-    if (true) //TODO: 도구를 들고 있으면
+    //손에 물건 안들고있으면 암것도 안함
+    if (HoldItems.IsEmpty()) return;
+    
+    if (!(HoldItems.IsEmpty()) && HoldItems[0]->IsTool) //TODO: 도구를 들고 있으면 0.5초마다 수확
     {
         HarvestTimer -= DeltaTime;
         if (HarvestTimer <= 0.f)
@@ -49,13 +73,7 @@ void ASBS_Player::Tick(float DeltaTime)
             }
         }
     }
-    else
-    {
-
-    }
-    //손에 물건 안들고있으면 암것도 안함
-    if (HoldItems.IsEmpty()) return;
-    else
+    if(!(HoldItems[0]->IsTool)) //물건이면
     {
         //손에 물건 들고있을 때 바닥타일 확인
         GetCurrentTile();
