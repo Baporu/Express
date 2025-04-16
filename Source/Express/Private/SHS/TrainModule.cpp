@@ -9,6 +9,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Tile.h"
 #include "SBS/TileGenerator.h"
+#include "SHS/GridManager.h"
 
 // Sets default values
 ATrainModule::ATrainModule()
@@ -137,7 +138,7 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 
 void ATrainModule::CheckNextTile()
 {
-	TArray<TArray<ATile*>> grid = TileGenerator->tileGrid;
+	TArray<TArray<ATile*>> grid = GridManager->Grid;
 
 	// аб©Л е╫╩Ж
 // 	if (RowIndex - 1 > 0)

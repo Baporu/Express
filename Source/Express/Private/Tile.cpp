@@ -10,6 +10,7 @@
 #include "SBS/Item.h"
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
+#include "SHS/GridManager.h"
 
 // Sets default values
 ATile::ATile()
@@ -142,5 +143,46 @@ void ATile::CreateTile(ETileType Type)
 	UpdateMeshMat();
 	UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
 
+}
+
+bool ATile::CheckRail()
+{
+	if (!GridManager || GridManager->Grid.IsEmpty()) {
+		UE_LOG(LogTemp, Fatal, TEXT("Error: Tile - CheckRail(), There is no grid."));
+		return false;
+	}
+
+	// 왼쪽 타일 탐색
+	if (gridRow - 1 > 0) {
+		// 타일에 선로가 깔려있으면 선로 연결 가능
+		if (GridManager->Grid[gridRow - 1][gridColumn]->TileType == ETileType::Rail)
+			return true;
+	}
+	// 오른쪽 타일 탐색
+	if (gridRow + 1 < GridManager->Grid.Num()) {
+		// 타일에 선로가 깔려있으면 선로 연결 가능
+		if (GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Rail)
+			return true;
+	}
+	// 위쪽 타일 탐색
+	if (gridColumn - 1 > 0) {
+		// 타일에 선로가 깔려있으면 선로 연결 가능
+		if (GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Rail)
+			return true;
+	}
+	// 아래쪽 타일 탐색
+	if (gridColumn + 1 < GridManager->Grid[gridRow].Num()) {
+		// 타일에 선로가 깔려있으면 선로 연결 가능
+		if (GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Rail)
+			return true;
+	}
+
+	// 전부 선로 안 깔려있으면 선로 연결 불가
+	return false;
+}
+
+void ATile::SetRail()
+{
+	TileType = ETileType::Rail;
 }
 

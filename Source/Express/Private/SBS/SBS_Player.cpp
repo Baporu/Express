@@ -231,10 +231,31 @@ void ASBS_Player::Release(const FInputActionValue& Value)
                 return;
             }
             GetCurrentTile();
-            HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-            HoldItems[0]->SetActorRotation(FRotator(0,0,0));
+
             FVector TargetPos = CurrentTile->GetActorLocation();
             TargetPos.Z += 100;
+
+            // 현재 아이템이 선로일 경우
+            if (HoldItems.Top()->ItemType == EItemType::Rail) {
+                // 선로 연결이 가능한지 확인
+                if (CurrentTile->CheckRail()) {
+                    // 선로 연결이 가능하면 가장 위 선로만 빼내기
+                    HoldItems.Top()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+                    HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
+                    HoldItems.Top()->SetActorLocation(TargetPos);
+
+                    CurrentTile->SetRail();
+                    HoldItems.Pop();
+
+                    return;
+                }
+
+                // 선로 연결이 불가능하면 그냥 내려놓으면 되므로 추가 로직 없이 하단 코드 실행
+            }
+
+            // 현재 아이템이 선로가 아닐 경우 타일에 전부 내려놓는다.
+            HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+            HoldItems[0]->SetActorRotation(FRotator(0,0,0));
             HoldItems[0]->SetActorLocation(TargetPos);
             CurrentTile->SetContainedItem(HoldItems);
             HoldItems.Empty();
@@ -340,10 +361,9 @@ void ASBS_Player::GetFrontTile()
             if (!crafter->CheckRail()) return;
 
             UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Check Succeeded"));
-            HoldItems.Add(crafter->GetRail());
+            HoldItems.Append(crafter->GetRail());
+            crafter->EmptyRail();
             HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-//             for (int i = 0; i < 4; i++)
-//                 HoldItems[i] = crafter->GetRail();
         }
         
         else if (ATile* Tile = Cast<ATile>(Hit.GetActor()))

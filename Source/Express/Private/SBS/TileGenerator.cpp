@@ -3,6 +3,7 @@
 
 #include "SBS/TileGenerator.h"
 #include "Express/Express.h"
+#include "SHS/GridManager.h"
 
 // Sets default values
 ATileGenerator::ATileGenerator()
@@ -54,6 +55,10 @@ void ATileGenerator::BeginPlay()
                     {
                         NewTile->CreateTile(ETileType::Ground);
 
+                        NewTile->gridRow = Row;
+                        NewTile->gridColumn = Col;
+                        NewTile->GridManager = GridManager;
+
                         ColTiles.Add(NewTile);
                     }
                     else
@@ -69,12 +74,12 @@ void ATileGenerator::BeginPlay()
             }
         }
 
-        tileGrid.Add(ColTiles);
+        GridManager->Grid.Add(ColTiles);
     }
 
-    for (int i = 0; i < tileGrid.Num(); i++) {
-        for (int j = 0; j < tileGrid[i].Num(); j++)
-            UE_LOG(LogTrain, Log, TEXT("Row: %d, Col: %d, Name: %s"), i, j, *tileGrid[i][j]->GetActorNameOrLabel())
+    for (int i = 0; i < GridManager->Grid.Num(); i++) {
+        for (int j = 0; j < GridManager->Grid[i].Num(); j++)
+            UE_LOG(LogTrain, Log, TEXT("Row: %d, Col: %d, Name: %s"), i, j, *GridManager->Grid[i][j]->GetActorNameOrLabel());
     }
 }
 

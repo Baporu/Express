@@ -65,8 +65,8 @@ protected:
 	// 모듈 이동 속도, 엔진에서 초기화
 	UPROPERTY(VisibleAnywhere, Category = "Move")
 	float ModuleSpeed = 25.0f;
-	UPROPERTY(EditAnywhere, Category = "Move")
-	class ATileGenerator* TileGenerator;
+	UPROPERTY(EditAnywhere, Category = "Tile")
+	class AGridManager* GridManager;
 	class ATile* CurrentTile;
 	// 현재 목표 타일의 Row 인덱스
 	int32 RowIndex = -1;

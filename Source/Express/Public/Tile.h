@@ -97,4 +97,15 @@ public:
 public:
 	UPROPERTY(EditAnywhere)
 	bool bIsPassed = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Tile")
+	int32 gridRow = -1;
+	UPROPERTY(VisibleAnywhere, Category = "Tile")
+	int32 gridColumn = -1;
+
+	UPROPERTY(VisibleAnywhere, Category = "Grid")
+	class AGridManager* GridManager;
+
+	bool CheckRail();
+	void SetRail();
 };

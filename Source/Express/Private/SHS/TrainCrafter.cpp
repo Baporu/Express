@@ -61,25 +61,26 @@ bool ATrainCrafter::CheckRail()
 	return false;
 }
 
-AItem* ATrainCrafter::GetRail()
+TArray<AItem*> ATrainCrafter::GetRail()
 {
-	if (Rails.IsEmpty()) return nullptr;
+	Rails[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 
-	AItem* rail = Rails.Top();
-	rail->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-	Rails.Pop();
-
-	return rail;
+	return Rails;
 }
 
 void ATrainCrafter::MakeRail()
 {
 	AItem* rail = GetWorld()->SpawnActor<AItem>(BP_Rail, GetActorLocation(), GetActorRotation());
 	rail->CreateItem(EItemType::Rail);
-	rail->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+	if (!CheckRail()) {
+		rail->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		rail->SetActorRelativeLocation(FVector(0.0, 0.0, 50.0));
+	}
+	else
+		rail->AttachToActor(Rails.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
 	Rails.Add(rail);
 
-	rail->SetActorRelativeLocation(FVector(0.0, 0.0, 50.0) * Rails.Num());
 
 	bIsMaking = false;
 	MakeTimer = 0.0f;

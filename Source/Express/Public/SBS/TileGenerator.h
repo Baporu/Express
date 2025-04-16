@@ -61,7 +61,8 @@ public:
     TArray<TArray<int>> TileHeights;
     TArray<TArray<ETileType>> TileTypes;
 
-    TArray<TArray<ATile*>> tileGrid;
+    UPROPERTY(EditAnywhere, Category = "Tile")
+    class AGridManager* GridManager;
 
 	void GenerateMap();
 };
