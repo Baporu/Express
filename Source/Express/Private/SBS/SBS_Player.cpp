@@ -10,6 +10,9 @@
 #include "Tile.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "SHS/TrainCargo.h"
+#include "SHS/TrainCrafter.h"
+#include "../Express.h"
 
 // Sets default values
 ASBS_Player::ASBS_Player()
@@ -285,8 +288,64 @@ void ASBS_Player::GetFrontTile()
     if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
         UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 1, 15);
-        ATile* Tile = Cast<ATile>(Hit.GetActor());
-        if (Tile)
+
+        // 기차 우선 탐지
+        if (ATrainCargo* cargo = Cast<ATrainCargo>(Hit.GetActor())) {
+            // 손에 뭐 들고 있으면 넣기
+            if (!HoldItems.IsEmpty()) {
+                UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo"));
+
+                if (cargo->CheckAddResource()) {
+                    for (int i = 0; i < HoldItems.Num(); i++) {
+                        HoldItems[i]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+                        cargo->AddResource(HoldItems.Top());
+                        HoldItems.Pop();
+                    }
+                }
+            }
+            // 손에 없으면 빼오기 시도
+            else {
+                UE_LOG(LogTrain, Log, TEXT("Hit Component: %s"), *Hit.GetComponent()->GetName());
+
+                // 보관 장소가 나무면 나무, 돌이면 돌 가져오기 (2개의 Box Collider로 구분되어 있음)
+                if (Hit.GetComponent()->GetName().Contains("Wood")) {
+                    UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Wood"));
+
+                    for (int i = 0; i < 4; i++) {
+                        if (!cargo->CheckGetResource(EItemType::Wood)) return;
+
+                        HoldItems.Add(cargo->GetResource(EItemType::Wood));
+                        HoldItems[i]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                    }
+				}
+                else {
+                    UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Stone"));
+
+                    for (int i = 0; i < 4; i++) {
+                        if (!cargo->CheckGetResource(EItemType::Stone)) return;
+     
+                        HoldItems.Add(cargo->GetResource(EItemType::Stone));
+                        HoldItems[i]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                    }
+                }
+            }
+        }
+
+        else if (ATrainCrafter* crafter = Cast<ATrainCrafter>(Hit.GetActor())) {
+            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter"));
+
+            if (!HoldItems.IsEmpty()) return;
+
+            if (!crafter->CheckRail()) return;
+
+            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Check Succeeded"));
+            HoldItems.Add(crafter->GetRail());
+            HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+//             for (int i = 0; i < 4; i++)
+//                 HoldItems[i] = crafter->GetRail();
+        }
+        
+        else if (ATile* Tile = Cast<ATile>(Hit.GetActor()))
         {
             FrontTile = Tile;
         }

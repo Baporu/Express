@@ -32,6 +32,8 @@ public:
 
 	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination, ATrainCargo* CargoModule);
 	bool CheckMakeRail();
+
+	bool CheckRail();
 	AItem* GetRail();
 
 private:

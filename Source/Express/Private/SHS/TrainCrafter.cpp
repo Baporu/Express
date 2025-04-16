@@ -4,6 +4,7 @@
 #include "SHS/TrainCrafter.h"
 #include "SHS/TrainCargo.h"
 #include "SBS/Item.h"
+#include "../Express.h"
 
 void ATrainCrafter::Tick(float DeltaTime)
 {
@@ -11,6 +12,8 @@ void ATrainCrafter::Tick(float DeltaTime)
 
 	// 만드는 중 아니면 return
 	if (!bIsMaking) return;
+
+	if (bOnFire) return;
 
 	MakeTimer += DeltaTime;
 
@@ -39,14 +42,23 @@ bool ATrainCrafter::CheckMakeRail()
 	AItem* wood = TrainCargo->Woods.Top();
 	TrainCargo->Woods.Pop();
 	wood->Destroy();
+	UE_LOG(LogTrain, Warning, TEXT("Wood Destroyed"));
 
 	AItem* stone = TrainCargo->Stones.Top();
 	TrainCargo->Stones.Pop();
 	stone->Destroy();
+	UE_LOG(LogTrain, Warning, TEXT("Stone Destroyed"));
 
 	bIsMaking = true;
 
 	return true;
+}
+
+bool ATrainCrafter::CheckRail()
+{
+	if (!Rails.IsEmpty()) return true;
+
+	return false;
 }
 
 AItem* ATrainCrafter::GetRail()
@@ -62,13 +74,12 @@ AItem* ATrainCrafter::GetRail()
 
 void ATrainCrafter::MakeRail()
 {
-	FVector SpawnLocation = GetActorLocation();
-	SpawnLocation.Z += 10.0f * Rails.Num();
-
-	AItem* rail = GetWorld()->SpawnActor<AItem>(BP_Rail, SpawnLocation, FRotator::ZeroRotator);
-	rail->CreateItem(EItemType::Rail, 1);
+	AItem* rail = GetWorld()->SpawnActor<AItem>(BP_Rail, GetActorLocation(), GetActorRotation());
+	rail->CreateItem(EItemType::Rail);
 	rail->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 	Rails.Add(rail);
+
+	rail->SetActorRelativeLocation(FVector(0.0, 0.0, 50.0) * Rails.Num());
 
 	bIsMaking = false;
 	MakeTimer = 0.0f;

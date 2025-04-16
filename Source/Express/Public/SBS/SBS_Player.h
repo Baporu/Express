@@ -58,6 +58,7 @@ public:
 
 	float TileSize = 100;
 
+	UPROPERTY(VisibleAnywhere, Category = "Item")
 	TArray<AItem*> HoldItems;
 	ATile* CurrentTile;
 	ATile* FrontTile;

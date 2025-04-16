@@ -99,7 +99,7 @@ void ATile::HarvestTile()
 	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
 	if (!NewItem)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spaw Fail"));
+		UE_LOG(LogTemp, Warning, TEXT("Spawn Fail"));
 	}
 	else
 	{

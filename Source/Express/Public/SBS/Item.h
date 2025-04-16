@@ -12,7 +12,7 @@ enum class EItemType : uint8
 {
 	Wood	UMETA(DisplayName = "Wood"),	// 0
 	Stone	UMETA(DisplayName = "Stone"),	// 1
-	Rail	UMETA(DisplayName = "Rail")	// 2
+	Rail	UMETA(DisplayName = "Rail")		// 2
 };
 
 UCLASS()
@@ -48,6 +48,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
 	class UMaterialInterface* StoneMaterial; //돌 material
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
+	class UMaterialInterface* RailMaterial; //레일 material
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemType ItemType; //아이템 타입

@@ -9,14 +9,37 @@
 ATrainCargo::ATrainCargo()
 {
 	WoodComp = CreateDefaultSubobject<UBoxComponent>(TEXT("WoodComp"));
-	WoodComp->SetupAttachment(MeshComp);
+	WoodComp->SetupAttachment(RootComponent);
 	WoodComp->SetBoxExtent(FVector(50.0, 25.0, 50.0));
 	WoodComp->SetRelativeLocation(FVector(0.0, -25.0, 0.0));
 
 	StoneComp = CreateDefaultSubobject<UBoxComponent>(TEXT("IronComp"));
-	StoneComp->SetupAttachment(MeshComp);
+	StoneComp->SetupAttachment(RootComponent);
 	StoneComp->SetBoxExtent(FVector(50.0, 25.0, 50.0));
 	StoneComp->SetRelativeLocation(FVector(0.0, 25.0, 0.0));
+}
+
+bool ATrainCargo::CheckAddResource()
+{
+	if (bOnFire) return false;
+	return true;
+}
+
+bool ATrainCargo::CheckGetResource(EItemType ResourceType)
+{
+	switch (ResourceType)
+	{
+		case EItemType::Wood:
+			if (!Woods.IsEmpty()) return true;
+			return false;
+
+		case EItemType::Stone:
+			if (!Stones.IsEmpty()) return true;
+			return false;
+
+		default:
+			return false;
+	}
 }
 
 void ATrainCargo::AddResource(AItem* Resource)
@@ -28,8 +51,10 @@ void ATrainCargo::AddResource(AItem* Resource)
 			if (Woods.Num() >= MaxCount) return;
 			
 			Woods.Add(Resource);
-			Resource->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-			Resource->SetActorRelativeLocation(Resource->GetActorLocation() + FVector(0.0, 0.0, 20.0) * Woods.Num());
+			Resource->MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			Resource->SetActorRelativeLocation(FVector(-40.0, 0.0, 0.0));
+			Resource->SetActorLocation(GetActorLocation() + FVector(0.0, 0.0, 50.0) * Woods.Num());
 			break;
 
 		case EItemType::Stone:
@@ -37,8 +62,9 @@ void ATrainCargo::AddResource(AItem* Resource)
 			if (Stones.Num() >= MaxCount) return;
 
 			Stones.Add(Resource);
-			Resource->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-			Resource->SetActorRelativeLocation(Resource->GetActorLocation() + FVector(0.0, 0.0, 20.0) * Stones.Num());
+			Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			Resource->SetActorRelativeLocation(FVector(40.0, 0.0, 0.0));
+			Resource->SetActorLocation(GetActorLocation() + FVector(0.0, 0.0, 50.0) * Stones.Num());
 			break;
 
 		// 방어 코드
@@ -59,7 +85,7 @@ AItem* ATrainCargo::GetResource(EItemType ResourceType)
 			if (Woods.IsEmpty()) break;
 
 			item = Woods.Top();
-			item->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+			item->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			Woods.Pop();
 			break;
 
@@ -67,7 +93,7 @@ AItem* ATrainCargo::GetResource(EItemType ResourceType)
 			if (Stones.IsEmpty()) break;
 
 			item = Stones.Top();
-			item->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+			item->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			Stones.Pop();
 			break;
 		

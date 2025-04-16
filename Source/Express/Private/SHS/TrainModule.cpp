@@ -32,6 +32,7 @@ ATrainModule::ATrainModule()
 	ModuleComp->SetupAttachment(RootComponent);
 	ModuleComp->SetBoxExtent(FVector(50.0));
 	ModuleComp->SetRelativeLocation(FVector(-150.0, 0.0, 0.0));
+	ModuleComp->SetCollisionProfileName(TEXT("NoCollision"));
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	if (tempMesh.Succeeded()) {
@@ -137,6 +138,66 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 void ATrainModule::CheckNextTile()
 {
 	TArray<TArray<ATile*>> grid = TileGenerator->tileGrid;
+
+	// 좌우 탐색
+// 	if (RowIndex - 1 > 0)
+// 		if (!grid[RowIndex - 1][ColIndex]->CheckContainedItem()) return;
+// 
+// 		if (grid[RowIndex - 1][ColIndex]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
+// 			CurrentTile = grid[RowIndex - 1][ColIndex];
+// 
+// 			NextPos = CurrentTile->GetActorLocation();
+// 			// 왼쪽으로 가야 하니까 왼쪽으로 회전
+// 			NextRot = 270.0;
+// 
+// 			RowIndex--;
+// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Left"));
+// 			return;
+// 		}
+// 	if (RowIndex + 1 < grid.Num())
+// 		if (!grid[RowIndex + 1][ColIndex]->CheckContainedItem()) return;
+// 
+// 		if (grid[RowIndex + 1][ColIndex]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex + 1][ColIndex]->bIsPassed == false) {
+// 			CurrentTile = grid[RowIndex + 1][ColIndex];
+// 
+// 			NextPos = CurrentTile->GetActorLocation();
+// 			// 오른쪽으로 회전
+// 			NextRot = 90.0;
+// 
+// 			RowIndex++;
+// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Right"));
+// 			return;
+// 		}
+// 
+// 	// 전후 탐색
+// 	if (ColIndex - 1 > 0)
+// 		if (!grid[RowIndex][ColIndex - 1]->CheckContainedItem()) return;
+// 
+// 		if (grid[RowIndex][ColIndex - 1]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
+// 			CurrentTile = grid[RowIndex][ColIndex - 1];
+// 
+// 			NextPos = CurrentTile->GetActorLocation();
+// 			// 앞으로 회전
+// 			NextRot = 0.0;
+// 
+// 			ColIndex--;
+// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Up"));
+// 			return;
+// 		}
+// 	if (ColIndex + 1 < grid[RowIndex].Num())
+// 		if (!grid[RowIndex][ColIndex + 1]->CheckContainedItem()) return;
+// 
+// 		if (grid[RowIndex][ColIndex + 1]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
+// 			CurrentTile = grid[RowIndex][ColIndex + 1];
+// 
+// 			NextPos = CurrentTile->GetActorLocation();
+// 			// 뒤로 회전
+// 			NextRot = 180.0;
+// 
+// 			ColIndex++;
+// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Down"));
+// 			return;
+// 		}
 
 	// 좌우 탐색
 	if (RowIndex - 1 > 0)

@@ -28,6 +28,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Resource")
 	TArray<AItem*> Stones;
 
+	bool CheckAddResource();
+	bool CheckGetResource(EItemType ResourceType);
 	void AddResource(AItem* Resource);
 	AItem* GetResource(EItemType ResourceType);
 

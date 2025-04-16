@@ -129,10 +129,11 @@ void ATileGenerator::GenerateMap()
 		TileTypes[Row].SetNum(NumCols);
 		for (int Col = 0; Col < NumCols; Col++) //열반복
 		{
-    		if (ColData[Col] == TEXT("W")) TileTypes[Row][Col] = ETileType::Wood; //W면 wood
-			else if (ColData[Col] == TEXT("G")) TileTypes[Row][Col] = ETileType::Ground;
-			else if (ColData[Col] == TEXT("S")) TileTypes[Row][Col] = ETileType::Stone;
+            if (ColData[Col] == TEXT("W")) TileTypes[Row][Col] = ETileType::Wood; //W면 wood
+            else if (ColData[Col] == TEXT("G")) TileTypes[Row][Col] = ETileType::Ground;
+            else if (ColData[Col] == TEXT("S")) TileTypes[Row][Col] = ETileType::Stone;
             else if (ColData[Col] == TEXT("R")) TileTypes[Row][Col] = ETileType::Rock;
+            else if (ColData[Col] == TEXT("T")) TileTypes[Row][Col] = ETileType::Rail;
 			else
 		    {
 				UE_LOG(LogTemp, Warning, TEXT("TYPE Wrong"));

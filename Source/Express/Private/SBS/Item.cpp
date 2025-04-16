@@ -68,6 +68,10 @@ void AItem::UpdateMeshMat()
     {
         MeshComp->SetStaticMesh(StoneMesh);
     }
+    else if (ItemType == EItemType::Rail)
+    {
+        MeshComp->SetStaticMesh(WoodMesh);
+    }
 
     //재질 설정
     if (ItemType == EItemType::Wood)
@@ -77,6 +81,10 @@ void AItem::UpdateMeshMat()
     else if (ItemType == EItemType::Stone)
     {
         MeshComp->SetMaterial(0, StoneMaterial);
+    }
+    else if (ItemType == EItemType::Rail)
+    {
+        MeshComp->SetMaterial(0, RailMaterial);
     }
     
 }

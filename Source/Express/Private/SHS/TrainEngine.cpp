@@ -39,6 +39,7 @@ void ATrainEngine::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5)
+		//CheckNextTile();
 		GetTileLocation();
 }
 
