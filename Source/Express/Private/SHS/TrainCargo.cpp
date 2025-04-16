@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "SBS/Item.h"
 #include "SHS/TrainEngine.h"
+#include "../Express.h"
 
 ATrainCargo::ATrainCargo()
 {
@@ -48,8 +49,10 @@ void ATrainCargo::AddResource(AItem* Resource)
 	{
 		case EItemType::Wood:
 			// 컨테이너가 이미 최대 수량이면 못 받고 return
-			if (Woods.Num() >= MaxCount) return;
+			if (Woods.Num() > MaxCount) return;
 			
+			UE_LOG(LogTrain, Warning, TEXT("Wood Added"));
+
 			Woods.Add(Resource);
 			Resource->MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -59,7 +62,7 @@ void ATrainCargo::AddResource(AItem* Resource)
 
 		case EItemType::Stone:
 			// 컨테이너가 이미 최대 수량이면 못 받고 return
-			if (Stones.Num() >= MaxCount) return;
+			if (Stones.Num() > MaxCount) return;
 
 			Stones.Add(Resource);
 			Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);

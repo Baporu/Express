@@ -71,6 +71,7 @@ void ASBS_Player::Tick(float DeltaTime)
                     TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
                     //배열에 추가
                     HoldItems.Append(TargetItem);
+                    CurrentTile->RemoveContainedItem();
                 }
             }
         }

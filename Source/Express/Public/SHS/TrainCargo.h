@@ -22,10 +22,10 @@ public:
 
 public:
 	// 나무 컨테이너
-	UPROPERTY(VisibleAnywhere, Category = "Resource")
+	UPROPERTY(VisibleAnywhere, Category = "Item")
 	TArray<AItem*> Woods;
 	// 철 컨테이너
-	UPROPERTY(VisibleAnywhere, Category = "Resource")
+	UPROPERTY(VisibleAnywhere, Category = "Item")
 	TArray<AItem*> Stones;
 
 	bool CheckAddResource();
@@ -35,7 +35,7 @@ public:
 
 protected:
 	// 화물차가 담을 수 있는 최대 수량
-	UPROPERTY(EditAnywhere, Category = "Resource")
+	UPROPERTY(EditAnywhere, Category = "Item")
 	int32 MaxCount = 3;
 
 	UPROPERTY(EditAnywhere)

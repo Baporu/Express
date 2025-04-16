@@ -91,6 +91,7 @@ public:
 	bool CheckContainedItem() { if (ContainedItem.IsEmpty()) return false; else return true; };
 	void SetContainedItem(TArray<AItem*> Item) {ContainedItem = Item;} //Set item
 	TArray<AItem*> GetContainedItem() const{ return ContainedItem;} // Get Item
+	void RemoveContainedItem() { ContainedItem.Empty(); };
 
 	
 public:
