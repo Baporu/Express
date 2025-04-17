@@ -15,7 +15,7 @@
 ATile::ATile()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	TileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tile Mesh"));
 	RootComponent = TileMesh;
@@ -26,6 +26,7 @@ ATile::ATile()
 
 	MaxTileHP = 3;
 	CurTileHP = MaxTileHP;
+
 }
 
 // Called when the game starts or when spawned
@@ -138,13 +139,27 @@ void ATile::UpdateMeshMat()
 	{
 		TileMesh->SetStaticMesh(RockMesh);
 	}
+	else if (TileType == ETileType::Water)
+	{
+		TileMesh->SetStaticMesh(WaterMesh);
+	}
+	else if (TileType == ETileType::Station_A)
+	{
+		TileMesh->SetStaticMesh(StationMesh);
+		TileCollision->SetCollisionProfileName(TEXT("Item"));
+	}
+	else if (TileType == ETileType::Station_Z)
+	{
+		TileMesh->SetStaticMesh(StationMesh);
+		TileCollision->SetCollisionProfileName(TEXT("Item"));
+	}
 }
 
 void ATile::CreateTile(ETileType Type)
 {
 	TileType = Type;
 	UpdateMeshMat();
-	UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
+	//UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
 
 }
 

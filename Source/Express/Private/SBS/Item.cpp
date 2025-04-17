@@ -163,7 +163,7 @@ void AItem::UpdateMeshMat()
 void AItem::CreateItem(EItemType Type)
 {
 	ItemType = Type;
-    if(ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe)
+    if(ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
         IsTool = true;
      UpdateMeshMat();
 }

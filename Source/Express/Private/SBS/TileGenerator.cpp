@@ -50,7 +50,7 @@ void ATileGenerator::BeginPlay()
                 if (TileActorClass)
                 {
                     ATile* NewTile = GetWorld()->SpawnActor<ATile>(TileActorClass, Location, FRotator::ZeroRotator);
-                    if (Z == 0)
+                    if (Z == 0 && (TileTypes[Row][Col] != ETileType::Water))
                     {
                         NewTile->CreateTile(ETileType::Ground);
 
@@ -133,7 +133,9 @@ void ATileGenerator::GenerateMap()
             else if (ColData[Col] == TEXT("G")) TileTypes[Row][Col] = ETileType::Ground;
             else if (ColData[Col] == TEXT("S")) TileTypes[Row][Col] = ETileType::Stone;
             else if (ColData[Col] == TEXT("R")) TileTypes[Row][Col] = ETileType::Rock;
-            else if (ColData[Col] == TEXT("T")) TileTypes[Row][Col] = ETileType::Rail;
+            else if (ColData[Col] == TEXT("A")) TileTypes[Row][Col] = ETileType::Station_A;
+            else if (ColData[Col] == TEXT("Z")) TileTypes[Row][Col] = ETileType::Station_Z;
+            else if (ColData[Col] == TEXT("O")) TileTypes[Row][Col] = ETileType::Water;
 			else
 		    {
 				UE_LOG(LogTemp, Warning, TEXT("TYPE Wrong"));

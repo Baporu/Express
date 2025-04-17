@@ -54,6 +54,19 @@ void ASBS_Player::BeginPlay()
 		TempItem.Add(PickaxeItem);
 		FrontTile->SetContainedItem(TempItem);
     }
+    //오른쪽 타일야 양도잉 놓기
+    GetRightTile();
+    if (RightTile)
+    {
+        AItem* Bucket;
+        FVector SpawnLocation = RightTile->GetActorLocation();
+        TArray<AItem*> TempItem;
+        SpawnLocation.Z += 100;
+        Bucket = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+        Bucket->CreateItem(EItemType::Bucket);
+        TempItem.Add(Bucket);
+        RightTile->SetContainedItem(TempItem);
+    }
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -422,5 +435,33 @@ void ASBS_Player::GetFrontTile()
     if (!FrontTile)
     {
         //UE_LOG(LogTemp, Warning, TEXT("No FrontTile"));
+    }
+}
+
+void ASBS_Player::GetRightTile()
+{
+    RightTile = nullptr;
+    FVector CurLoc = GetActorLocation();
+    FVector Right = GetActorRightVector();
+
+    FVector RightLoc = CurLoc + Right * TileSize;
+    int RightTileX = FMath::RoundToInt(RightLoc.X / TileSize) * TileSize;
+    int RightTileY = FMath::RoundToInt(RightLoc.Y / TileSize) * TileSize;
+    FVector Start = FVector(RightTileX, RightTileY, CurLoc.Z + 200.f);
+    FVector End = FVector(RightTileX, RightTileY, CurLoc.Z - 100.f);
+    FHitResult Hit;
+    FCollisionQueryParams params;
+    params.AddIgnoredActor(this);
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
+        ATile* HitTile = Cast<ATile>(Hit.GetActor());
+        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        if (HitTile) //타일이 채취 불가능일때
+        {
+            RightTile = HitTile;
+            UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
+
+        }
     }
 }

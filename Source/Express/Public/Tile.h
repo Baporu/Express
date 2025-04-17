@@ -15,7 +15,8 @@ enum class ETileType : uint8
 	Wood UMETA(DisplayName = "Wood"),		// 채취 가능 자원
 	Stone UMETA(DisplayName = "Stone"),		// 채취 가능 자원
 	Rock UMETA(DisplayName = "Rock"),		// 채취 불가능
-	Rail UMETA(DisplayName = "Rail"),		// 선로
+	Station_A UMETA(DisplayName = "Station_A"),		// 선로
+	Station_Z UMETA(DisplayName = "Station_Z"),		// 선로
 	Water UMETA(DisplayName = "Water")		// 선로
 
 };
@@ -50,17 +51,11 @@ public:
 	class UStaticMesh* WoodMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* RockMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* WaterMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* StationMesh;
 	
-
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
-	//class UMaterial* WoodMat;
-	//
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
-	//class UMaterial* StoneMat;
-	//
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Material)
-	//class UMaterial* GroundMat;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
 	class UTile_FSM* TileFSM;
 

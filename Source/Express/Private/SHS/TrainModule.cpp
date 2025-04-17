@@ -201,7 +201,7 @@ void ATrainModule::CheckNextTile()
 
 	// ÁÂ¿ì Å½»ö
 	if (RowIndex - 1 > 0)
-		if (grid[RowIndex - 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
+		if (grid[RowIndex - 1][ColIndex]->TileType == ETileType::Station_A && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
 			CurrentTile = grid[RowIndex - 1][ColIndex];
 
 			NextPos = CurrentTile->GetActorLocation();
@@ -212,7 +212,7 @@ void ATrainModule::CheckNextTile()
 			return;
 		}
 	if (RowIndex + 1 < grid.Num() && grid[RowIndex + 1][ColIndex]->bIsPassed == false)
-		if (grid[RowIndex + 1][ColIndex]->TileType == ETileType::Rail) {
+		if (grid[RowIndex + 1][ColIndex]->TileType == ETileType::Station_A) {
 			CurrentTile = grid[RowIndex + 1][ColIndex];
 			
 			NextPos = CurrentTile->GetActorLocation();
@@ -225,7 +225,7 @@ void ATrainModule::CheckNextTile()
 	
 	// ÀüÈÄ Å½»ö
 	if (ColIndex - 1 > 0)
-		if (grid[RowIndex][ColIndex - 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
+		if (grid[RowIndex][ColIndex - 1]->TileType == ETileType::Station_A && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
 			CurrentTile = grid[RowIndex][ColIndex - 1];
 
 			NextPos = CurrentTile->GetActorLocation();
@@ -236,7 +236,7 @@ void ATrainModule::CheckNextTile()
 			return;
 		}
 	if (ColIndex + 1 < grid[RowIndex].Num() && grid[RowIndex][ColIndex + 1]->bIsPassed == false)
-		if (grid[RowIndex][ColIndex + 1]->TileType == ETileType::Rail) {
+		if (grid[RowIndex][ColIndex + 1]->TileType == ETileType::Station_A) {
 			CurrentTile = grid[RowIndex][ColIndex + 1];
 
 			NextPos = CurrentTile->GetActorLocation();
