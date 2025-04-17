@@ -11,15 +11,16 @@
 UENUM(BlueprintType)
 enum class ETileType : uint8
 {
-	Ground UMETA(DisplayName = "Ground"),	// 바닥
-	Wood UMETA(DisplayName = "Wood"),		// 채취 가능 자원
-	Stone UMETA(DisplayName = "Stone"),		// 채취 가능 자원
-	Rock UMETA(DisplayName = "Rock"),		// 채취 불가능
-	Station_A UMETA(DisplayName = "Station_A"),		// 선로
-	Station_Z UMETA(DisplayName = "Station_Z"),		// 선로
-	Water UMETA(DisplayName = "Water")		// 선로
-
+	Ground	UMETA(DisplayName = "Ground"),	// 바닥
+	Wood	UMETA(DisplayName = "Wood"),	// 채취 가능 자원
+	Stone	UMETA(DisplayName = "Stone"),	// 채취 가능 자원
+	Rock	UMETA(DisplayName = "Rock"),	// 채취 불가능
+	Rail	UMETA(DisplayName = "Rail"),	// 선로
+	Water	UMETA(DisplayName = "Water"),	// 물
+	Station_A UMETA(DisplayName = "Station_A"),	// 출발 역
+	Station_Z UMETA(DisplayName = "Station_Z")	// 도착 역
 };
+
 UCLASS()
 class EXPRESS_API ATile : public AActor
 {

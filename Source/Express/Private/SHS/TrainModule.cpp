@@ -10,6 +10,7 @@
 #include "Tile.h"
 #include "SBS/TileGenerator.h"
 #include "SHS/GridManager.h"
+#include "SBS/SBS_Player.h"
 
 // Sets default values
 ATrainModule::ATrainModule()
@@ -40,6 +41,11 @@ ATrainModule::ATrainModule()
 		MeshComp->SetStaticMesh(tempMesh.Object);
 		ChainComp->SetStaticMesh(tempMesh.Object);
 	}
+
+	WaterComp = CreateDefaultSubobject<UBoxComponent>(TEXT("WaterComp"));
+	WaterComp->SetupAttachment(RootComponent);
+	WaterComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
+	WaterComp->OnComponentBeginOverlap.AddDynamic(this, ATrainModule::OnWaterBeginOverlap);
 }
 
 // Called when the game starts or when spawned
@@ -272,5 +278,18 @@ void ATrainModule::OnFire(float DeltaTime)
 
 	// 엔진을 제외하면 앞에 모듈이 없을 수 없음
 	TrainEngine->TrainModules[ModuleNumber - 1]->FireTimer += DeltaTime;
+}
+
+void ATrainModule::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// 불이 안 붙어있으면 return
+	if (!bOnFire) return;
+
+	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
+
+	if (!player) return;
+
+	player->bHasWater = false;
+	EndFire();
 }
 

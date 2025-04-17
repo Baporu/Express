@@ -65,6 +65,7 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 			UE_LOG(LogTrain, Warning, TEXT("Wood Added"));
 
 			Woods.Append(Resources);
+			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
 			Resources[0]->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 50.0));
 
@@ -75,6 +76,7 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 			if (Stones.Num() > MaxCount) return;
 
 			Stones.Append(Resources);
+			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
 			Resources[0]->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 50.0));
 			break;

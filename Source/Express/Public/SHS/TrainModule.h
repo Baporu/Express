@@ -48,6 +48,8 @@ protected:
 	class UStaticMeshComponent* ChainComp;
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* ModuleComp;
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* WaterComp;
 
 	// 열차의 모듈 배열을 가진 클래스
 	UPROPERTY(VisibleAnywhere, Category = "Module")
@@ -92,5 +94,8 @@ protected:
 	void RotateTrain(float DeltaTime);
 
 	virtual void OnFire(float DeltaTime);
+
+	UFUNCTION()
+	virtual void OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 };
