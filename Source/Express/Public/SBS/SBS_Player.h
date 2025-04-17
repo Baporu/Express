@@ -81,4 +81,6 @@ public:
 public:
 	UPROPERTY(EditAnywhere, Category = "Item")
 	bool bHasWater = false;
+
+	bool FindTrain();
 };

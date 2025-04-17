@@ -63,9 +63,13 @@ bool ATrainCrafter::CheckRail()
 
 TArray<AItem*> ATrainCrafter::GetRail()
 {
-	Rails[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	TArray<AItem*> items;
 
-	return Rails;
+	items = Rails;
+	items[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	Rails.Empty();
+
+	return items;
 }
 
 void ATrainCrafter::MakeRail()

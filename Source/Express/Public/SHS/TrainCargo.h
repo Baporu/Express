@@ -28,10 +28,15 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	TArray<AItem*> Stones;
 
-	bool CheckAddResource();
+	// 상호작용 가능한지(불 붙어있는지) 확인하는 함수
+	bool CheckInteraction();
+	// 유효한 아이템 종류인지 확인하는 함수
+	bool CheckAddResource(EItemType ResourceType);
+	// 아이템 가져올 수 있는지 확인하는 함수
 	bool CheckGetResource(EItemType ResourceType);
-	void AddResource(AItem* Resource);
-	AItem* GetResource(EItemType ResourceType);
+
+	void AddResource(TArray<AItem*> Resources);
+	TArray<AItem*> GetResource(EItemType ResourceType);
 
 protected:
 	// 화물차가 담을 수 있는 최대 수량

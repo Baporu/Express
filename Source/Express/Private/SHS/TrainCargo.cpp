@@ -20,10 +20,21 @@ ATrainCargo::ATrainCargo()
 	StoneComp->SetRelativeLocation(FVector(0.0, 25.0, 0.0));
 }
 
-bool ATrainCargo::CheckAddResource()
+bool ATrainCargo::CheckInteraction()
 {
-	if (bOnFire) return false;
-	return true;
+	return bOnFire ? false : true;
+}
+
+bool ATrainCargo::CheckAddResource(EItemType ResourceType)
+{
+	// 나무나 돌이면 추가할 수 있는 자원
+	switch (ResourceType)
+	{
+		case EItemType::Wood:	return true;
+		case EItemType::Stone:	return true;
+
+		default: return false;
+	}
 }
 
 bool ATrainCargo::CheckGetResource(EItemType ResourceType)
@@ -43,9 +54,9 @@ bool ATrainCargo::CheckGetResource(EItemType ResourceType)
 	}
 }
 
-void ATrainCargo::AddResource(AItem* Resource)
+void ATrainCargo::AddResource(TArray<AItem*> Resources)
 {
-	switch (Resource->ItemType)
+	switch (Resources[0]->ItemType)
 	{
 		case EItemType::Wood:
 			// 컨테이너가 이미 최대 수량이면 못 받고 return
@@ -53,33 +64,31 @@ void ATrainCargo::AddResource(AItem* Resource)
 			
 			UE_LOG(LogTrain, Warning, TEXT("Wood Added"));
 
-			Woods.Add(Resource);
-			Resource->MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-			Resource->SetActorRelativeLocation(FVector(-40.0, 0.0, 0.0));
-			Resource->SetActorLocation(GetActorLocation() + FVector(0.0, 0.0, 50.0) * Woods.Num());
+			Woods.Append(Resources);
+			Resources[0]->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 50.0));
+
 			break;
 
 		case EItemType::Stone:
 			// 컨테이너가 이미 최대 수량이면 못 받고 return
 			if (Stones.Num() > MaxCount) return;
 
-			Stones.Add(Resource);
-			Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-			Resource->SetActorRelativeLocation(FVector(40.0, 0.0, 0.0));
-			Resource->SetActorLocation(GetActorLocation() + FVector(0.0, 0.0, 50.0) * Stones.Num());
+			Stones.Append(Resources);
+			Resources[0]->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 50.0));
 			break;
 
 		// 방어 코드
-		default: break;
+		default: return;
 	}
 
 	TrainEngine->CheckMakeRail();
 }
 
-AItem* ATrainCargo::GetResource(EItemType ResourceType)
+TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 {
-	AItem* item = nullptr;
+	TArray<AItem*> items;
 
 	// 해당 타입의 아이템이 컨테이너에 있으면 가장 끝의 아이템부터 반환
 	switch (ResourceType)
@@ -87,17 +96,17 @@ AItem* ATrainCargo::GetResource(EItemType ResourceType)
 		case EItemType::Wood:
 			if (Woods.IsEmpty()) break;
 
-			item = Woods.Top();
-			item->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			Woods.Pop();
+			items = Woods;
+			items[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Woods.Empty();
 			break;
 
 		case EItemType::Stone:
 			if (Stones.IsEmpty()) break;
 
-			item = Stones.Top();
-			item->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			Stones.Pop();
+			items = Stones;
+			items[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Stones.Empty();
 			break;
 		
 		// 방어 코드, 나무나 돌 아니면 널 포인터 반환
@@ -105,5 +114,5 @@ AItem* ATrainCargo::GetResource(EItemType ResourceType)
 	}
 
 	// 해당하는 타입의 아이템(없으면 nullptr)을 반환
-	return item;
+	return items;
 }

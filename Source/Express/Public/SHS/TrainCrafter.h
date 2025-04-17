@@ -35,7 +35,6 @@ public:
 
 	bool CheckRail();
 	TArray<AItem*> GetRail();
-	void EmptyRail() { Rails.Empty(); };
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Craft")
