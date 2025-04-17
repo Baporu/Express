@@ -62,6 +62,7 @@ public:
 	TArray<AItem*> HoldItems;
 	ATile* CurrentTile;
 	ATile* FrontTile;
+	ATile* RightTile;
 
 	bool bIsholdingitem = false;
 	float HarvestTimer = 0;
@@ -76,6 +77,7 @@ public:
 	//void GetGroundTile_Location(ATile*& GroundTile) const;
 	void GetCurrentTile();
 	void GetFrontTile();
+	void GetRightTile();
 	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:

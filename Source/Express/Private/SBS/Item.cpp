@@ -16,29 +16,73 @@ AItem::AItem()
     MeshComp->SetMaterial(0, nullptr); // 초기 재질 비우기
     MeshComp->SetCollisionProfileName(TEXT("Item"));
 	ItemType = EItemType::Wood;
-
+    //Mesh 설정
     static ConstructorHelpers::FObjectFinder<UStaticMesh> WoodMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Wood.Item_Wood"));
     if (WoodMeshFinder.Succeeded())
     {
         WoodMesh = WoodMeshFinder.Object;
     }
-
     static ConstructorHelpers::FObjectFinder<UStaticMesh> StoneMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Stone.Item_Stone"));
     if (StoneMeshFinder.Succeeded())
     {
         StoneMesh = StoneMeshFinder.Object;
     }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> RailMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Rail.Item_Rail"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        RailMesh = RailMeshFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> AxeMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Axe.Item_Axe"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        AxeMesh = AxeMeshFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> PickaxeMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Pickaxe.Item_Pickaxe"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        PickaxeMesh = PickaxeMeshFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BucketMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Bucket.Item_Bucket"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        BucketMesh = BucketMeshFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BucketMesh_EmptyFinder(TEXT("/Game/SBS/MeshTex/Item_Bucket_Empty.Item_Bucket_Empty"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        BucketMesh_Empty = BucketMesh_EmptyFinder.Object;
+    }
 
+    //Material 설정
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> WoodMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Wood.M_Wood"));
     if (WoodMaterialFinder.Succeeded())
     {
         WoodMaterial = WoodMaterialFinder.Object;
     }
-
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> StoneMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Stone.M_Stone"));
     if (StoneMaterialFinder.Succeeded())
     {
         StoneMaterial = StoneMaterialFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> RailMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Rail.M_Rail"));
+    if (StoneMaterialFinder.Succeeded())
+    {
+        RailMaterial = RailMaterialFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> AxeMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Axe.M_Axe"));
+    if (StoneMaterialFinder.Succeeded())
+    {
+        AxeMaterial = AxeMaterialFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> PickaxeMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Pickaxe.M_Pickaxe"));
+    if (StoneMaterialFinder.Succeeded())
+    {
+        PickaxeMaterial = PickaxeMaterialFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BucketMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Bucket.M_Bucket"));
+    if (StoneMaterialFinder.Succeeded())
+    {
+        BucketMaterial = BucketMaterialFinder.Object;
     }
 }
 
@@ -46,7 +90,6 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-
 	UpdateMeshMat();
 }
 
@@ -70,8 +113,25 @@ void AItem::UpdateMeshMat()
     }
     else if (ItemType == EItemType::Rail)
     {
-        MeshComp->SetStaticMesh(WoodMesh);
+        MeshComp->SetStaticMesh(RailMesh);
     }
+    else if (ItemType == EItemType::Axe)
+    {
+        MeshComp->SetStaticMesh(AxeMesh);
+    }
+    else if (ItemType == EItemType::Pickaxe)
+    {
+        MeshComp->SetStaticMesh(PickaxeMesh);
+    }
+    else if (ItemType == EItemType::Bucket && !IsBucketEmpty)
+    {
+        MeshComp->SetStaticMesh(BucketMesh);
+    }
+    else if (ItemType == EItemType::Bucket && IsBucketEmpty)
+    {
+        MeshComp->SetStaticMesh(BucketMesh_Empty);
+    }
+
 
     //재질 설정
     if (ItemType == EItemType::Wood)
@@ -86,12 +146,26 @@ void AItem::UpdateMeshMat()
     {
         MeshComp->SetMaterial(0, RailMaterial);
     }
+    else if (ItemType == EItemType::Axe)
+    {
+        MeshComp->SetMaterial(0, AxeMaterial);
+    }
+    else if (ItemType == EItemType::Pickaxe)
+    {
+        MeshComp->SetMaterial(0, PickaxeMaterial);
+    }
+    else if (ItemType == EItemType::Bucket)
+    {
+        MeshComp->SetMaterial(0, BucketMaterial);
+    }
     
 }
 void AItem::CreateItem(EItemType Type)
 {
 	ItemType = Type;
-	UpdateMeshMat();
+    if(ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
+        IsTool = true;
+     UpdateMeshMat();
 }
 
 void AItem::StackItem()
