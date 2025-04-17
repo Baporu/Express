@@ -28,25 +28,32 @@ void ASBS_Player::BeginPlay()
 
     //현재타일에 도끼 놓기
     GetCurrentTile();
-	AItem* AxeItem;
-    FVector SpawnLocation = CurrentTile->GetActorLocation();
-    TArray<AItem*> TempItem;
-    SpawnLocation.Z += 100;
-    AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-    AxeItem->CreateItem(EItemType::Axe);
-    TempItem.Add(AxeItem);
-    CurrentTile->SetContainedItem(TempItem);
-    TempItem.Empty();
+    if (CurrentTile)
+    {
+        AItem* AxeItem;
+		FVector SpawnLocation = CurrentTile->GetActorLocation();
+		TArray<AItem*> TempItem;
+		SpawnLocation.Z += 100;
+		AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+		AxeItem->CreateItem(EItemType::Axe);
+		TempItem.Add(AxeItem);
+		CurrentTile->SetContainedItem(TempItem);
+    }
 
     //앞 타일에 곡괭이 놓기
     GetFrontTile();
-    AItem* PickaxeItem;
-    SpawnLocation = FrontTile->GetActorLocation();
-    SpawnLocation.Z += 100;
-    PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-    AxeItem->CreateItem(EItemType::Pickaxe);
-    TempItem.Add(PickaxeItem);
-    FrontTile->SetContainedItem(TempItem);
+    if (FrontTile)
+    {
+		
+		AItem* PickaxeItem;
+        FVector SpawnLocation = FrontTile->GetActorLocation();
+        TArray<AItem*> TempItem;
+		SpawnLocation.Z += 100;
+		PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+        PickaxeItem->CreateItem(EItemType::Pickaxe);
+		TempItem.Add(PickaxeItem);
+		FrontTile->SetContainedItem(TempItem);
+    }
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -55,47 +62,90 @@ void ASBS_Player::Tick(float DeltaTime)
 
     //손에 물건 안들고있으면 암것도 안함
     if (HoldItems.IsEmpty()) return;
-    
-    if (!(HoldItems.IsEmpty()) && HoldItems[0]->IsTool) //TODO: 도구를 들고 있으면 0.5초마다 수확
-    {
-        HarvestTimer -= DeltaTime;
-        if (HarvestTimer <= 0.f)
-        {
-            GetFrontTile();
-            if (FrontTile && FrontTile->CanHarvest())
-            {
-                FrontTile->ReduceHP();
-                HarvestTimer = 0.5f;
-            }
-            else
-            {
-                HarvestTimer = 0.5f;
-            }
-        }
-    }
-    if(!(HoldItems[0]->IsTool)) //물건이면
-    {
-        //손에 물건 들고있을 때 바닥타일 확인
-        GetCurrentTile();
-        TArray<AItem*> TargetItem;
-        //helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
-        if (CurrentTile)
-        {
-            if (!(CurrentTile->GetContainedItem().IsEmpty())) {
-                TargetItem = CurrentTile->GetContainedItem();
-                if (!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
-                {
-                    //attach
-                    TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
-                    //배열에 추가
-                    HoldItems.Append(TargetItem);
-                    CurrentTile->RemoveContainedItem();
-                }
-            }
-        }
-    }
+    //물건을 들고 있드면
+	if (HoldItems[0]->IsTool)//들고 있는게 도구(양동이 곡괭이 도끼)
+	{
+		HarvestTimer -= DeltaTime;
+		//0.5초마다
+		if (HarvestTimer <= 0.f)
+		{
+			GetFrontTile();
+			if (FrontTile)
+			{
+                //들고있는게 양동이고 타일이 물이면
+				if (HoldItems[0]->ItemType == EItemType::Bucket && FrontTile->TileType == ETileType::Water) //들고 있는게 양동이면
+				{
+					//TODO: 양동이에 물담기
+					if (FrontTile && FrontTile->CanHarvest() && FrontTile->TileType == ETileType::Water)
+					{
+						FrontTile->ReduceHP();
+						if (FrontTile->CurTileHP == 0)
+						{
+							HoldItems[0]->IsBucketEmpty = false;
+							HoldItems[0]->UpdateMeshMat();
+						}
+						HarvestTimer = 0.5f;
 
+					}
+					else
+					{
+						HarvestTimer = 0.5f;
+					}
+
+				}
+                // 들고 있는게 도끼고 타일이 나무면
+				else if (HoldItems[0]->ItemType == EItemType::Axe && FrontTile->TileType == ETileType::Wood) 
+				{
+					if (FrontTile && FrontTile->CanHarvest() && FrontTile)
+					{
+						FrontTile->ReduceHP();
+						HarvestTimer = 0.5f;
+					}
+					else
+					{
+						HarvestTimer = 0.5f;
+					}
+				}
+                // 들고 있는게 곡괭이고 타일이 돌이면
+				else if (HoldItems[0]->ItemType == EItemType::Pickaxe && FrontTile->TileType == ETileType::Stone) 
+				{
+					if (FrontTile && FrontTile->CanHarvest() && FrontTile)
+					{
+						FrontTile->ReduceHP();
+						HarvestTimer = 0.5f;
+					}
+					else
+					{
+						HarvestTimer = 0.5f;
+					}
+				}
+
+			}
+		}
+	}
+	else //들고 있는게 자원이면
+	{
+		//손에 물건 들고있을 때 바닥타일 확인
+		GetCurrentTile();
+		TArray<AItem*> TargetItem;
+		//helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
+		if (CurrentTile)
+		{
+			if (!(CurrentTile->GetContainedItem().IsEmpty())) {
+				TargetItem = CurrentTile->GetContainedItem();
+				if (!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
+				{
+					//attach
+					TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+					//배열에 추가
+					HoldItems.Append(TargetItem);
+					CurrentTile->RemoveContainedItem();
+				}
+			}
+		}
+	}
 }
+
 
 void ASBS_Player::NotifyControllerChanged()
 {

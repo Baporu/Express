@@ -14,7 +14,8 @@ enum class EItemType : uint8
 	Stone	UMETA(DisplayName = "Stone"),	// 1
 	Rail	UMETA(DisplayName = "Rail"),	// 2
 	Axe		UMETA(DisplayName = "Axe"),
-	Pickaxe UMETA(DisplayName = "Pickaxe")
+	Pickaxe UMETA(DisplayName = "Pickaxe"),
+	Bucket  UMETA(DisplayName = "Bucket")
 };
 
 UCLASS()
@@ -48,6 +49,11 @@ public:
 	class UStaticMesh* AxeMesh; //µµ³¢ mesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	class UStaticMesh* PickaxeMesh; //°î±ªÀÌ mesh
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	class UStaticMesh* BucketMesh; //¾çµ¿ÀÌ mesh
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	class UStaticMesh* BucketMesh_Empty; //ºó ¾çµ¿ÀÌ mesh
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
 	class UMaterialInterface* WoodMaterial; //³ª¹« material
@@ -59,11 +65,16 @@ public:
 	class UMaterialInterface* AxeMaterial; //µµ³¢ material
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
 	class UMaterialInterface* PickaxeMaterial; //°î±ªÀÌ material
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
+	class UMaterialInterface* BucketMaterial; //¾çµ¿ÀÌ material
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItemType ItemType; //¾ÆÀÌÅÛ Å¸ÀÔ
 	UPROPERTY(EditAnywhere)
 	bool IsTool = false;
+
+	UPROPERTY(EditAnywhere)
+	bool IsBucketEmpty = true;
 public:
 	void UpdateMeshMat();
 	void CreateItem(EItemType Type);

@@ -15,7 +15,9 @@ enum class ETileType : uint8
 	Wood UMETA(DisplayName = "Wood"),		// 채취 가능 자원
 	Stone UMETA(DisplayName = "Stone"),		// 채취 가능 자원
 	Rock UMETA(DisplayName = "Rock"),		// 채취 불가능
-	Rail UMETA(DisplayName = "Rail")		// 선로
+	Rail UMETA(DisplayName = "Rail"),		// 선로
+	Water UMETA(DisplayName = "Water")		// 선로
+
 };
 UCLASS()
 class EXPRESS_API ATile : public AActor

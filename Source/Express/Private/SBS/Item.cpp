@@ -42,6 +42,17 @@ AItem::AItem()
     {
         PickaxeMesh = PickaxeMeshFinder.Object;
     }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BucketMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Bucket.Item_Bucket"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        BucketMesh = BucketMeshFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> BucketMesh_EmptyFinder(TEXT("/Game/SBS/MeshTex/Item_Bucket_Empty.Item_Bucket_Empty"));
+    if (StoneMeshFinder.Succeeded())
+    {
+        BucketMesh_Empty = BucketMesh_EmptyFinder.Object;
+    }
+
     //Material 설정
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> WoodMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Wood.M_Wood"));
     if (WoodMaterialFinder.Succeeded())
@@ -67,6 +78,11 @@ AItem::AItem()
     if (StoneMaterialFinder.Succeeded())
     {
         PickaxeMaterial = PickaxeMaterialFinder.Object;
+    }
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> BucketMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Bucket.M_Bucket"));
+    if (StoneMaterialFinder.Succeeded())
+    {
+        BucketMaterial = BucketMaterialFinder.Object;
     }
 }
 
@@ -107,6 +123,14 @@ void AItem::UpdateMeshMat()
     {
         MeshComp->SetStaticMesh(PickaxeMesh);
     }
+    else if (ItemType == EItemType::Bucket && !IsBucketEmpty)
+    {
+        MeshComp->SetStaticMesh(BucketMesh);
+    }
+    else if (ItemType == EItemType::Bucket && IsBucketEmpty)
+    {
+        MeshComp->SetStaticMesh(BucketMesh_Empty);
+    }
 
 
     //재질 설정
@@ -129,6 +153,10 @@ void AItem::UpdateMeshMat()
     else if (ItemType == EItemType::Pickaxe)
     {
         MeshComp->SetMaterial(0, PickaxeMaterial);
+    }
+    else if (ItemType == EItemType::Bucket)
+    {
+        MeshComp->SetMaterial(0, BucketMaterial);
     }
     
 }

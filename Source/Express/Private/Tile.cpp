@@ -81,6 +81,10 @@ void ATile::HarvestTile()
 	{
 		ItemType = EItemType::Stone;
 	}
+	else if (TileType == ETileType::Water)
+	{
+		return;
+	}
 	else
 	{
 		return;
