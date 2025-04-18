@@ -11,6 +11,7 @@
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
 #include "SHS/GridManager.h"
+#include "../Express.h"
 
 // Sets default values
 ATile::ATile()
@@ -120,39 +121,39 @@ void ATile::HarvestTile()
 
 void ATile::UpdateMeshMat()
 {
-
-	if (TileType == ETileType::Ground)
+	switch (TileType)
 	{
-		TileMesh->SetStaticMesh(GroundMesh);
-		//TileMesh->SetMaterial(0, GroundMat);
-	}
-	else if(TileType == ETileType::Stone)
-	{
-		TileMesh->SetStaticMesh(StoneMesh);
-		//TileMesh->SetMaterial(0, StoneMat);
-	}
-	else if (TileType == ETileType::Wood)
-	{
-		TileMesh->SetStaticMesh(WoodMesh);
-		//TileMesh->SetMaterial(0, WoodMat);
-	}
-	else if (TileType == ETileType::Rock)
-	{
-		TileMesh->SetStaticMesh(RockMesh);
-	}
-	else if (TileType == ETileType::Water)
-	{
-		TileMesh->SetStaticMesh(WaterMesh);
-	}
-	else if (TileType == ETileType::Station_A)
-	{
-		TileMesh->SetStaticMesh(StationMesh);
-		TileCollision->SetCollisionProfileName(TEXT("Item"));
-	}
-	else if (TileType == ETileType::Station_Z)
-	{
-		TileMesh->SetStaticMesh(StationMesh);
-		TileCollision->SetCollisionProfileName(TEXT("Item"));
+		case ETileType::Ground:
+			TileMesh->SetStaticMesh(GroundMesh);
+			//TileMesh->SetMaterial(0, GroundMat);
+			break;
+		case ETileType::Wood:
+			TileMesh->SetStaticMesh(WoodMesh);
+			break;
+		case ETileType::Stone:
+			TileMesh->SetStaticMesh(StoneMesh);
+			break;
+		case ETileType::Rock:
+			TileMesh->SetStaticMesh(RockMesh);
+			break;
+		case ETileType::Rail:
+			TileMesh->SetStaticMesh(RailMesh);
+			TileCollision->SetCollisionProfileName(TEXT("Item"));
+			break;
+		case ETileType::Water:
+			TileMesh->SetStaticMesh(WaterMesh);
+			break;
+		case ETileType::Station_A:
+			TileMesh->SetStaticMesh(StationMesh);
+			TileCollision->SetCollisionProfileName(TEXT("Item"));
+			break;
+		case ETileType::Station_Z:
+			TileMesh->SetStaticMesh(StationMesh);
+			TileCollision->SetCollisionProfileName(TEXT("Item"));
+			break;
+		default:
+			UE_LOG(LogTrain, Warning, TEXT("Wrong TileType"));
+			break;
 	}
 }
 

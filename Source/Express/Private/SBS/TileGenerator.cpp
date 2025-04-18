@@ -134,13 +134,14 @@ void ATileGenerator::GenerateMap()
 		TileTypes[Row].SetNum(NumCols);
 		for (int Col = 0; Col < NumCols; Col++) //열반복
 		{
-            if (ColData[Col] == TEXT("W")) TileTypes[Row][Col] = ETileType::Wood; //W면 wood
-            else if (ColData[Col] == TEXT("G")) TileTypes[Row][Col] = ETileType::Ground;
-            else if (ColData[Col] == TEXT("S")) TileTypes[Row][Col] = ETileType::Stone;
-            else if (ColData[Col] == TEXT("R")) TileTypes[Row][Col] = ETileType::Rock;
-            else if (ColData[Col] == TEXT("A")) TileTypes[Row][Col] = ETileType::Station_A;
-            else if (ColData[Col] == TEXT("Z")) TileTypes[Row][Col] = ETileType::Station_Z;
-            else if (ColData[Col] == TEXT("O")) TileTypes[Row][Col] = ETileType::Water;
+            if (ColData[Col].Contains("W")) TileTypes[Row][Col] = ETileType::Wood; //W면 wood
+            else if (ColData[Col].Contains("G")) TileTypes[Row][Col] = ETileType::Ground;
+            else if (ColData[Col].Contains("S")) TileTypes[Row][Col] = ETileType::Stone;
+            else if (ColData[Col].Contains("R")) TileTypes[Row][Col] = ETileType::Rock;
+            else if (ColData[Col].Contains("O")) TileTypes[Row][Col] = ETileType::Water;
+            else if (ColData[Col].Contains("T")) TileTypes[Row][Col] = ETileType::Rail;
+            else if (ColData[Col].Contains("A")) TileTypes[Row][Col] = ETileType::Station_A;
+            else if (ColData[Col].Contains("Z")) TileTypes[Row][Col] = ETileType::Station_Z;
 			else
 		    {
 				UE_LOG(LogTemp, Warning, TEXT("TYPE Wrong"));

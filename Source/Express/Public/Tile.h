@@ -55,6 +55,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* WaterMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* RailMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* StationMesh;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
