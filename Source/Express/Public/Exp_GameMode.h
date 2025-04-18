@@ -16,11 +16,13 @@ UCLASS()
 class EXPRESS_API AExp_GameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	class ATrainWaterTank* WaterTank;
 
 	UFUNCTION(Exec)
 	void CoolDownTank();
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 };
 
