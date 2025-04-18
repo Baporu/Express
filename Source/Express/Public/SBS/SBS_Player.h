@@ -63,6 +63,7 @@ public:
 	ATile* CurrentTile;
 	ATile* FrontTile;
 	ATile* RightTile;
+	ATile* LeftTile;
 
 	bool bIsholdingitem = false;
 	float HarvestTimer = 0;
@@ -74,10 +75,13 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Release(const FInputActionValue& Value);
+
+	void SetToolsOnGround();
 	//void GetGroundTile_Location(ATile*& GroundTile) const;
 	void GetCurrentTile();
 	void GetFrontTile();
 	void GetRightTile();
+	void GetLeftTile();
 	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:

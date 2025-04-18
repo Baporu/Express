@@ -26,47 +26,7 @@ void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
 
-    //현재타일에 도끼 놓기
-    GetCurrentTile();
-    if (CurrentTile)
-    {
-        AItem* AxeItem;
-		FVector SpawnLocation = CurrentTile->GetActorLocation();
-		TArray<AItem*> TempItem;
-		SpawnLocation.Z += 100;
-		AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-		AxeItem->CreateItem(EItemType::Axe);
-		TempItem.Add(AxeItem);
-		CurrentTile->SetContainedItem(TempItem);
-    }
-
-    //앞 타일에 곡괭이 놓기
-    GetFrontTile();
-    if (FrontTile)
-    {
-		
-		AItem* PickaxeItem;
-        FVector SpawnLocation = FrontTile->GetActorLocation();
-        TArray<AItem*> TempItem;
-		SpawnLocation.Z += 100;
-		PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-        PickaxeItem->CreateItem(EItemType::Pickaxe);
-		TempItem.Add(PickaxeItem);
-		FrontTile->SetContainedItem(TempItem);
-    }
-    //오른쪽 타일에 양동이 놓기
-    GetRightTile();
-    if (RightTile)
-    {
-        AItem* Bucket;
-        FVector SpawnLocation = RightTile->GetActorLocation();
-        TArray<AItem*> TempItem;
-        SpawnLocation.Z += 100;
-        Bucket = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-        Bucket->CreateItem(EItemType::Bucket);
-        TempItem.Add(Bucket);
-        RightTile->SetContainedItem(TempItem);
-    }
+    SetToolsOnGround();
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -346,6 +306,68 @@ void ASBS_Player::Release(const FInputActionValue& Value)
     }
 }
 
+void ASBS_Player::SetToolsOnGround()
+{
+    //현재타일에 도끼 놓기
+    GetCurrentTile();
+    if (CurrentTile)
+    {
+        AItem* AxeItem;
+        FVector SpawnLocation = CurrentTile->GetActorLocation();
+        TArray<AItem*> TempItem;
+        SpawnLocation.Z += 100;
+        AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+        AxeItem->CreateItem(EItemType::Axe);
+        TempItem.Add(AxeItem);
+        CurrentTile->SetContainedItem(TempItem);
+    }
+
+    //앞 타일에 곡괭이 놓기
+    GetFrontTile();
+    if (FrontTile)
+    {
+
+        AItem* PickaxeItem;
+        FVector SpawnLocation = FrontTile->GetActorLocation();
+        TArray<AItem*> TempItem;
+        SpawnLocation.Z += 100;
+        PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+        PickaxeItem->CreateItem(EItemType::Pickaxe);
+        TempItem.Add(PickaxeItem);
+        FrontTile->SetContainedItem(TempItem);
+    }
+    //오른쪽 타일에 양동이 놓기
+    GetRightTile();
+    if (RightTile)
+    {
+        AItem* Bucket;
+        FVector SpawnLocation = RightTile->GetActorLocation();
+        TArray<AItem*> TempItem;
+        SpawnLocation.Z += 100;
+        Bucket = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+        Bucket->CreateItem(EItemType::Bucket);
+        TempItem.Add(Bucket);
+        RightTile->SetContainedItem(TempItem);
+    }
+    GetLeftTile();
+    if (LeftTile)
+    {
+        AItem* Rail;
+        FVector SpawnLocation = LeftTile->GetActorLocation();
+        TArray<AItem*> TempItem;
+        SpawnLocation.Z += 100;
+        for (int i = 0; i < 3; i++)
+        {
+            Rail = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+            Rail->CreateItem(EItemType::Rail);
+            TempItem.Push(Rail);
+            if(i>0)
+            Rail->AttachToActor(TempItem[i-1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+        }
+        LeftTile->SetContainedItem(TempItem);
+    }
+}
+
 void ASBS_Player::GetCurrentTile()
 {
     CurrentTile = nullptr;
@@ -426,6 +448,34 @@ void ASBS_Player::GetRightTile()
         if (HitTile) //타일이 채취 불가능일때
         {
             RightTile = HitTile;
+            UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
+
+        }
+    }
+}
+
+void ASBS_Player::GetLeftTile()
+{
+    LeftTile = nullptr;
+    FVector CurLoc = GetActorLocation();
+    FVector Left = GetActorRightVector()*-1;
+
+    FVector LeftLoc = CurLoc + Left * TileSize;
+    int LeftTileX = FMath::RoundToInt(LeftLoc.X / TileSize) * TileSize;
+    int LeftTileY = FMath::RoundToInt(LeftLoc.Y / TileSize) * TileSize;
+    FVector Start = FVector(LeftTileX, LeftTileY, CurLoc.Z + 200.f);
+    FVector End = FVector(LeftTileX, LeftTileY, CurLoc.Z - 100.f);
+    FHitResult Hit;
+    FCollisionQueryParams params;
+    params.AddIgnoredActor(this);
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
+        ATile* HitTile = Cast<ATile>(Hit.GetActor());
+        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        if (HitTile) //타일이 채취 불가능일때
+        {
+            LeftTile = HitTile;
             UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
 
         }
