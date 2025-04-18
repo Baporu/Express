@@ -6,3 +6,4 @@
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Express, "Express" );
 
 DEFINE_LOG_CATEGORY(LogTrain);
+DEFINE_LOG_CATEGORY(NetLog);
