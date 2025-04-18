@@ -97,6 +97,9 @@ public:
 public:
 	UPROPERTY(EditAnywhere)
 	bool bIsPassed = false;
+	// 끝 선로인지 확인하는 변수
+	UPROPERTY(VisibleAnywhere)
+	bool bIsLastRail = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Tile")
 	int32 gridRow = -1;
@@ -105,6 +108,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Grid")
 	class AGridManager* GridManager;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Train")
+	TSubclassOf<class ATrainEngine> TrainFactory;
+
+
+	void SetTrain();
 
 	bool CheckRail();
 	void SetRail();
