@@ -12,6 +12,7 @@
 #include "Components/BoxComponent.h"
 #include "SHS/GridManager.h"
 #include "../Express.h"
+#include "SHS/TrainEngine.h"
 
 // Sets default values
 ATile::ATile()
@@ -146,6 +147,7 @@ void ATile::UpdateMeshMat()
 		case ETileType::Station_A:
 			TileMesh->SetStaticMesh(StationMesh);
 			TileCollision->SetCollisionProfileName(TEXT("Item"));
+			SetTrain();
 			break;
 		case ETileType::Station_Z:
 			TileMesh->SetStaticMesh(StationMesh);
@@ -163,6 +165,17 @@ void ATile::CreateTile(ETileType Type)
 	UpdateMeshMat();
 	//UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
 
+}
+
+void ATile::SetTrain()
+{
+	FVector spawnLoc = GetActorLocation();
+	spawnLoc.Z += 50.0f;
+
+	FActorSpawnParameters params;
+	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	GetWorld()->SpawnActor<ATrainEngine>(TrainFactory, spawnLoc, FRotator::ZeroRotator, params);
 }
 
 bool ATile::CheckRail()
