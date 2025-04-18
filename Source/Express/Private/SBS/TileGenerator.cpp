@@ -4,6 +4,7 @@
 #include "SBS/TileGenerator.h"
 #include "Express/Express.h"
 #include "SHS/GridManager.h"
+#include "SHS/TrainEngine.h"
 
 // Sets default values
 ATileGenerator::ATileGenerator()
@@ -51,20 +52,43 @@ void ATileGenerator::BeginPlay()
                 if (TileActorClass)
                 {
                     ATile* NewTile = GetWorld()->SpawnActor<ATile>(TileActorClass, Location, FRotator::ZeroRotator);
-                    if (Z == 0 && (TileTypes[Row][Col] != ETileType::Water))
-                    {
-                        NewTile->CreateTile(ETileType::Ground);
 
+                    // 바닥 타일만 그리드에 넣기
+                    if (Z == 0) {
                         NewTile->gridRow = Row;
                         NewTile->gridColumn = Col;
                         NewTile->GridManager = GridManager;
 
                         ColTiles.Add(NewTile);
+
+                        // 바닥이 물 타일이면 물로, 아니면 땅으로 깔기
+                        switch (TileTypes[Row][Col])
+                        {
+                            case ETileType::Water:
+                                NewTile->CreateTile(ETileType::Water);
+                                break;
+                            case ETileType::Rail:
+                                NewTile->CreateTile(ETileType::Rail);
+                                if (Col - 1 > 0 && TileTypes[Row][Col - 1] != ETileType::Station_A)
+                                    NewTile->bIsPassed = true;
+                                break;
+                            default:
+                                NewTile->CreateTile(ETileType::Ground);
+                                break;
+                        }
                     }
-                    else
-                    {
+
+                    // 다른 타일들은 장식이고 실제 길이 아니므로 그리드에 넣지 않음
+                    else {
                         NewTile->CreateTile(TileTypes[Row][Col]);
-                        //NewTile->TileType = TileTypes[Row][Col];
+
+                        // 시작 역이면 기차 스폰
+                        if (TileTypes[Row][Col] == ETileType::Station_A)
+                            SetTrain(NewTile, Row, Col);
+                        // 시작 역 바로 다음 선로가 아니면 기차가 못 지나가게 설정
+                        else if (TileTypes[Row][Col] == ETileType::Rail)
+                            if (Col - 1 > 0 && TileTypes[Row][Col - 1] != ETileType::Station_A)
+                                NewTile->bIsPassed = true;
                     }
                 }
                 else
@@ -149,5 +173,19 @@ void ATileGenerator::GenerateMap()
 		}
         
     }
+}
+
+void ATileGenerator::SetTrain(ATile* Tile, int32 TileRow, int32 TileColumn)
+{
+    FVector TileLoc = Tile->GetActorLocation();
+
+    // 선로 높이 보정
+    TileLoc.Z += 15.0f;
+
+    FActorSpawnParameters params;
+    params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    ATrainEngine* train = GetWorld()->SpawnActor<ATrainEngine>(TrainFactory, TileLoc, FRotator(0.0, 90.0, 0.0), params);
+    train->Init(GridManager, Tile, TileRow, TileColumn);
 }
 

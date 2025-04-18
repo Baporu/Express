@@ -6,4 +6,5 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTrain, Log, All);
 
-#define PRINTFATALLOG(fmt, ...) UE_LOG(LogTrain, Fatal, TEXT("ERROR: [%s] (%d): %s"), *FString(__FUNCTION__), __LINE__, *FString::Printf(fmt, ##__VA_ARGS__))
+#define PRINTLOG(fmt, ...) UE_LOG(LogTrain, Log, TEXT("[%s]: %s"), *FString(__FUNCTION__), *FString::Printf(fmt, ##__VA_ARGS__))
+#define PRINTFATALLOG(fmt, ...) UE_LOG(LogTrain, Fatal, TEXT("ERROR - [%s] (%d): %s"), *FString(__FUNCTION__), __LINE__, *FString::Printf(fmt, ##__VA_ARGS__))

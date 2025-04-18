@@ -2,8 +2,8 @@
 
 
 #include "SBS/SBS_Player.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Interface_Tile.h"
 #include "SBS/Item.h"
 #include "EngineUtils.h"
@@ -12,7 +12,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "SHS/TrainCargo.h"
 #include "SHS/TrainCrafter.h"
-#include "../Express.h"
+#include "Express/Express.h"
 
 // Sets default values
 ASBS_Player::ASBS_Player()
@@ -97,6 +97,8 @@ void ASBS_Player::Tick(float DeltaTime)
 							HoldItems[0]->IsBucketEmpty = false;
 							HoldItems[0]->UpdateMeshMat();
                             bHasWater = true;
+
+                            FrontTile->CurTileHP = FrontTile->MaxTileHP;
 						}
 						HarvestTimer = 0.5f;
 
@@ -321,13 +323,13 @@ void ASBS_Player::Release(const FInputActionValue& Value)
             // 현재 아이템이 선로일 경우
             if (HoldItems.Top()->ItemType == EItemType::Rail) {
                 // 선로 연결이 가능한지 확인
-                if (CurrentTile->CheckRail()) {
+                if (ATile* PreviousTile = CurrentTile->CheckRail()) {
                     // 선로 연결이 가능하면 가장 위 선로만 빼내기
                     HoldItems.Top()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
                     HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
                     HoldItems.Top()->SetActorLocation(TargetPos);
 
-                    CurrentTile->SetRail();
+                    CurrentTile->SetRail(PreviousTile);
                     HoldItems.Pop();
 
                     return;

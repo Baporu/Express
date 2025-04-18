@@ -10,11 +10,6 @@
 
 ATrainWaterTank::ATrainWaterTank()
 {
-	IAComp = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionComp"));
-	IAComp->SetupAttachment(RootComponent);
-	IAComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
-	IAComp->OnComponentBeginOverlap.AddDynamic(this, &ATrainWaterTank::OnPlayerBeginOverlap);
-
 	ConstructorHelpers::FObjectFinder<UMaterial> tempMat(TEXT("/Script/Engine.Material'/Game/SHS/Designs/M_WaterTank.M_WaterTank'"));
 	if (tempMat.Succeeded()) MeshComp->SetMaterial(0, tempMat.Object);
 }
@@ -43,6 +38,8 @@ void ATrainWaterTank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bIsStarted) return;
+
 	FireTimer += DeltaTime;
 
 	ChangeTankColor();
@@ -59,7 +56,7 @@ void ATrainWaterTank::EndFire()
 	FireTimer = 0.0f;
 }
 
-void ATrainWaterTank::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ATrainWaterTank::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// 일정 시간 이상 지나야만 물을 넣을 수 있음 (원작 고증)
 	if (FireTimer <= 10.0f) return;
@@ -69,6 +66,8 @@ void ATrainWaterTank::OnPlayerBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	if (!player || !player->bHasWater) return;
 
 	player->bHasWater = false;
+	player->HoldItems[0]->IsBucketEmpty = true;
+	player->HoldItems[0]->UpdateMeshMat();
 	EndFire();
 }
 

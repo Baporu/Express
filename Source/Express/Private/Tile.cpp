@@ -11,8 +11,7 @@
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
 #include "SHS/GridManager.h"
-#include "../Express.h"
-#include "SHS/TrainEngine.h"
+#include "Express/Express.h"
 
 // Sets default values
 ATile::ATile()
@@ -147,7 +146,6 @@ void ATile::UpdateMeshMat()
 		case ETileType::Station_A:
 			TileMesh->SetStaticMesh(StationMesh);
 			TileCollision->SetCollisionProfileName(TEXT("Item"));
-			SetTrain();
 			break;
 		case ETileType::Station_Z:
 			TileMesh->SetStaticMesh(StationMesh);
@@ -167,55 +165,103 @@ void ATile::CreateTile(ETileType Type)
 
 }
 
-void ATile::SetTrain()
-{
-	FVector spawnLoc = GetActorLocation();
-	spawnLoc.Z += 50.0f;
-
-	FActorSpawnParameters params;
-	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	GetWorld()->SpawnActor<ATrainEngine>(TrainFactory, spawnLoc, FRotator::ZeroRotator, params);
-}
-
-bool ATile::CheckRail()
+ATile* ATile::CheckRail()
 {
 	if (!GridManager || GridManager->Grid.IsEmpty()) {
 		UE_LOG(LogTemp, Fatal, TEXT("Error: Tile - CheckRail(), There is no grid."));
-		return false;
+		return nullptr;
 	}
 
-	// 왼쪽 타일 탐색
-	if (gridRow - 1 > 0) {
-		// 타일에 선로가 깔려있으면 선로 연결 가능
-		if (GridManager->Grid[gridRow - 1][gridColumn]->TileType == ETileType::Rail)
-			return true;
+	// 왼쪽 타일 탐색, 타일에 선로가 깔려있으면 선로 연결 가능
+	if (gridRow - 1 > 0 && GridManager->Grid[gridRow - 1][gridColumn]->TileType == ETileType::Rail) {
+		// 오른쪽이 도착 역인지 확인
+		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
+			bIsFinished = true;
+		// 위쪽이 도착 역인지 확인
+		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
+			bIsFinished = true;
+
+		return GridManager->Grid[gridRow - 1][gridColumn];
 	}
-	// 오른쪽 타일 탐색
-	if (gridRow + 1 < GridManager->Grid.Num()) {
-		// 타일에 선로가 깔려있으면 선로 연결 가능
-		if (GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Rail)
-			return true;
-	}
+
 	// 위쪽 타일 탐색
-	if (gridColumn - 1 > 0) {
-		// 타일에 선로가 깔려있으면 선로 연결 가능
-		if (GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Rail)
-			return true;
+	if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Rail) {
+		// 오른쪽이 도착 역인지 확인
+		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
+			bIsFinished = true;
+
+		return GridManager->Grid[gridRow][gridColumn - 1];
 	}
 	// 아래쪽 타일 탐색
-	if (gridColumn + 1 < GridManager->Grid[gridRow].Num()) {
-		// 타일에 선로가 깔려있으면 선로 연결 가능
-		if (GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Rail)
-			return true;
+	if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Rail) {
+		// 오른쪽이 도착 역인지 확인
+		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
+			bIsFinished = true;
+		// 위쪽이 도착 역인지 확인
+		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
+			bIsFinished = true;
+
+		return GridManager->Grid[gridRow][gridColumn + 1];
+	}
+	// 오른쪽 타일 탐색 (게임 구조 상 오른쪽 타일 검색할 일이 제일 적어서 아래로 뺌)
+	if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Rail) {
+		// 도착 역은 오른쪽에서 접근할 수 없음
+		return GridManager->Grid[gridRow + 1][gridColumn];
 	}
 
 	// 전부 선로 안 깔려있으면 선로 연결 불가
-	return false;
+	return nullptr;
 }
 
-void ATile::SetRail()
+void ATile::SetRail(ATile* PreviousTile)
 {
 	TileType = ETileType::Rail;
+
+	// 도착 역과 연결됐으면 게임을 끝냄
+	//if (bIsFinished) return;
+
+	// 이전 선로가 종단 선로였을 경우, 이 타일을 새로운 종단 선로로 설정함
+	if (PreviousTile->bIsLastRail) {
+		PreviousTile->bIsLastRail = false;
+		PreviousTile->TileCollision->SetCollisionProfileName(TEXT("Item"));
+		bIsLastRail = true;
+	}
+
+	// 마지막 선로면서 열차가 지나가고 있지 않은 경우에만 선로를 주울 수 있음
+	if (bIsLastRail && !bIsPassed)
+		TileCollision->SetCollisionProfileName(TEXT("Tile"));
+	else
+		TileCollision->SetCollisionProfileName(TEXT("Item"));
+
+	// 바닥에 연결 가능한 선로 아이템이 있는지 확인
+	if (ATile* NextTile = CheckRailItem())
+		NextTile->SetRail(this);
+}
+
+ATile* ATile::CheckRailItem()
+{
+	if (!GridManager || GridManager->Grid.IsEmpty()) {
+		PRINTFATALLOG(TEXT("There is no grid."));
+		return nullptr;
+	}
+
+	// 오른쪽 타일 탐색, 타일에 선로 아이템이 딱 하나 떨어져 있었다면 연결 가능
+	if (gridRow + 1 < GridManager->Grid.Num() && !GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem.Num() == 1)
+		return GridManager->Grid[gridRow + 1][gridColumn];
+
+	// 아래쪽 타일 탐색
+	if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && !GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem.Num() == 1)
+		return GridManager->Grid[gridRow][gridColumn + 1];
+
+	// 위쪽 타일 탐색
+	if (gridColumn - 1 > 0 && !GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.Num() == 1)
+		return GridManager->Grid[gridRow][gridColumn - 1];
+
+	// 왼쪽 타일 탐색 (게임 구조 상 가장 검색할 일이 적을 것 같아서 아래로 둠)
+	if (gridRow - 1 > 0 && !GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.Num() == 1)
+		return GridManager->Grid[gridRow - 1][gridColumn];
+
+	// 전부 선로 안 깔려있으면 선로 연결 불가
+	return nullptr;
 }
 

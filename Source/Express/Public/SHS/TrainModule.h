@@ -67,13 +67,9 @@ protected:
 	// 모듈 이동 속도, 엔진에서 초기화
 	UPROPERTY(VisibleAnywhere, Category = "Move")
 	float ModuleSpeed = 25.0f;
-	UPROPERTY(EditAnywhere, Category = "Tile")
-	class AGridManager* GridManager;
-	class ATile* CurrentTile;
-	// 현재 목표 타일의 Row 인덱스
-	int32 RowIndex = -1;
-	// 현재 목표 타일의 Column 인덱스
-	int32 ColIndex = -1;
+	// 출발 여부 변수, 기다리다가 출발
+	UPROPERTY(VisibleAnywhere, Category = "Move")
+	bool bIsStarted = false;
 
 	// 화재 로직 관련
 	UPROPERTY(EditAnywhere, Category = "Fire")
@@ -88,8 +84,6 @@ protected:
 	class UParticleSystemComponent* FireComp;
 
 
-	void CheckNextTile();
-
 	virtual void MoveTrain(float DeltaTime);
 	void RotateTrain(float DeltaTime);
 
@@ -98,4 +92,6 @@ protected:
 	UFUNCTION()
 	virtual void OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	UFUNCTION()
+	void OnEngineInit();
 };
