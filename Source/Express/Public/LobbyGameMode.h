@@ -14,4 +14,6 @@ class EXPRESS_API ALobbyGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
+public:
+	ALobbyGameMode();
 };

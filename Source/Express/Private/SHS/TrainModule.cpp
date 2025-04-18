@@ -45,7 +45,7 @@ ATrainModule::ATrainModule()
 	WaterComp = CreateDefaultSubobject<UBoxComponent>(TEXT("WaterComp"));
 	WaterComp->SetupAttachment(RootComponent);
 	WaterComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
-	WaterComp->OnComponentBeginOverlap.AddDynamic(this, ATrainModule::OnWaterBeginOverlap);
+	WaterComp->OnComponentBeginOverlap.AddDynamic(this, &ATrainModule::OnWaterBeginOverlap);
 }
 
 // Called when the game starts or when spawned
