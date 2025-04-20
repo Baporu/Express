@@ -180,7 +180,7 @@ void ATileGenerator::SetTrain(ATile* Tile, int32 TileRow, int32 TileColumn)
     FVector TileLoc = Tile->GetActorLocation();
 
     // 선로 높이 보정
-    TileLoc.Z += 15.0f;
+    TileLoc.Z += 17.0f;
 
     FActorSpawnParameters params;
     params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

@@ -62,7 +62,7 @@ void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Co
 	else NextRot = 180.0;
 
 	FTimerHandle InitHandle;
-	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&] { CheckNextTile(); EngineInit.Broadcast(); }), 5.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&] { CheckNextTile(); bIsStarted = true; EngineInit.Broadcast(); }), InitTime, false);
 }
 
 bool ATrainEngine::CheckModule(int32 ModuleIndex)
@@ -149,7 +149,8 @@ void ATrainEngine::CheckNextTile()
 			CurrentTile = grid[RowIndex - 1][ColIndex];
 
 			NextPos = CurrentTile->GetActorLocation();
-			NextPos.Z += 65.0;
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
 			// 위로 가야 하니까 위쪽으로 회전
 			NextRot = 0.0;
 
@@ -161,7 +162,8 @@ void ATrainEngine::CheckNextTile()
 			CurrentTile = grid[RowIndex + 1][ColIndex];
 
 			NextPos = CurrentTile->GetActorLocation();
-			NextPos.Z += 65.0;
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
 			// 아래쪽으로 회전
 			NextRot = 180.0;
 
@@ -175,7 +177,8 @@ void ATrainEngine::CheckNextTile()
 			CurrentTile = grid[RowIndex][ColIndex - 1];
 
 			NextPos = CurrentTile->GetActorLocation();
-			NextPos.Z += 65.0;
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
 			// 왼쪽으로 회전
 			NextRot = 270.0;
 
@@ -187,6 +190,7 @@ void ATrainEngine::CheckNextTile()
 			CurrentTile = grid[RowIndex][ColIndex + 1];
 
 			NextPos = CurrentTile->GetActorLocation();
+			CurrentTile->bIsPassed = true;
 			NextPos.Z += 115.0;
 			// 오른쪽으로 회전
 			NextRot = 90.0;

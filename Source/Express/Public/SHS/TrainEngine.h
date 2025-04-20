@@ -59,6 +59,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Tile")
 	class AGridManager* GridManager;
+
+	// 기차가 움직이기 전 대기 시간
+	UPROPERTY(EditDefaultsOnly, Category = "Move")
+	float InitTime = 10.0f;
+
 	// 이동할 목표 타일
 	UPROPERTY(VisibleAnywhere, Category = "Move")
 	class ATile* CurrentTile;

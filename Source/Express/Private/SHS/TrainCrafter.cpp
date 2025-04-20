@@ -10,8 +10,6 @@ void ATrainCrafter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!bIsStarted) return;
-
 	// 만드는 중 아니면 return
 	if (!bIsMaking) return;
 
