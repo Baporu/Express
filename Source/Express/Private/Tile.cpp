@@ -13,6 +13,7 @@
 #include "SHS/GridManager.h"
 #include "../Express.h"
 #include "SHS/TrainEngine.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATile::ATile()
@@ -167,6 +168,11 @@ void ATile::CreateTile(ETileType Type)
 
 }
 
+void ATile::SetContainedItem(TArray<AItem*> Item)
+{
+	ContainedItem = Item;
+}
+
 void ATile::SetTrain()
 {
 	FVector spawnLoc = GetActorLocation();
@@ -217,5 +223,11 @@ bool ATile::CheckRail()
 void ATile::SetRail()
 {
 	TileType = ETileType::Rail;
+}
+
+void ATile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ATile, ContainedItem);
 }
 

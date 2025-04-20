@@ -58,14 +58,17 @@ public:
 
 	float TileSize = 100;
 
-	UPROPERTY(VisibleAnywhere, Category = "Item")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Item")
 	TArray<AItem*> HoldItems;
+
 	ATile* CurrentTile;
 	ATile* FrontTile;
 	ATile* RightTile;
 	ATile* LeftTile;
 
+	UPROPERTY(Replicated, BlueprintReadOnly);
 	bool bIsholdingitem = false;
+
 	float HarvestTimer = 0;
 	int HarvestCount = 0;
 	ATile* LastHarvestTile = nullptr;
@@ -85,8 +88,25 @@ public:
 	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Item")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Item")
 	bool bHasWater = false;
 
 	bool FindTrain();
+
+//네트워크
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	float Rep_Yaw;
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	FRotator Rep_Rotation;
+
+	UFUNCTION(Server, Reliable)
+	void Server_UdateRotation(float NewYaw);
+
+
+
+
+
 };

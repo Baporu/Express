@@ -13,6 +13,7 @@
 #include "SHS/TrainCargo.h"
 #include "SHS/TrainCrafter.h"
 #include "../Express.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASBS_Player::ASBS_Player()
@@ -20,13 +21,33 @@ ASBS_Player::ASBS_Player()
     PrimaryActorTick.bCanEverTick = true;
     TempHandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TempHandMesh"));
     TempHandMesh->SetupAttachment(GetMesh());
+
+    //네트워크
+    NetUpdateFrequency = 100;
+
+    SetReplicates(true);
+    SetReplicateMovement(true);
+
+
 }
 
 void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
 
-    SetToolsOnGround();
+    //회전 변수 초기화
+    Rep_Yaw = GetActorRotation().Yaw;
+    if (HasAuthority())
+    {
+        if (AExp_GameMode* gamemode = GetWorld()->GetAuthGameMode<AExp_GameMode>())
+        {
+            if (!gamemode->bIsToolsSpawned)
+            {
+                SetToolsOnGround();
+                gamemode->bIsToolsSpawned = true;
+            }
+        }
+    }
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -36,7 +57,7 @@ void ASBS_Player::Tick(float DeltaTime)
     //손에 물건 안들고있으면 암것도 안함
     if (HoldItems.IsEmpty()) return;
     //물건을 들고 있드면
-	if (HoldItems[0]->IsTool)//들고 있는게 도구(양동이 곡괭이 도끼)
+	if (HoldItems[0] && HoldItems[0]->IsTool)//들고 있는게 도구(양동이 곡괭이 도끼)
 	{
 		HarvestTimer -= DeltaTime;
 		//0.5초마다
@@ -97,7 +118,8 @@ void ASBS_Player::Tick(float DeltaTime)
 			}
 		}
 	}
-	else //들고 있는게 자원이면
+    //들고 있는게 자원이면
+	else 
 	{
 		//손에 물건 들고있을 때 바닥타일 확인
 		GetCurrentTile();
@@ -118,6 +140,17 @@ void ASBS_Player::Tick(float DeltaTime)
 			}
 		}
 	}
+
+    //클라면 회전 보간
+	if (!HasAuthority())
+	{
+		FRotator CurrentRotaion = GetActorRotation();
+        FRotator TargetRotation(0,Rep_Yaw, 0);
+		FRotator NewRotation = FMath::RInterpTo(CurrentRotaion, TargetRotation, DeltaTime, RotationLerpRate);
+		SetActorRotation(NewRotation);
+	}
+
+
 }
 
 
@@ -156,9 +189,22 @@ void ASBS_Player::Move(const FInputActionValue& Value)
             FRotator TargetRotation = DIr.Rotation();
             TargetRotation.Pitch = 0;
             TargetRotation.Roll = 0;
-            FRotator CurrentRotation = GetActorRotation();
-            FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), RotationLerpRate);
-            SetActorRotation(NewRotation);
+            //서버는
+            if (HasAuthority())
+            {
+                //타겟로케이션을 받아서 rep yaw에 넣고
+                Rep_Yaw = TargetRotation.Yaw;
+                //회전한다.
+                SetActorRotation(FRotator(0, Rep_Yaw, 0)); //
+    
+            }
+            //클라는
+            else
+            {
+                //
+                SetActorRotation(FRotator(0, TargetRotation.Yaw, 0));
+                Server_UdateRotation(TargetRotation.Yaw);
+            }
         }
         const FVector ForwardDirection = FVector::ForwardVector;
         const FVector RightDirection = FVector::RightVector;
@@ -308,6 +354,10 @@ void ASBS_Player::Release(const FInputActionValue& Value)
 
 void ASBS_Player::SetToolsOnGround()
 {
+    if(!HasAuthority()) return;
+
+
+
     //현재타일에 도끼 놓기
     GetCurrentTile();
     if (CurrentTile)
@@ -321,7 +371,6 @@ void ASBS_Player::SetToolsOnGround()
         TempItem.Add(AxeItem);
         CurrentTile->SetContainedItem(TempItem);
     }
-
     //앞 타일에 곡괭이 놓기
     GetFrontTile();
     if (FrontTile)
@@ -349,6 +398,7 @@ void ASBS_Player::SetToolsOnGround()
         TempItem.Add(Bucket);
         RightTile->SetContainedItem(TempItem);
     }
+    //왼쪽 타일에 레일 놓기
     GetLeftTile();
     if (LeftTile)
     {
@@ -569,3 +619,19 @@ bool ASBS_Player::FindTrain()
     // 화물차도 제작차도 아니니까 return false
     return false;
 }
+
+void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(ASBS_Player, Rep_Rotation); // 
+    DOREPLIFETIME(ASBS_Player, HoldItems); //HoldItems 
+    DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
+
+}
+
+void ASBS_Player::Server_UdateRotation_Implementation(float NewYaw)
+{
+    Rep_Yaw = NewYaw;
+    SetActorRotation(FRotator(0, Rep_Yaw, 0));
+}
+
