@@ -68,8 +68,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
 	class UMaterialInterface* BucketMaterial; //양동이 material
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EItemType ItemType; //아이템 타입
 	UPROPERTY(EditAnywhere)
 	bool IsTool = false;
 
@@ -79,6 +77,16 @@ public:
 	void UpdateMeshMat();
 	void CreateItem(EItemType Type);
 
-	void StackItem();
-	
+//네트워크
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(Replicatedusing=OnRep_ItemType, EditAnywhere, BlueprintReadWrite)
+	EItemType ItemType; //아이템 타입
+	UFUNCTION()
+	void OnRep_ItemType();
+	UFUNCTION(Server, Reliable)
+	void Server_CreateItem(EItemType Type);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UpdateMeshMat();
 };

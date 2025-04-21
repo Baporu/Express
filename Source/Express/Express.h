@@ -4,7 +4,17 @@
 
 #include "CoreMinimal.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogTrain, Log, All);
 
-#define PRINTLOG(fmt, ...) UE_LOG(LogTrain, Log, TEXT("[%s]: %s"), *FString(__FUNCTION__), *FString::Printf(fmt, ##__VA_ARGS__))
-#define PRINTFATALLOG(fmt, ...) UE_LOG(LogTrain, Fatal, TEXT("ERROR - [%s] (%d): %s"), *FString(__FUNCTION__), __LINE__, *FString::Printf(fmt, ##__VA_ARGS__))
+
+DECLARE_LOG_CATEGORY_EXTERN(NetLog, Log, All);
+#define LOCAL_ROLE (UEnum::GetValueAsString<ENetRole>(GetLocalRole()))
+#define REMOTE_ROLE (UEnum::GetValueAsString<ENetRole>(GetRemoteRole()))
+#define NETMODE (GetWorld()->GetNetMode() == ENetMode::NM_Client ? TEXT("CLIENT") : GetWorld()->GetNetMode() == NM_Standalone ? TEXT("Standalone") : TEXT("Server"))
+#define CALLINFO (FString(__FUNCTION__) + TEXT("( ") + FString::FromInt(__LINE__) + TEXT(" )"))
+#define PRINTLOG(fmt, ...) UE_LOG(NetLog, Warning, TEXT("[%s]%s : %s"), NETMODE, *CALLINFO, *FString::Printf(fmt, ##__VA_ARGS__))
+
+
+DECLARE_LOG_CATEGORY_EXTERN(LogTrain, Log, All);
+#define PRINTFATALLOG(fmt, ...) UE_LOG(LogTrain, Fatal, TEXT("ERROR: [%s] (%d): %s"), *FString(__FUNCTION__), __LINE__, *FString::Printf(fmt, ##__VA_ARGS__))
+#define PRINTTRAIN(fmt, ...) UE_LOG(LogTrain, Log, TEXT("[%s]: %s"), *FString(__FUNCTION__), *FString::Printf(fmt, ##__VA_ARGS__))
+

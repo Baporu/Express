@@ -3,13 +3,14 @@
 
 #include "SBS/Item.h"
 #include "Components/StaticMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AItem::AItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+    SetReplicates(true);
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
     MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
@@ -162,13 +163,43 @@ void AItem::UpdateMeshMat()
 }
 void AItem::CreateItem(EItemType Type)
 {
-	ItemType = Type;
-    if(ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
-        IsTool = true;
-     UpdateMeshMat();
+    //서버면
+    if (HasAuthority())
+    {
+		ItemType = Type;
+		if (ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
+			IsTool = true;
+		UpdateMeshMat();
+		Multicast_UpdateMeshMat();
+    }
+    //클라면
+    else
+    {
+        Server_CreateItem(Type);//서버에 전달
+    }
 }
 
-void AItem::StackItem()
+void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-    //AttachToActor()
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AItem, ItemType);
 }
+
+void AItem::OnRep_ItemType()
+{
+    UpdateMeshMat();
+}
+
+void AItem::Server_CreateItem_Implementation(EItemType Type)
+{
+	ItemType = Type;
+	if (ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
+		IsTool = true;
+	UpdateMeshMat();
+	Multicast_UpdateMeshMat();
+}
+void AItem::Multicast_UpdateMeshMat_Implementation()
+{
+    UpdateMeshMat();
+}
+

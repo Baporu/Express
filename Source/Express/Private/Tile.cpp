@@ -11,7 +11,10 @@
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
 #include "SHS/GridManager.h"
+#include "SHS/TrainEngine.h"
+#include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
+
 
 // Sets default values
 ATile::ATile()
@@ -164,6 +167,10 @@ void ATile::CreateTile(ETileType Type)
 	//UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
 
 }
+void ATile::SetContainedItem(TArray<AItem*> Item)
+{
+	ContainedItem = Item;
+}
 
 ATile* ATile::CheckRail()
 {
@@ -212,6 +219,7 @@ ATile* ATile::CheckRail()
 	// 전부 선로 안 깔려있으면 선로 연결 불가
 	return nullptr;
 }
+
 
 void ATile::SetRail(ATile* PreviousTile)
 {
@@ -263,5 +271,11 @@ ATile* ATile::CheckRailItem()
 
 	// 전부 선로 안 깔려있으면 선로 연결 불가
 	return nullptr;
+}
+
+void ATile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ATile, ContainedItem);
 }
 

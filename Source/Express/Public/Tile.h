@@ -63,7 +63,7 @@ public:
 	class UTile_FSM* TileFSM;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TArray<AItem*> ContainedItem; //타일 위 아이템
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
@@ -89,7 +89,7 @@ public:
 
 
 	bool CheckContainedItem() { if (ContainedItem.IsEmpty()) return false; else return true; };
-	void SetContainedItem(TArray<AItem*> Item) {ContainedItem = Item;} //Set item
+	void SetContainedItem(TArray<AItem*> Item);//Set item
 	TArray<AItem*> GetContainedItem() const{ return ContainedItem;} // Get Item
 	void RemoveContainedItem() { ContainedItem.Empty(); };
 
@@ -115,4 +115,5 @@ public:
 	ATile* CheckRail();
 	void SetRail(ATile* PreviousTile);
 	ATile* CheckRailItem();
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 };
