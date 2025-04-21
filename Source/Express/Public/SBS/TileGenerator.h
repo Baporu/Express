@@ -65,4 +65,11 @@ public:
     class AGridManager* GridManager;
 
 	void GenerateMap();
+
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "Train")
+	TSubclassOf<class ATrainEngine> TrainFactory;
+
+
+	void SetTrain(ATile* Tile, int32 TileRow, int32 TileColumn);
 };

@@ -7,6 +7,9 @@
 #include "SHS/TrainWaterTank.h"
 #include "SHS/TrainCargo.h"
 #include "SHS/TrainCrafter.h"
+#include "Tile.h"
+#include "SHS/GridManager.h"
+#include "SBS/SBS_Player.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -24,12 +27,6 @@ void ATrainEngine::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 처음에 타일 정보 받아와서 계산
-	NextPos = GetActorLocation();
-	NextRot = GetActorRotation().Yaw;
-
-	Init();
-
 	SpawnDefaultModules();
 }
 
@@ -38,24 +35,34 @@ void ATrainEngine::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bIsStarted) return;
+
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5)
-		//CheckNextTile();
-		GetTileLocation();
+		CheckNextTile();
+		//GetTileLocation();
 }
 
-void ATrainEngine::Init()
+void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Column)
 {
-	// 다음 위치를 타일한테서 받아옴
-	if (FMath::RandBool()) {
-		NextPos.X += 100.0f;
-		NextRot = 0.0;
-	}
-	else {
-		NextPos.Y += 100.0f;
-		NextRot = 90.0;
-	}
+	GridManager = Grid;
+	CurrentTile = NextTile;
+	RowIndex = Row;
+	ColIndex = Column;
 
-	UE_LOG(LogTrain, Log, TEXT("Next Position Changed"));
+	NextPos = CurrentTile->GetActorLocation();
+	
+	FVector CurPos = GetActorLocation();
+
+	if (NextPos.Y >= CurPos.Y)
+		NextRot = 90.0;
+	else if (NextPos.Y < CurPos.Y)
+		NextRot = 270.0;
+	else if (NextPos.X >= CurPos.X)
+		NextRot = 0.0;
+	else NextRot = 180.0;
+
+	FTimerHandle InitHandle;
+	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&] { CheckNextTile(); bIsStarted = true; EngineInit.Broadcast(); }), InitTime, false);
 }
 
 bool ATrainEngine::CheckModule(int32 ModuleIndex)
@@ -113,6 +120,88 @@ void ATrainEngine::CheckMakeRail()
 			crafter->CheckMakeRail();
 }
 
+void ATrainEngine::CheckNextTile()
+{
+	if (!GridManager) {
+		PRINTFATALLOG(TEXT("There is no GridManager."));
+		return;
+	}
+
+	TArray<TArray<ATile*>> grid = GridManager->Grid;
+	
+	if (grid.IsEmpty()) {
+		PRINTFATALLOG(TEXT("There is no grid."));
+		return;
+	}
+
+	PRINTLOG(TEXT("Tile Check Started"));
+
+	// 현재 위치를 다음 모듈에게 넘겨주고
+	TrainModules[1]->SetModuleLocation(NextPos);
+	TrainModules[1]->SetModuleRotation(NextRot);
+
+	PRINTLOG(TEXT("Location Enqueued"));
+
+	// 상하 탐색
+	if (RowIndex - 1 > 0)
+		// 선로가 깔린 타일이고, 아직 지나가지 않은 길이면
+		if (grid[RowIndex - 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
+			CurrentTile = grid[RowIndex - 1][ColIndex];
+
+			NextPos = CurrentTile->GetActorLocation();
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
+			// 위로 가야 하니까 위쪽으로 회전
+			NextRot = 0.0;
+
+			RowIndex--;
+			return;
+		}
+	if (RowIndex + 1 < grid.Num())
+		if (grid[RowIndex + 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex + 1][ColIndex]->bIsPassed == false) {
+			CurrentTile = grid[RowIndex + 1][ColIndex];
+
+			NextPos = CurrentTile->GetActorLocation();
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
+			// 아래쪽으로 회전
+			NextRot = 180.0;
+
+			RowIndex++;
+			return;
+		}
+
+	// 좌우 탐색
+	if (ColIndex - 1 > 0)
+		if (grid[RowIndex][ColIndex - 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
+			CurrentTile = grid[RowIndex][ColIndex - 1];
+
+			NextPos = CurrentTile->GetActorLocation();
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
+			// 왼쪽으로 회전
+			NextRot = 270.0;
+
+			ColIndex--;
+			return;
+		}
+	if (ColIndex + 1 < grid[RowIndex].Num())
+		if (grid[RowIndex][ColIndex + 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex + 1]->bIsPassed == false) {
+			CurrentTile = grid[RowIndex][ColIndex + 1];
+
+			NextPos = CurrentTile->GetActorLocation();
+			CurrentTile->bIsPassed = true;
+			NextPos.Z += 115.0;
+			// 오른쪽으로 회전
+			NextRot = 90.0;
+
+			ColIndex++;
+			return;
+		}
+
+	PRINTFATALLOG(TEXT("Current Rail: %s, There is no rail, Game Failed"), *CurrentTile->GetActorNameOrLabel());
+}
+
 void ATrainEngine::MoveTrain(float DeltaTime)
 {
 	FVector dir = NextPos - GetActorLocation();
@@ -120,17 +209,30 @@ void ATrainEngine::MoveTrain(float DeltaTime)
 	SetActorLocation(GetActorLocation() + vt);
 }
 
-// void ATrainEngine::RotateTrain(float DeltaTime)
-// {
-// 	double curRot = GetActorRotation().Yaw;
-// 	curRot = FMath::Lerp(curRot, NextRot, DeltaTime / 4);
-// 
-// 	SetActorRotation(FRotator(0.0, curRot, 0.0));
-// }
-
 void ATrainEngine::OnFire(float DeltaTime)
 {
 	TrainModules[ModuleNumber + 1]->FireTimer += DeltaTime;
+}
+
+void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// 엔진도 물탱크도 불 안 붙었으면 return
+	if (!bOnFire && !TrainWaterTank->bOnFire) return;
+
+	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
+	if (!player || !player->bHasWater) return;
+
+	// 공통 처리: 플레이어 물 없애기
+	player->bHasWater = false;
+	player->HoldItems[0]->IsBucketEmpty = true;
+	player->HoldItems[0]->UpdateMeshMat();
+
+	// 엔진에 불 붙은 경우
+	if (bOnFire) EndFire();
+
+	// 물탱크에 불 붙은 경우
+	if (TrainWaterTank->bOnFire)
+		TrainWaterTank->EndFire();
 }
 
 // ================================ 임시 함수들 ================================
@@ -185,6 +287,7 @@ void ATrainEngine::SpawnDefaultModules()
 
 	AttachModule(WaterTank);
 	WaterTank->SetModuleIndex(1);
+	TrainWaterTank = WaterTank;
 	AttachModule(Cargo, 1);
 	Cargo->SetModuleIndex(2);
 	AttachModule(Crafter, 2);

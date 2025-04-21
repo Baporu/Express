@@ -7,9 +7,6 @@
 #include "Express/Express.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Tile.h"
-#include "SBS/TileGenerator.h"
-#include "SHS/GridManager.h"
 #include "SBS/SBS_Player.h"
 
 // Sets default values
@@ -53,12 +50,15 @@ void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TrainEngine->EngineInit.AddUObject(this, &ATrainModule::OnEngineInit);
 }
 
 // Called every frame
 void ATrainModule::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (!bIsStarted) return;
 
 	MoveTrain(DeltaTime);
 	RotateTrain(DeltaTime);
@@ -142,119 +142,6 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 	RotatorQueue.Enqueue(CurrentYaw);
 }
 
-void ATrainModule::CheckNextTile()
-{
-	TArray<TArray<ATile*>> grid = GridManager->Grid;
-
-	// 좌우 탐색
-// 	if (RowIndex - 1 > 0)
-// 		if (!grid[RowIndex - 1][ColIndex]->CheckContainedItem()) return;
-// 
-// 		if (grid[RowIndex - 1][ColIndex]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
-// 			CurrentTile = grid[RowIndex - 1][ColIndex];
-// 
-// 			NextPos = CurrentTile->GetActorLocation();
-// 			// 왼쪽으로 가야 하니까 왼쪽으로 회전
-// 			NextRot = 270.0;
-// 
-// 			RowIndex--;
-// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Left"));
-// 			return;
-// 		}
-// 	if (RowIndex + 1 < grid.Num())
-// 		if (!grid[RowIndex + 1][ColIndex]->CheckContainedItem()) return;
-// 
-// 		if (grid[RowIndex + 1][ColIndex]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex + 1][ColIndex]->bIsPassed == false) {
-// 			CurrentTile = grid[RowIndex + 1][ColIndex];
-// 
-// 			NextPos = CurrentTile->GetActorLocation();
-// 			// 오른쪽으로 회전
-// 			NextRot = 90.0;
-// 
-// 			RowIndex++;
-// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Right"));
-// 			return;
-// 		}
-// 
-// 	// 전후 탐색
-// 	if (ColIndex - 1 > 0)
-// 		if (!grid[RowIndex][ColIndex - 1]->CheckContainedItem()) return;
-// 
-// 		if (grid[RowIndex][ColIndex - 1]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
-// 			CurrentTile = grid[RowIndex][ColIndex - 1];
-// 
-// 			NextPos = CurrentTile->GetActorLocation();
-// 			// 앞으로 회전
-// 			NextRot = 0.0;
-// 
-// 			ColIndex--;
-// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Up"));
-// 			return;
-// 		}
-// 	if (ColIndex + 1 < grid[RowIndex].Num())
-// 		if (!grid[RowIndex][ColIndex + 1]->CheckContainedItem()) return;
-// 
-// 		if (grid[RowIndex][ColIndex + 1]->GetContainedItem()[0]->ItemType == EItemType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
-// 			CurrentTile = grid[RowIndex][ColIndex + 1];
-// 
-// 			NextPos = CurrentTile->GetActorLocation();
-// 			// 뒤로 회전
-// 			NextRot = 180.0;
-// 
-// 			ColIndex++;
-// 			UE_LOG(LogTrain, Log, TEXT("Next Tile: Down"));
-// 			return;
-// 		}
-
-	// 좌우 탐색
-	if (RowIndex - 1 > 0)
-		if (grid[RowIndex - 1][ColIndex]->TileType == ETileType::Station_A && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
-			CurrentTile = grid[RowIndex - 1][ColIndex];
-
-			NextPos = CurrentTile->GetActorLocation();
-			// 왼쪽으로 가야 하니까 왼쪽으로 회전
-			NextRot = 270.0;
-
-			RowIndex--;
-			return;
-		}
-	if (RowIndex + 1 < grid.Num() && grid[RowIndex + 1][ColIndex]->bIsPassed == false)
-		if (grid[RowIndex + 1][ColIndex]->TileType == ETileType::Station_A) {
-			CurrentTile = grid[RowIndex + 1][ColIndex];
-			
-			NextPos = CurrentTile->GetActorLocation();
-			// 오른쪽으로 회전
-			NextRot = 90.0;
-
-			RowIndex++;
-			return;
-		}
-	
-	// 전후 탐색
-	if (ColIndex - 1 > 0)
-		if (grid[RowIndex][ColIndex - 1]->TileType == ETileType::Station_A && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
-			CurrentTile = grid[RowIndex][ColIndex - 1];
-
-			NextPos = CurrentTile->GetActorLocation();
-			// 앞으로 회전
-			NextRot = 0.0;
-
-			ColIndex--;
-			return;
-		}
-	if (ColIndex + 1 < grid[RowIndex].Num() && grid[RowIndex][ColIndex + 1]->bIsPassed == false)
-		if (grid[RowIndex][ColIndex + 1]->TileType == ETileType::Station_A) {
-			CurrentTile = grid[RowIndex][ColIndex + 1];
-
-			NextPos = CurrentTile->GetActorLocation();
-			// 뒤로 회전
-			NextRot = 180.0;
-
-			ColIndex++;
-			return;
-		}
-}
-
 void ATrainModule::MoveTrain(float DeltaTime)
 {
 	FVector dir = NextPos - GetActorLocation();
@@ -290,6 +177,13 @@ void ATrainModule::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (!player) return;
 
 	player->bHasWater = false;
+	player->HoldItems[0]->IsBucketEmpty = true;
+	player->HoldItems[0]->UpdateMeshMat();
 	EndFire();
+}
+
+void ATrainModule::OnEngineInit()
+{
+	bIsStarted = true;
 }
 
