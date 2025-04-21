@@ -11,13 +11,10 @@
 #include "EngineUtils.h"
 #include "Components/BoxComponent.h"
 #include "SHS/GridManager.h"
-<<<<<<< HEAD
-#include "../Express.h"
 #include "SHS/TrainEngine.h"
 #include "Net/UnrealNetwork.h"
-=======
 #include "Express/Express.h"
->>>>>>> origin/Hoseung
+
 
 // Sets default values
 ATile::ATile()
@@ -170,28 +167,12 @@ void ATile::CreateTile(ETileType Type)
 	//UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
 
 }
-
-<<<<<<< HEAD
 void ATile::SetContainedItem(TArray<AItem*> Item)
 {
 	ContainedItem = Item;
 }
 
-void ATile::SetTrain()
-{
-	FVector spawnLoc = GetActorLocation();
-	spawnLoc.Z += 50.0f;
-
-	FActorSpawnParameters params;
-	params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	GetWorld()->SpawnActor<ATrainEngine>(TrainFactory, spawnLoc, FRotator::ZeroRotator, params);
-}
-
-bool ATile::CheckRail()
-=======
 ATile* ATile::CheckRail()
->>>>>>> origin/Hoseung
 {
 	if (!GridManager || GridManager->Grid.IsEmpty()) {
 		UE_LOG(LogTemp, Fatal, TEXT("Error: Tile - CheckRail(), There is no grid."));
@@ -238,6 +219,7 @@ ATile* ATile::CheckRail()
 	// 전부 선로 안 깔려있으면 선로 연결 불가
 	return nullptr;
 }
+
 
 void ATile::SetRail(ATile* PreviousTile)
 {

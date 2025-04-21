@@ -62,7 +62,7 @@ void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Co
 	else NextRot = 180.0;
 
 	FTimerHandle InitHandle;
-	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&] { CheckNextTile(); bIsStarted = true; EngineInit.Broadcast(); }), InitTime, false);
+	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&] { CheckNextTile();}), InitTime, false);
 }
 
 bool ATrainEngine::CheckModule(int32 ModuleIndex)
@@ -134,13 +134,13 @@ void ATrainEngine::CheckNextTile()
 		return;
 	}
 
-	PRINTLOG(TEXT("Tile Check Started"));
+	PRINTTRAIN(TEXT("Tile Check Started"));
 
 	// 현재 위치를 다음 모듈에게 넘겨주고
 	TrainModules[1]->SetModuleLocation(NextPos);
 	TrainModules[1]->SetModuleRotation(NextRot);
 
-	PRINTLOG(TEXT("Location Enqueued"));
+	PRINTTRAIN(TEXT("Location Enqueued"));
 
 	// 상하 탐색
 	if (RowIndex - 1 > 0)

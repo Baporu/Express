@@ -87,8 +87,6 @@ public:
 	void OnRep_ItemType();
 	UFUNCTION(Server, Reliable)
 	void Server_CreateItem(EItemType Type);
-	UFUNCTION(Server, Reliable)
-	void Server_UpdateMeshMat();
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateMeshMat();
 };

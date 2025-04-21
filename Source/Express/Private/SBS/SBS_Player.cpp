@@ -14,12 +14,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "SHS/TrainCargo.h"
 #include "SHS/TrainCrafter.h"
-<<<<<<< HEAD
-#include "../Express.h"
 #include "Net/UnrealNetwork.h"
-=======
 #include "Express/Express.h"
->>>>>>> origin/Hoseung
+
 
 // Sets default values
 ASBS_Player::ASBS_Player()

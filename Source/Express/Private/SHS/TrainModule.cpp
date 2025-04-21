@@ -50,7 +50,7 @@ void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TrainEngine->EngineInit.AddUObject(this, &ATrainModule::OnEngineInit);
+	//TrainEngine->EngineInit.AddUObject(this, &ATrainModule::OnEngineInit);
 }
 
 // Called every frame
