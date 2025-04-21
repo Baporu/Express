@@ -104,7 +104,8 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_UdateRotation(float NewYaw);
-
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetToolsOnGround();
 
 
 

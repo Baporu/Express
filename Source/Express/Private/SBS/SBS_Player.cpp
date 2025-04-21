@@ -59,8 +59,8 @@ void ASBS_Player::Tick(float DeltaTime)
 
     //손에 물건 안들고있으면 암것도 안함
     if (HoldItems.IsEmpty()) return;
-    //물건을 들고 있드면
-	if (HoldItems[0] && HoldItems[0]->IsTool)//들고 있는게 도구(양동이 곡괭이 도끼)
+    // 들고 있는게 도구(양동이 곡괭이 도끼)
+	if (HoldItems[0] && HoldItems[0]->IsTool)
 	{
 		HarvestTimer -= DeltaTime;
 		//0.5초마다
@@ -72,7 +72,7 @@ void ASBS_Player::Tick(float DeltaTime)
                 //들고있는게 양동이고 타일이 물이면
 				if (HoldItems[0]->ItemType == EItemType::Bucket && FrontTile->TileType == ETileType::Water) //들고 있는게 양동이면
 				{
-					//TODO: 양동이에 물담기
+					//양동이에 물담기
 					if (FrontTile && FrontTile->CanHarvest() && FrontTile->TileType == ETileType::Water)
 					{
 						FrontTile->ReduceHP();
@@ -140,7 +140,9 @@ void ASBS_Player::Tick(float DeltaTime)
 					TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
 					//배열에 추가
 					HoldItems.Append(TargetItem);
-					CurrentTile->RemoveContainedItem();
+                    //바닥 비우기
+                    TargetItem.Empty();
+					CurrentTile->SetContainedItem(TargetItem);
 				}
 			}
 		}
@@ -260,13 +262,15 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
                 TArray<AItem*> temp = TargetItem;
                 if (PlaceTile && PlaceTile->TileType == ETileType::Ground)
                 {
-                    //손에서 땐다.
+                    //손에서 원래 있던 물건을 땐다.
                     HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
                   
-                    FVector TargetPos = PlaceTile->GetActorLocation();
-                    TargetPos.Z += 100;
-                    HoldItems[0]->SetActorLocation(TargetPos);
+					//FVector TargetPos = PlaceTile->GetActorLocation();
+					//TargetPos.Z += 100;
+					//HoldItems[0]->SetActorLocation(TargetPos);
                     //temp[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+
+                    //temp을 손에 붙인다.
                     temp[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 
                     PlaceTile->SetContainedItem(HoldItems);
@@ -322,7 +326,6 @@ void ASBS_Player::Release(const FInputActionValue& Value)
             if (!(CurrentTile->GetContainedItem().IsEmpty()))
             {
                 UE_LOG(LogTemp, Warning, TEXT("CurrentTile already has item"));
-                // TODO: 교체처리 추가
                 return;
             }
             GetCurrentTile();
@@ -346,10 +349,9 @@ void ASBS_Player::Release(const FInputActionValue& Value)
 
                 // 선로 연결이 불가능하면 그냥 내려놓으면 되므로 추가 로직 없이 하단 코드 실행
             }
-
+           
             HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-            HoldItems[0]->SetActorRotation(FRotator(0,0,0));
-            HoldItems[0]->SetActorLocation(TargetPos);
+            HoldItems[0]->Destroy();
             CurrentTile->SetContainedItem(HoldItems);
             HoldItems.Empty();
             bIsholdingitem = false;
@@ -361,65 +363,66 @@ void ASBS_Player::SetToolsOnGround()
 {
     if(!HasAuthority()) return;
 
-
-
-    //현재타일에 도끼 놓기
-    GetCurrentTile();
-    if (CurrentTile)
+    if (HasAuthority())
     {
-        AItem* AxeItem;
-        FVector SpawnLocation = CurrentTile->GetActorLocation();
-        TArray<AItem*> TempItem;
-        SpawnLocation.Z += 100;
-        AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-        AxeItem->CreateItem(EItemType::Axe);
-        TempItem.Add(AxeItem);
-        CurrentTile->SetContainedItem(TempItem);
-    }
-    //앞 타일에 곡괭이 놓기
-    GetFrontTile();
-    if (FrontTile)
-    {
-
-        AItem* PickaxeItem;
-        FVector SpawnLocation = FrontTile->GetActorLocation();
-        TArray<AItem*> TempItem;
-        SpawnLocation.Z += 100;
-        PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-        PickaxeItem->CreateItem(EItemType::Pickaxe);
-        TempItem.Add(PickaxeItem);
-        FrontTile->SetContainedItem(TempItem);
-    }
-    //오른쪽 타일에 양동이 놓기
-    GetRightTile();
-    if (RightTile)
-    {
-        AItem* Bucket;
-        FVector SpawnLocation = RightTile->GetActorLocation();
-        TArray<AItem*> TempItem;
-        SpawnLocation.Z += 100;
-        Bucket = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-        Bucket->CreateItem(EItemType::Bucket);
-        TempItem.Add(Bucket);
-        RightTile->SetContainedItem(TempItem);
-    }
-    //왼쪽 타일에 레일 놓기
-    GetLeftTile();
-    if (LeftTile)
-    {
-        AItem* Rail;
-        FVector SpawnLocation = LeftTile->GetActorLocation();
-        TArray<AItem*> TempItem;
-        SpawnLocation.Z += 100;
-        for (int i = 0; i < 3; i++)
+        //현재타일에 도끼 놓기
+        GetCurrentTile();
+        if (CurrentTile)
         {
-            Rail = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-            Rail->CreateItem(EItemType::Rail);
-            TempItem.Push(Rail);
-            if(i>0)
-            Rail->AttachToActor(TempItem[i-1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+            AItem* AxeItem;
+            FVector SpawnLocation = CurrentTile->GetActorLocation();
+            TArray<AItem*> TempItem;
+            SpawnLocation.Z += 100;
+            //AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+            AxeItem->CreateItem(EItemType::Axe);
+            TempItem.Add(AxeItem);
+            CurrentTile->SetContainedItem(TempItem);
         }
-        LeftTile->SetContainedItem(TempItem);
+        //앞 타일에 곡괭이 놓기
+        GetFrontTile();
+        if (FrontTile)
+        {
+
+            AItem* PickaxeItem;
+            FVector SpawnLocation = FrontTile->GetActorLocation();
+            TArray<AItem*> TempItem;
+            SpawnLocation.Z += 100;
+         //   PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+            PickaxeItem->CreateItem(EItemType::Pickaxe);
+            TempItem.Add(PickaxeItem);
+            FrontTile->SetContainedItem(TempItem);
+        }
+        //오른쪽 타일에 양동이 놓기
+        GetRightTile();
+        if (RightTile)
+        {
+            AItem* Bucket;
+            FVector SpawnLocation = RightTile->GetActorLocation();
+            TArray<AItem*> TempItem;
+            SpawnLocation.Z += 100;
+       //     Bucket = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+            Bucket->CreateItem(EItemType::Bucket);
+            TempItem.Add(Bucket);
+            RightTile->SetContainedItem(TempItem);
+        }
+        //왼쪽 타일에 레일 놓기
+        GetLeftTile();
+        if (LeftTile)
+        {
+            AItem* Rail;
+            FVector SpawnLocation = LeftTile->GetActorLocation();
+            TArray<AItem*> TempItem;
+            SpawnLocation.Z += 100;
+            for (int i = 0; i < 3; i++)
+            {
+               // Rail = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+                Rail->CreateItem(EItemType::Rail);
+                TempItem.Push(Rail);
+                if(i>0)
+                Rail->AttachToActor(TempItem[i-1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+            }
+            LeftTile->SetContainedItem(TempItem);
+        }
     }
 }
 
@@ -638,5 +641,10 @@ void ASBS_Player::Server_UdateRotation_Implementation(float NewYaw)
 {
     Rep_Yaw = NewYaw;
     SetActorRotation(FRotator(0, Rep_Yaw, 0));
+}
+
+void ASBS_Player::Multicast_SetToolsOnGround_Implementation()
+{
+   // if(TargetTile)
 }
 

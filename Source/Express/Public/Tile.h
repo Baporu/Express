@@ -63,7 +63,7 @@ public:
 	class UTile_FSM* TileFSM;
 
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UPROPERTY(Replicatedusing = OnRep_ContainedItem, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TArray<AItem*> ContainedItem; //타일 위 아이템
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
@@ -116,4 +116,15 @@ public:
 	void SetRail(ATile* PreviousTile);
 	ATile* CheckRailItem();
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetContainedItem(const TArray<AItem*>& Item);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetContainedItem(const TArray<AItem*>& Item);
+
+	UFUNCTION()
+	void OnRep_ContainedItem();
+
+
 };

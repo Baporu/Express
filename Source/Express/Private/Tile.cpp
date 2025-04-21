@@ -170,6 +170,16 @@ void ATile::CreateTile(ETileType Type)
 void ATile::SetContainedItem(TArray<AItem*> Item)
 {
 	ContainedItem = Item;
+	OnRep_ContainedItem();
+	//if (HasAuthority())
+	//{
+	//	ContainedItem = Item;
+	//	Multicast_SetContainedItem(Item);
+	//}
+	//else
+	//{
+	//	Server_SetContainedItem(Item);
+	//}
 }
 
 ATile* ATile::CheckRail()
@@ -273,9 +283,49 @@ ATile* ATile::CheckRailItem()
 	return nullptr;
 }
 
+//네트워크
+
 void ATile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATile, ContainedItem);
+}
+
+void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
+{
+	ContainedItem = Item;
+	Multicast_SetContainedItem(Item);
+	UE_LOG(LogTemp, Warning, TEXT("serever_conItem Called"));
+
+}
+
+void ATile::Multicast_SetContainedItem_Implementation(const TArray<AItem*>& Item)
+{
+	ContainedItem = Item;
+	if (ContainedItem.IsEmpty() || !ContainedItem[0])
+		return;
+
+	ContainedItem[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	FVector BaseLocation = GetActorLocation() + FVector(0, 0, 100);
+	ContainedItem[0]->SetActorLocation(BaseLocation);
+	UE_LOG(LogTemp, Warning, TEXT("netmulti_conItem Called"));
+}
+
+void ATile::OnRep_ContainedItem()
+{
+	if(ContainedItem.IsEmpty() || !ContainedItem[0])
+		return;
+
+	FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 100);
+	for (int i = 0; i < ContainedItem.Num(); i++)
+	{
+		if(i == 0)
+			ContainedItem[i]->GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+		else
+		{
+			ContainedItem[i]->GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+			ContainedItem[i]->AttachToActor(ContainedItem[i-1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+		}
+	}
 }
 
