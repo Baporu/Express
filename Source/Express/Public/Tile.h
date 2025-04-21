@@ -115,5 +115,14 @@ public:
 	ATile* CheckRail();
 	void SetRail(ATile* PreviousTile);
 	ATile* CheckRailItem();
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	//네트워크
+	UFUNCTION(Server, Reliable)
+	void Server_SetContainedItme(const TArray<AItem*>& Item);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetContainedItem(const TArray<AItem*>& Item);
+	UFUNCTION()
+	void OnRep_ContainedItem();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
