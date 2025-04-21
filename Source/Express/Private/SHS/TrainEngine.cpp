@@ -16,16 +16,16 @@ ATrainEngine::ATrainEngine()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	TrainEngine = this;
-	TrainModules.Add(this);
-	ModuleNumber = 0;
 }
 
 // Called when the game starts or when spawned
 void ATrainEngine::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TrainEngine = this;
+	TrainModules.Add(this);
+	ModuleNumber = 0;
 
 	SpawnDefaultModules();
 }
@@ -62,7 +62,12 @@ void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Co
 	else NextRot = 180.0;
 
 	FTimerHandle InitHandle;
-	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&] { CheckNextTile(); bIsStarted = true; EngineInit.Broadcast(); }), InitTime, false);
+	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&]
+																					{
+																						CheckNextTile();
+																						for (int i = 0; i < TrainModules.Num(); ++i)
+																							TrainModules[i]->bIsStarted = true;
+																					}), InitTime, false);
 }
 
 bool ATrainEngine::CheckModule(int32 ModuleIndex)

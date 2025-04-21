@@ -50,7 +50,6 @@ void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TrainEngine->EngineInit.AddUObject(this, &ATrainModule::OnEngineInit);
 }
 
 // Called every frame
@@ -180,10 +179,5 @@ void ATrainModule::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	player->HoldItems[0]->IsBucketEmpty = true;
 	player->HoldItems[0]->UpdateMeshMat();
 	EndFire();
-}
-
-void ATrainModule::OnEngineInit()
-{
-	bIsStarted = true;
 }
 

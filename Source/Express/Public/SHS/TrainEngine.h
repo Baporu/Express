@@ -8,8 +8,6 @@
 
 class ATrainModule;
 
-DECLARE_MULTICAST_DELEGATE(FEngineInit);
-
 UCLASS()
 class EXPRESS_API ATrainEngine : public ATrainModule
 {
@@ -34,9 +32,6 @@ public:
 	TSubclassOf<class ATrainCargo> BP_Cargo;
 	UPROPERTY(EditDefaultsOnly, Category = "Train")
 	TSubclassOf<class ATrainCrafter> BP_Crafter;
-
-	// Init()에서 호출할 델리게이트
-	FEngineInit EngineInit;
 
 	void Init(class AGridManager* Grid, class ATile* NextTile, int32 Row, int32 Column);
 
