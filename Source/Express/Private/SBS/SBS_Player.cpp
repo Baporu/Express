@@ -628,15 +628,31 @@ bool ASBS_Player::FindTrain()
 void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(ASBS_Player, Rep_Rotation); // 
     DOREPLIFETIME(ASBS_Player, HoldItems); //HoldItems 
     DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
 
 }
 
-void ASBS_Player::Server_UdateRotation_Implementation(float NewYaw)
+void ASBS_Player::Server_UdateRotation_Implementation(const FRotator& NewRotation)
 {
-    Rep_Yaw = NewYaw;
-    SetActorRotation(FRotator(0, Rep_Yaw, 0));
+    SetActorRotation(NewRotation);
+}
+
+void ASBS_Player::Server_Interact_Implementation()
+{
+
+}
+
+void ASBS_Player::Server_Release_Implementation()
+{
+
+}
+
+void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
+{
+    if (TargetItem && HoldItems.Num() > 0)
+    {
+       // TargetItem->Server_Attach(HoldItems.Top())
+    }
 }
 
