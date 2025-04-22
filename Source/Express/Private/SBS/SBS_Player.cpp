@@ -137,9 +137,10 @@ void ASBS_Player::Tick(float DeltaTime)
 			if(!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
 			{
 
-			Server_AttachItems(TargetItem[0]);
-			HoldItems.Append(TargetItem);
-			CurrentTile->Server_SetContainedItem(TArray<AItem*>());
+				Server_AttachItems(TargetItem[0]);
+				HoldItems.Append(TargetItem);
+				CurrentTile->Server_SetContainedItem(TArray<AItem*>());
+            
 			}
 			
 		}
@@ -749,6 +750,7 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
     if (TargetItem && HoldItems.Num() > 0)
     {
        TargetItem->Server_Attach(HoldItems.Top(), TEXT("ItemHead"));
+       ForceNetUpdate();
     }
 }
 

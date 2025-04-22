@@ -5,12 +5,14 @@
 #include "Express/Express.h"
 #include "SHS/GridManager.h"
 #include "SHS/TrainEngine.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATileGenerator::ATileGenerator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+    //SetReplicates(true);
 
 }
 
@@ -19,7 +21,10 @@ void ATileGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
-  
+    if(!HasAuthority())
+    return;
+
+
     if (bHasGenerated)
     {
         return;
@@ -196,5 +201,11 @@ void ATileGenerator::SetTrain(ATile* Tile, int32 TileRow, int32 TileColumn)
 
     ATrainEngine* train = GetWorld()->SpawnActor<ATrainEngine>(TrainFactory, TileLoc, FRotator(0.0, 90.0, 0.0), params);
     train->Init(GridManager, Tile, TileRow, TileColumn);
+}
+
+void ATileGenerator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(ATileGenerator, GridManager);
 }
 
