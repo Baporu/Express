@@ -116,7 +116,7 @@ void ATile::HarvestTile()
 		NewItem->CreateItem(ItemType); // 아이템 생성
 		TArray<AItem*> TempItem;
 		TempItem.Add(NewItem);
-		CurrentTile->Server_SetContainedItme(TempItem);
+		CurrentTile->Server_SetContainedItem(TempItem);
 		UE_LOG(LogTemp, Log, TEXT("HarvestTile: Item %s spawned on Tile %s"), *NewItem->GetName(), *CurrentTile->GetName());
 	}
 
@@ -180,7 +180,7 @@ void ATile::SetContainedItem(TArray<AItem*> Item)
 	}
 	else
 	{
-		Server_SetContainedItme(Item);
+		Server_SetContainedItem(Item);
 	}
 }
 
@@ -287,7 +287,7 @@ ATile* ATile::CheckRailItem()
 	return nullptr;
 }
 
-void ATile::Server_SetContainedItme_Implementation(const TArray<AItem*>& Item)
+void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
 {
 	ContainedItem = Item;
 	OnRep_ContainedItem();
@@ -321,6 +321,11 @@ void ATile::OnRep_ContainedItem()
 			ContainedItem[i]->AttachToActor(ContainedItem[i - 1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
 		}
 	}
+}
+
+void ATile::Server_SetRail_Implementation(ATile* PreviousTile)
+{
+	SetRail(PreviousTile);
 }
 
 void ATile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

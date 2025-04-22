@@ -82,6 +82,8 @@ public:
 	bool IsTool = false;
 	UPROPERTY(Replicatedusing = OnRep_IsBucketEmpty, EditAnywhere, BlueprintReadWrite)
 	bool IsBucketEmpty = false;
+	UPROPERTY(Replicated, EditAnywhere, Category = "Item")
+    bool bHasWater = false;
 
 	UFUNCTION()
 	void OnRep_ItemType();

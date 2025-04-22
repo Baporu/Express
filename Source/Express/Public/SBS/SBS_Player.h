@@ -106,7 +106,7 @@ public:
 	void Server_AttachItems(AItem* TargetItem);
 
 	UPROPERTY(Replicated, EditAnywhere, Category = Item)
-	bool bHaswater = false;
+	bool bHasWater = false;
 
 
 

@@ -209,7 +209,7 @@ void AItem::Server_Attach_Implementation(AActor* TargetActor, FName SocketName)
     if (TargetActor)
     {
         DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
         Multicast_Attach(TargetActor, SocketName);
     }
 }
@@ -219,7 +219,7 @@ void AItem::Multicast_Attach_Implementation(AActor* TargetActor, FName SocketNam
     if (TargetActor)
     {
         DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
     }
 }
 
