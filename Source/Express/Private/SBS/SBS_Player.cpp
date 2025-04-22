@@ -220,8 +220,11 @@ void ASBS_Player::Move(const FInputActionValue& Value)
 
 void ASBS_Player::Interact(const FInputActionValue& Value)
 {
+    if (!IsLocallyControlled()) return;
+
     // 기차와 먼저 상호작용을 시도하고, 성공했으면 추가 상호작용을 하지 않음
-    if (FindTrain()) return;
+    Server_FindTrain(HoldItems);
+    if (bHasFound) return;
       
     //if(!HasAuthority())
     Server_Interact();
@@ -501,6 +504,9 @@ bool ASBS_Player::FindTrain()
 }
 
 void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& PlayerItems) {
+    // 먼저 초기화
+    bHasFound = false;
+
     // 현재 위치와 타일 크기로 전방의 타일 위치를 계산
     FVector CurLoc = GetActorLocation();
     FVector ForwardLoc = CurLoc + GetActorForwardVector() * TileSize;
@@ -535,7 +541,9 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
 
             Multicast_DetachHoldItem(PlayerItems[0]);
             cargo->AddResource(PlayerItems);
+            Multicast_RemoveHoldItem();
 
+            bHasFound = true;
             return;
         }
 
@@ -548,7 +556,7 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
                 if (!cargo->CheckGetResource(EItemType::Wood)) return;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Wood));
-                HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                Multicast_AttachHoldItem(HoldItems[0]);
             }
 
             else {
@@ -557,9 +565,10 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
                 if (!cargo->CheckGetResource(EItemType::Stone)) return;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Stone));
-                HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                Multicast_AttachHoldItem(HoldItems[0]);
             }
 
+            bHasFound = true;
             return;
         }
     }
@@ -577,8 +586,9 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
         UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Has Rails"));
 
         HoldItems.Append(crafter->GetRail());
-        HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
+        Multicast_AttachHoldItem(HoldItems[0]);
+        
+        bHasFound = true;
         return;
     }
 
@@ -586,8 +596,16 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
     return;
 }
 
+void ASBS_Player::Multicast_AttachHoldItem_Implementation(class AItem* PlayerItem) {
+    PlayerItem->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
 void ASBS_Player::Multicast_DetachHoldItem_Implementation(class AItem* PlayerItem) {
     PlayerItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void ASBS_Player::Multicast_RemoveHoldItem_Implementation() {
+    HoldItems.Empty();
 }
 
 void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness) {

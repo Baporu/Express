@@ -88,12 +88,18 @@ public:
 	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
+	bool bHasFound = false;
+
 	bool FindTrain();
 
  	UFUNCTION(Server, Reliable)
  	void Server_FindTrain(const TArray<class AItem*>& PlayerItems);
 	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_AttachHoldItem(class AItem* PlayerItem);
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DetachHoldItem(class AItem* PlayerItem);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RemoveHoldItem();
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawRaycast(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness);
 

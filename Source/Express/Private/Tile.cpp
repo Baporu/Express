@@ -199,6 +199,9 @@ ATile* ATile::CheckRail()
 		// 위쪽이 도착 역인지 확인
 		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
 			bIsFinished = true;
+		// 아래쪽이 도착 역인지 확인
+		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
+			bIsFinished = true;
 
 		return GridManager->Grid[gridRow - 1][gridColumn];
 	}

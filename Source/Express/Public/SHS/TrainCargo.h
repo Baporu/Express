@@ -41,6 +41,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AttachResource(AItem* Resource);
 	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AttachResourceToParent(AItem* Resource, AActor* ParentActor);
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DetachResource(AItem* Resource);
 
 protected:

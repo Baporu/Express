@@ -147,13 +147,13 @@ void ATrainEngine::CheckNextTile()
 		return;
 	}
 
-	PRINTLOG(TEXT("Tile Check Started"));
+//	PRINTLOG(TEXT("Tile Check Started"));
 
 	// 현재 위치를 다음 모듈에게 넘겨주고
 	TrainModules[1]->SetModuleLocation(NextPos);
 	TrainModules[1]->SetModuleRotation(NextRot);
 
-	PRINTLOG(TEXT("Location Enqueued"));
+//	PRINTLOG(TEXT("Location Enqueued"));
 
 	// 상하 탐색
 	if (RowIndex - 1 > 0)

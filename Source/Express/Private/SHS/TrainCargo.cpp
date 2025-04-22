@@ -61,24 +61,35 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 		case EItemType::Wood:
 			// 컨테이너가 이미 최대 수량이면 못 받고 return
 			if (Woods.Num() > MaxCount) return;
-			
-			UE_LOG(LogTrain, Warning, TEXT("Wood Added"));
+
+			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
+
+			if (Woods.IsEmpty()) {
+				Multicast_AttachResource(Resources[0]);
+				Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 50.0));
+			}
+			else {
+				Multicast_AttachResourceToParent(Resources[0], Woods.Top());
+			}
 
 			Woods.Append(Resources);
-			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
-			Multicast_AttachResource(Resources[0]);
-			Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 50.0));
-
 			break;
 
 		case EItemType::Stone:
 			// 컨테이너가 이미 최대 수량이면 못 받고 return
 			if (Stones.Num() > MaxCount) return;
 
-			Stones.Append(Resources);
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
-			Multicast_AttachResource(Resources[0]);
-			Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 50.0));
+			
+			if (Stones.IsEmpty()) {
+				Multicast_AttachResource(Resources[0]);
+				Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 50.0));
+			}
+			else {
+				Multicast_AttachResourceToParent(Resources[0], Stones.Top());
+			}
+
+			Stones.Append(Resources);
 			break;
 
 		// 방어 코드
@@ -121,6 +132,10 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 
 void ATrainCargo::Multicast_AttachResource_Implementation(AItem* Resource) {
 	Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+void ATrainCargo::Multicast_AttachResourceToParent_Implementation(AItem* Resource, AActor* ParentActor) {
+	Resource->AttachToActor(ParentActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("ItemHead"));
 }
 
 void ATrainCargo::Multicast_DetachResource_Implementation(AItem* Resource) {
