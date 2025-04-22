@@ -2,8 +2,8 @@
 
 
 #include "SBS/SBS_Player.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Interface_Tile.h"
@@ -26,7 +26,7 @@ ASBS_Player::ASBS_Player()
     TempHandMesh->SetupAttachment(GetMesh());
 
     //네트워크
-    NetUpdateFrequency = 100;
+    SetNetUpdateFrequency(100);
 
     SetReplicates(true);
     SetReplicateMovement(true);

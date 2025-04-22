@@ -27,6 +27,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
+	UPROPERTY(Replicated)
 	float FireTimer = 0.0f;
 
 	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination);
@@ -34,7 +35,12 @@ public:
 	UBoxComponent* GetModuleComp();
 
 	void StartFire();
-	virtual void EndFire();
+	void EndFire();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_StartFire();
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_EndFire();
 
 	void SetModuleLocation(FVector CurrentLocation);
 	void SetModuleRotation(double CurrentYaw);
@@ -52,10 +58,10 @@ protected:
 	UBoxComponent* WaterComp;
 
 	// 열차의 모듈 배열을 가진 클래스
-	UPROPERTY(VisibleAnywhere, Category = "Module")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Module")
 	ATrainEngine* TrainEngine;
 	// 모듈 배열의 내 인덱스
-	UPROPERTY(EditAnywhere, Category = "Module")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Module")
 	int32 ModuleNumber = -1;
 
 	// 다음 이동 좌표
@@ -81,6 +87,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Fire")
 	class UParticleSystem* FireEffect;
 	// 화재 이펙트 인스턴스 담아둘 변수
+	UPROPERTY(EditAnywhere, Category = "Fire")
 	class UParticleSystemComponent* FireComp;
 
 
@@ -91,6 +98,8 @@ protected:
 
 	UFUNCTION()
 	virtual void OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	friend ATrainEngine;

@@ -45,14 +45,14 @@ public:
 
 	void CheckMakeRail();
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<ATrainModule*> TrainModules;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
 	float TrainSpeed = 25.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Tile")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Tile")
 	class AGridManager* GridManager;
 
 	// 기차가 움직이기 전 대기 시간
@@ -81,8 +81,10 @@ protected:
 	virtual void OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 									 int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Fire")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Fire")
 	class ATrainWaterTank* TrainWaterTank;
 
 	// 임시 함수들

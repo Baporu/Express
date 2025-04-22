@@ -5,7 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "SBS/Item.h"
 #include "SHS/TrainEngine.h"
-#include "../Express.h"
+#include "Express/Express.h"
 
 ATrainCargo::ATrainCargo()
 {
