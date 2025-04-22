@@ -1,1 +1,1 @@
-"C:\Program Files\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor” "C:\Unreal\sourcetree\Express\Express.uproject" -game -ResX=1280 -ResY=720 -WinX=0 -WinY=100 -log
+"C:\Program Files\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor" "C:\Unreal\sourcetree\Express\Express.uproject" "LobbyMap" -game -ResX=600 -ResY=400 -WinX=0 -WinY=100 -log -WINDOWED
