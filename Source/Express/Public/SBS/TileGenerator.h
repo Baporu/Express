@@ -61,7 +61,7 @@ public:
     TArray<TArray<int>> TileHeights;
     TArray<TArray<ETileType>> TileTypes;
 
-    UPROPERTY(EditAnywhere, Category = "Tile")
+    UPROPERTY(Replicated, EditAnywhere, Category = "Tile")
     class AGridManager* GridManager;
 
 	void GenerateMap();
@@ -72,4 +72,8 @@ private:
 
 
 	void SetTrain(ATile* Tile, int32 TileRow, int32 TileColumn);
+
+//네트워크
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 };
