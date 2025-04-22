@@ -72,7 +72,7 @@ void UNetGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucce
 
 	if (bWasSuccessful == true)
 	{
-		GetWorld()->ServerTravel(TEXT("/Game/Net/Maps/BattleMap?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
 	}
 }
 
