@@ -109,7 +109,7 @@ public:
 
 
 	UFUNCTION(Server, Reliable)
-	void Server_UdateRotation(const FRotator& NewRotation);
+	void Server_UpdateRotation(const FRotator& NewRotation);
 	UFUNCTION(Server, Reliable)
 	void Server_Interact();
 	UFUNCTION(Server, Reliable)
@@ -120,7 +120,11 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, Category = Item)
 	bool bHasWater = false;
 
+	UPROPERTY(ReplicatedUsing=OnRep_Rotation)
+	FRotator ReplicatedRotation;
 
+	UFUNCTION()
+	void OnRep_Rotation();
 
 
 

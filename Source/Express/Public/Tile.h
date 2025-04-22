@@ -119,6 +119,8 @@ public:
 	//네트워크
 	UFUNCTION(Server, Reliable)
 	void Server_SetContainedItem(const TArray<AItem*>& Item);
+	UFUNCTION(Server, Reliable)
+	void Server_SetItemLocation(const FVector& NewLocation);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetContainedItem(const TArray<AItem*>& Item);
 	UFUNCTION()

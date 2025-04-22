@@ -11,6 +11,8 @@ AItem::AItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
     SetReplicates(true);
+    SetReplicateMovement(true);
+
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
     MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
@@ -209,7 +211,7 @@ void AItem::Server_Attach_Implementation(AActor* TargetActor, FName SocketName)
     if (TargetActor)
     {
         DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
         Multicast_Attach(TargetActor, SocketName);
     }
 }
@@ -219,8 +221,13 @@ void AItem::Multicast_Attach_Implementation(AActor* TargetActor, FName SocketNam
     if (TargetActor)
     {
         DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
     }
+}
+
+void AItem::Server_SetItemLocation_Implementation(const FVector& NewLocation)
+{
+    SetActorLocation(NewLocation);
 }
 
 void AItem::Server_Detach_Implementation()

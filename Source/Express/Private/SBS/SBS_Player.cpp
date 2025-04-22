@@ -139,7 +139,8 @@ void ASBS_Player::Tick(float DeltaTime)
 			//attach
 			Server_AttachItems(TargetItem[0]);
 			//배열에 추가
-			
+
+			HoldItems.Append(TargetItem);
 			CurrentTile->Server_SetContainedItem(TArray<AItem*>());
 			}
 			
@@ -208,7 +209,7 @@ void ASBS_Player::Move(const FInputActionValue& Value)
             {
                 //
                 //SetActorRotation(FRotator(0, TargetRotation.Yaw, 0));
-                Server_UdateRotation(TargetRotation);
+                Server_UpdateRotation(TargetRotation);
             }
         }
         const FVector ForwardDirection = FVector::ForwardVector;
@@ -220,11 +221,8 @@ void ASBS_Player::Move(const FInputActionValue& Value)
 
 void ASBS_Player::Interact(const FInputActionValue& Value)
 {
-    if (!IsLocallyControlled()) return;
-
     // 기차와 먼저 상호작용을 시도하고, 성공했으면 추가 상호작용을 하지 않음
-    Server_FindTrain(HoldItems);
-    if (bHasFound) return;
+    if (FindTrain()) return;
       
     //if(!HasAuthority())
     Server_Interact();
@@ -502,11 +500,8 @@ bool ASBS_Player::FindTrain()
     // 화물차도 제작차도 아니니까 return false
     return false;
 }
-
-void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& PlayerItems) {
-    // 먼저 초기화
-    bHasFound = false;
-
+/*
+void ASBS_Player::Server_FindTrain_Implementation(TArray<AItem*> PlayerItems) {
     // 현재 위치와 타일 크기로 전방의 타일 위치를 계산
     FVector CurLoc = GetActorLocation();
     FVector ForwardLoc = CurLoc + GetActorForwardVector() * TileSize;
@@ -534,16 +529,15 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
 
         // 손에 뭐 들고 있으면 넣기
         if (!PlayerItems.IsEmpty()) {
-            PRINTTRAIN(TEXT("Player Interaction: Cargo"));
+            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo"));
 
             // 유효한 자원인지 확인
             if (!cargo->CheckAddResource(PlayerItems[0]->ItemType)) return;
 
-            Multicast_DetachHoldItem(PlayerItems[0]);
+            PlayerItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
             cargo->AddResource(PlayerItems);
-            Multicast_RemoveHoldItem();
+            PlayerItems.Empty();
 
-            bHasFound = true;
             return;
         }
 
@@ -553,23 +547,22 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
             if (Hit.GetComponent()->GetName().Contains("Wood")) {
                 UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Wood"));
 
-                if (!cargo->CheckGetResource(EItemType::Wood)) return;
+                if (!cargo->CheckGetResource(EItemType::Wood)) return false;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Wood));
-                Multicast_AttachHoldItem(HoldItems[0]);
+                HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
             }
 
             else {
                 UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Stone"));
 
-                if (!cargo->CheckGetResource(EItemType::Stone)) return;
+                if (!cargo->CheckGetResource(EItemType::Stone)) return false;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Stone));
-                Multicast_AttachHoldItem(HoldItems[0]);
+                HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
             }
 
-            bHasFound = true;
-            return;
+            return true;
         }
     }
 
@@ -586,28 +579,15 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
         UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Has Rails"));
 
         HoldItems.Append(crafter->GetRail());
-        Multicast_AttachHoldItem(HoldItems[0]);
-        
-        bHasFound = true;
+        HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+
         return;
     }
 
     // 화물차도 제작차도 아니니까 return false
     return;
 }
-
-void ASBS_Player::Multicast_AttachHoldItem_Implementation(class AItem* PlayerItem) {
-    PlayerItem->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-}
-
-void ASBS_Player::Multicast_DetachHoldItem_Implementation(class AItem* PlayerItem) {
-    PlayerItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-}
-
-void ASBS_Player::Multicast_RemoveHoldItem_Implementation() {
-    HoldItems.Empty();
-}
-
+*/
 void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness) {
     UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
 }
@@ -617,11 +597,15 @@ void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(ASBS_Player, HoldItems); //HoldItems 
     DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
+
     DOREPLIFETIME(ASBS_Player, bHasWater);
+    DOREPLIFETIME(ASBS_Player, ReplicatedRotation);
+
 }
 
-void ASBS_Player::Server_UdateRotation_Implementation(const FRotator& NewRotation)
+void ASBS_Player::Server_UpdateRotation_Implementation(const FRotator& NewRotation)
 {
+    ReplicatedRotation = NewRotation;
     SetActorRotation(NewRotation);
 }
 
@@ -722,7 +706,7 @@ void ASBS_Player::Server_Release_Implementation()
         if (ATile* PreviousTile = CurrentTile->CheckRail())
         {
             HoldItems.Top()->Server_Detach();
-            HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
+           HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
             HoldItems.Top()->SetActorLocation(TargetPos);
             CurrentTile->Server_SetRail(PreviousTile);
             HoldItems.Pop();
@@ -743,7 +727,12 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
 {
     if (TargetItem && HoldItems.Num() > 0)
     {
-       // TargetItem->Server_Attach(HoldItems.Top())
+       TargetItem->Server_Attach(HoldItems.Top(), TEXT("ItemHead"));
     }
+}
+
+void ASBS_Player::OnRep_Rotation()
+{
+    SetActorRotation(ReplicatedRotation);
 }
 

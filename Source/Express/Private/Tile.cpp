@@ -296,6 +296,11 @@ void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
 	OnRep_ContainedItem();
 }
 
+void ATile::Server_SetItemLocation_Implementation(const FVector& NewLocation)
+{
+	SetActorLocation(NewLocation);
+}
+
 void ATile::Multicast_SetContainedItem_Implementation(const TArray<AItem*>& Item)
 {
 	ContainedItem = Item;
@@ -317,11 +322,11 @@ void ATile::OnRep_ContainedItem()
 			continue;
 		}
 
-		ContainedItem[i]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		ContainedItem[i]->SetActorLocation(BaseLocation);
+		ContainedItem[i]->Server_Detach();
+		//ContainedItem[i]->Server_SetItemLocation(BaseLocation);
 		if (i > 0)
 		{
-			ContainedItem[i]->AttachToActor(ContainedItem[i - 1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+			ContainedItem[i]->Server_Attach(ContainedItem[i - 1], FName(TEXT("ItemHead")));
 		}
 	}
 }
