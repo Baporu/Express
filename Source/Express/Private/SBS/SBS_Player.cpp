@@ -208,7 +208,7 @@ void ASBS_Player::Move(const FInputActionValue& Value)
             {
                 //
                 //SetActorRotation(FRotator(0, TargetRotation.Yaw, 0));
-                Server_UdateRotation(TargetRotation);
+                Server_UpdateRotation(TargetRotation);
             }
         }
         const FVector ForwardDirection = FVector::ForwardVector;
@@ -597,12 +597,14 @@ void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     DOREPLIFETIME(ASBS_Player, HoldItems); //HoldItems 
     DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
 
-    DOREPLIFETIME(ASBS_Player, Rep_Yaw);
     DOREPLIFETIME(ASBS_Player, bHasWater);
+    DOREPLIFETIME(ASBS_Player, ReplicatedRotation);
+
 }
 
-void ASBS_Player::Server_UdateRotation_Implementation(const FRotator& NewRotation)
+void ASBS_Player::Server_UpdateRotation_Implementation(const FRotator& NewRotation)
 {
+    ReplicatedRotation = NewRotation;
     SetActorRotation(NewRotation);
 }
 
@@ -726,5 +728,10 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
     {
        // TargetItem->Server_Attach(HoldItems.Top())
     }
+}
+
+void ASBS_Player::OnRep_Rotation()
+{
+    SetActorRotation(ReplicatedRotation);
 }
 
