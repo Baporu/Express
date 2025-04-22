@@ -9,8 +9,8 @@
 AItem::AItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-    bReplicates = true;
+	PrimaryActorTick.bCanEverTick = false;
+    SetReplicates(true);
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
     MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
@@ -39,17 +39,17 @@ AItem::AItem()
         AxeMesh = AxeMeshFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UStaticMesh> PickaxeMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Pickaxe.Item_Pickaxe"));
-    if (StoneMeshFinder.Succeeded())
+    if (PickaxeMeshFinder.Succeeded())
     {
         PickaxeMesh = PickaxeMeshFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UStaticMesh> BucketMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Bucket.Item_Bucket"));
-    if (StoneMeshFinder.Succeeded())
+    if (BucketMeshFinder.Succeeded())
     {
         BucketMesh = BucketMeshFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UStaticMesh> BucketMesh_EmptyFinder(TEXT("/Game/SBS/MeshTex/Item_Bucket_Empty.Item_Bucket_Empty"));
-    if (StoneMeshFinder.Succeeded())
+    if (BucketMesh_EmptyFinder.Succeeded())
     {
         BucketMesh_Empty = BucketMesh_EmptyFinder.Object;
     }
@@ -91,7 +91,9 @@ AItem::AItem()
 void AItem::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateMeshMat();
+
+    if(HasAuthority())
+	    UpdateMeshMat();
 }
 
 // Called every frame
@@ -166,11 +168,11 @@ void AItem::CreateItem(EItemType Type)
     //서버면
     if (HasAuthority())
     {
-		ItemType = Type;
-		if (ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
-			IsTool = true;
+	    ItemType = Type;
+        IsTool = (Type == EItemType::Axe || Type == EItemType::Pickaxe || Type == EItemType::Bucket);
+		IsBucketEmpty = (Type == EItemType::Bucket);
 		UpdateMeshMat();
-		Multicast_UpdateMeshMat();
+		//Multicast_UpdateMeshMat();
     }
     //클라면
     else
@@ -183,6 +185,8 @@ void AItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AItem, ItemType);
+    DOREPLIFETIME(AItem, IsTool);
+    DOREPLIFETIME(AItem, IsBucketEmpty);
 }
 
 void AItem::OnRep_ItemType()
@@ -190,16 +194,56 @@ void AItem::OnRep_ItemType()
     UpdateMeshMat();
 }
 
-void AItem::Server_CreateItem_Implementation(EItemType Type)
+void AItem::OnRep_IsTool()
 {
-	ItemType = Type;
-	if (ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe || ItemType == EItemType::Bucket)
-		IsTool = true;
-	UpdateMeshMat();
-	Multicast_UpdateMeshMat();
+    
 }
-void AItem::Multicast_UpdateMeshMat_Implementation()
+
+void AItem::OnRep_IsBucketEmpty()
 {
     UpdateMeshMat();
 }
+
+void AItem::Server_Attach_Implementation(AActor* TargetActor, FName SocketName)
+{
+    if (TargetActor)
+    {
+        DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        Multicast_Attach(TargetActor, SocketName);
+    }
+}
+
+void AItem::Multicast_Attach_Implementation(AActor* TargetActor, FName SocketName)
+{
+    if (TargetActor)
+    {
+        DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    }
+}
+
+void AItem::Server_Detach_Implementation()
+{
+    DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    Multicast_Detach();
+}
+
+void AItem::Multicast_Detach_Implementation()
+{
+    DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void AItem::Server_CreateItem_Implementation(EItemType Type)
+{
+	ItemType = Type;
+    IsTool = (Type == EItemType::Axe || Type == EItemType::Pickaxe || Type == EItemType::Bucket);
+    IsBucketEmpty = (Type == EItemType::Bucket); // 변경: 명시적 초기화
+    UpdateMeshMat();
+	//Multicast_UpdateMeshMat();
+}
+//void AItem::Multicast_UpdateMeshMat_Implementation()
+//{
+//    UpdateMeshMat();
+//}
 

@@ -39,7 +39,7 @@ void ASBS_Player::BeginPlay()
     Super::BeginPlay();
 
     //회전 변수 초기화
-    Rep_Yaw = GetActorRotation().Yaw;
+    //Rep_Yaw = GetActorRotation().Yaw;
     if (HasAuthority())
     {
         if (AExp_GameMode* gamemode = GetWorld()->GetAuthGameMode<AExp_GameMode>())
@@ -132,28 +132,28 @@ void ASBS_Player::Tick(float DeltaTime)
 		//helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
 		if (CurrentTile)
 		{
-			if (!(CurrentTile->GetContainedItem().IsEmpty())) {
-				TargetItem = CurrentTile->GetContainedItem();
-				if (!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
-				{
-					//attach
-					TargetItem[0]->AttachToActor(HoldItems.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
-					//배열에 추가
-					HoldItems.Append(TargetItem);
-					CurrentTile->RemoveContainedItem();
-				}
+			
+            TargetItem = CurrentTile->GetContainedItem();
+			if(!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
+			{
+			//attach
+			Server_AttachItems(TargetItem[0]);
+			//배열에 추가
+			
+			CurrentTile->Server_SetContainedItem(TArray<AItem*>());
 			}
+			
 		}
 	}
 
     //클라면 회전 보간
-	if (!HasAuthority())
-	{
-		FRotator CurrentRotaion = GetActorRotation();
-        FRotator TargetRotation(0,Rep_Yaw, 0);
-		FRotator NewRotation = FMath::RInterpTo(CurrentRotaion, TargetRotation, DeltaTime, RotationLerpRate);
-		SetActorRotation(NewRotation);
-	}
+	//if (!HasAuthority())
+	//{
+	//	FRotator CurrentRotaion = GetActorRotation();
+	//    FRotator TargetRotation(0,Rep_Yaw, 0);
+	//	FRotator NewRotation = FMath::RInterpTo(CurrentRotaion, TargetRotation, DeltaTime, RotationLerpRate);
+	//	SetActorRotation(NewRotation);
+	//}
 
 
 }
@@ -198,17 +198,17 @@ void ASBS_Player::Move(const FInputActionValue& Value)
             if (HasAuthority())
             {
                 //타겟로케이션을 받아서 rep yaw에 넣고
-                Rep_Yaw = TargetRotation.Yaw;
+                //Rep_Yaw = TargetRotation.Yaw;
                 //회전한다.
-                SetActorRotation(FRotator(0, Rep_Yaw, 0)); //
+                SetActorRotation(TargetRotation); //
     
             }
             //클라는
             else
             {
                 //
-                SetActorRotation(FRotator(0, TargetRotation.Yaw, 0));
-                Server_UdateRotation(TargetRotation.Yaw);
+                //SetActorRotation(FRotator(0, TargetRotation.Yaw, 0));
+                Server_UdateRotation(TargetRotation);
             }
         }
         const FVector ForwardDirection = FVector::ForwardVector;
@@ -222,146 +222,21 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 {
     // 기차와 먼저 상호작용을 시도하고, 성공했으면 추가 상호작용을 하지 않음
     if (FindTrain()) return;
-
-    TArray<AItem*> TargetItem;
-    TargetItem.Empty();
-    GetCurrentTile();
-    // 1순위: CurrentTile
-    if (CurrentTile)
-    {
-        TargetItem = CurrentTile->GetContainedItem(); //바닥타일에 있는 아이템이 타겟 아이템
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No CurrentTile"));
-    }
-
-    // 2순위: CurrentTile에 아이템 없으면 FrontTile 체크
-    if (CurrentTile && TargetItem.IsEmpty())
-    {
-        GetFrontTile();
-        if (FrontTile && FrontTile->TileType == ETileType::Ground)
-        {
-            TargetItem = FrontTile->GetContainedItem();
-            UE_LOG(LogTemp, Log, TEXT("Checking FrontTile for item"));
-        }
-    }
-
-    // 아이템 처리
-    if (!(TargetItem.IsEmpty()))
-    {
-        if (!HoldItems.IsEmpty()) //물건 들고있으면
-        {
-            //바닥에 있는 아이템과 들고 있는 아이템 타입이 같지 않으면. 
-            //====교체====
-            if (HoldItems.Top()->ItemType != TargetItem[0]->ItemType)
-            {
-                ATile* PlaceTile = CurrentTile;
-                TArray<AItem*> temp = TargetItem;
-                if (PlaceTile && PlaceTile->TileType == ETileType::Ground)
-                {
-                    //손에서 땐다.
-                    HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-                  
-                    FVector TargetPos = PlaceTile->GetActorLocation();
-                    TargetPos.Z += 100;
-                    HoldItems[0]->SetActorLocation(TargetPos);
-                    //temp[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
-                    temp[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-
-                    PlaceTile->SetContainedItem(HoldItems);
-                    HoldItems.Empty();
-                    HoldItems.Append(temp);
-                    
-                    //HoldItems = TargetItem;
-                    //UE_LOG(LogTemp, Warning, TEXT("Swapped Item: %s"), *TargetItem->ItemType);
-                }
-            }
-        }
-        else //물건 안들고 있으면 =====줍기=====
-        {
-            //attach 하고 스택에 추가
-            TargetItem[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-            HoldItems.Append(TargetItem);
-
-            //타일에서 아이템 들었으니까 타일의 아이템 제거
-            if (CurrentTile)
-            {
-                CurrentTile->SetContainedItem(TArray<AItem*>());
-            }
-            else if (FrontTile)
-            {
-                FrontTile->SetContainedItem(TArray<AItem*>());
-            }
-            bIsholdingitem = true;
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("No Item found"));
-    }
+      
+    //if(!HasAuthority())
+    Server_Interact();
+  
 }
 
 void ASBS_Player::Release(const FInputActionValue& Value)
 {
     //내려놓기
-    if (HoldItems.Num() == 0) //안들고있으면 안함
-    {
-        UE_LOG(LogTemp, Warning, TEXT("have no Item"));
-        return;
-    }
-    else
-    {
-        if (!CurrentTile)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("No CurrentTile"));
-            return;
-        }
-        else
-        {
-            if (!(CurrentTile->GetContainedItem().IsEmpty()))
-            {
-                UE_LOG(LogTemp, Warning, TEXT("CurrentTile already has item"));
-                // TODO: 교체처리 추가
-                return;
-            }
-            GetCurrentTile();
-            FVector TargetPos = CurrentTile->GetActorLocation();
-            TargetPos.Z += 100;
-
-            // 현재 아이템이 선로일 경우
-            if (HoldItems.Top()->ItemType == EItemType::Rail) {
-                // 선로 연결이 가능한지 확인
-                if (ATile* PreviousTile = CurrentTile->CheckRail()) {
-                    // 선로 연결이 가능하면 가장 위 선로만 빼내기
-                    HoldItems.Top()->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-                    HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
-                    HoldItems.Top()->SetActorLocation(TargetPos);
-
-                    CurrentTile->SetRail(PreviousTile);
-                    HoldItems.Pop();
-
-                    return;
-                }
-
-                // 선로 연결이 불가능하면 그냥 내려놓으면 되므로 추가 로직 없이 하단 코드 실행
-            }
-
-            HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-            HoldItems[0]->SetActorRotation(FRotator(0,0,0));
-            HoldItems[0]->SetActorLocation(TargetPos);
-            CurrentTile->SetContainedItem(HoldItems);
-            HoldItems.Empty();
-            bIsholdingitem = false;
-        }
-    }
+   Server_Release();
 }
 
 void ASBS_Player::SetToolsOnGround()
 {
     if(!HasAuthority()) return;
-
-
 
     //현재타일에 도끼 놓기
     GetCurrentTile();
@@ -374,7 +249,7 @@ void ASBS_Player::SetToolsOnGround()
         AxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
         AxeItem->CreateItem(EItemType::Axe);
         TempItem.Add(AxeItem);
-        CurrentTile->SetContainedItem(TempItem);
+        CurrentTile->Server_SetContainedItem(TempItem);
     }
     //앞 타일에 곡괭이 놓기
     GetFrontTile();
@@ -388,7 +263,7 @@ void ASBS_Player::SetToolsOnGround()
         PickaxeItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
         PickaxeItem->CreateItem(EItemType::Pickaxe);
         TempItem.Add(PickaxeItem);
-        FrontTile->SetContainedItem(TempItem);
+        FrontTile->Server_SetContainedItem(TempItem);
     }
     //오른쪽 타일에 양동이 놓기
     GetRightTile();
@@ -401,7 +276,7 @@ void ASBS_Player::SetToolsOnGround()
         Bucket = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
         Bucket->CreateItem(EItemType::Bucket);
         TempItem.Add(Bucket);
-        RightTile->SetContainedItem(TempItem);
+        RightTile->Server_SetContainedItem(TempItem);
     }
     //왼쪽 타일에 레일 놓기
     GetLeftTile();
@@ -415,11 +290,11 @@ void ASBS_Player::SetToolsOnGround()
         {
             Rail = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
             Rail->CreateItem(EItemType::Rail);
-            TempItem.Push(Rail);
+            TempItem.Add(Rail);
             if(i>0)
-            Rail->AttachToActor(TempItem[i-1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+            Rail->Server_Attach(TempItem[i-1], FName(TEXT("ItemHead")));
         }
-        LeftTile->SetContainedItem(TempItem);
+        LeftTile->Server_SetContainedItem(TempItem);
     }
 }
 
@@ -571,7 +446,7 @@ bool ASBS_Player::FindTrain()
             // 유효한 자원인지 확인
             if (!cargo->CheckAddResource(HoldItems[0]->ItemType)) return false;
 
-            HoldItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+            HoldItems[0]->Server_Detach();
             cargo->AddResource(HoldItems);
             HoldItems.Empty();
 
@@ -587,7 +462,7 @@ bool ASBS_Player::FindTrain()
                 if (!cargo->CheckGetResource(EItemType::Wood)) return false;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Wood));
-                HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
             }
 
             else {
@@ -596,7 +471,7 @@ bool ASBS_Player::FindTrain()
                 if (!cargo->CheckGetResource(EItemType::Stone)) return false;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Stone));
-                HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
             }
 
             return true;
@@ -616,7 +491,7 @@ bool ASBS_Player::FindTrain()
         UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Has Rails"));
 
         HoldItems.Append(crafter->GetRail());
-        HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
 
         return true;
     }
@@ -719,7 +594,6 @@ void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldConte
 void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-    DOREPLIFETIME(ASBS_Player, Rep_Rotation); // 
     DOREPLIFETIME(ASBS_Player, HoldItems); //HoldItems 
     DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
 
@@ -727,9 +601,130 @@ void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     DOREPLIFETIME(ASBS_Player, bHasWater);
 }
 
-void ASBS_Player::Server_UdateRotation_Implementation(float NewYaw)
+void ASBS_Player::Server_UdateRotation_Implementation(const FRotator& NewRotation)
 {
-    Rep_Yaw = NewYaw;
-    SetActorRotation(FRotator(0, Rep_Yaw, 0));
+    SetActorRotation(NewRotation);
+}
+
+void ASBS_Player::Server_Interact_Implementation()
+{
+    if (FindTrain()) return;
+
+    TArray<AItem*> TargetItem;
+    TargetItem.Empty();
+    GetCurrentTile();
+    // 1순위: CurrentTile
+    if (CurrentTile)
+    {
+        TargetItem = CurrentTile->GetContainedItem(); //바닥타일에 있는 아이템이 타겟 아이템
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No CurrentTile"));
+    }
+
+    // 2순위: CurrentTile에 아이템 없으면 FrontTile 체크
+    if (CurrentTile && TargetItem.IsEmpty())
+    {
+        GetFrontTile();
+        if (FrontTile && FrontTile->TileType == ETileType::Ground)
+        {
+            TargetItem = FrontTile->GetContainedItem();
+            UE_LOG(LogTemp, Log, TEXT("Checking FrontTile for item"));
+        }
+    }
+
+    // 아이템 처리
+    if (!(TargetItem.IsEmpty()))
+    {
+        if (!HoldItems.IsEmpty()) //물건 들고있으면
+        {
+            //바닥에 있는 아이템과 들고 있는 아이템 타입이 같지 않으면. 
+            //====교체====
+            if (HoldItems.Top()->ItemType != TargetItem[0]->ItemType)
+            {
+                ATile* PlaceTile = CurrentTile;
+                //TArray<AItem*> temp = TargetItem;
+                if (PlaceTile && PlaceTile->TileType == ETileType::Ground)
+                {
+                    //손에서 땐다.
+                    HoldItems[0]->Server_Detach();
+                    FVector TargetPos = PlaceTile->GetActorLocation();
+                    TargetPos.Z += 100;
+                    HoldItems[0]->SetActorLocation(TargetPos);
+                    //temp[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+                    //temp[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                    TargetItem[0]->Server_Attach(this, FName(TEXT("TempHandMesh")));
+                    PlaceTile->Server_SetContainedItem(HoldItems);
+                    HoldItems.Empty();
+                    HoldItems.Append(TargetItem);
+
+                    //HoldItems = TargetItem;
+                    //UE_LOG(LogTemp, Warning, TEXT("Swapped Item: %s"), *TargetItem->ItemType);
+                }
+            }
+        }
+        else //물건 안들고 있으면 =====줍기=====
+        {
+            //attach 하고 스택에 추가
+            TargetItem[0]->Server_Attach(this, FName(TEXT("TempHandMesh")));
+            HoldItems.Append(TargetItem);
+
+            //타일에서 아이템 들었으니까 타일의 아이템 제거
+            if (CurrentTile)
+            {
+                CurrentTile->Server_SetContainedItem(TArray<AItem*>());
+            }
+            else if (FrontTile)
+            {
+                FrontTile->Server_SetContainedItem(TArray<AItem*>());
+            }
+            bIsholdingitem = true;
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No Item found"));
+    }
+}
+
+void ASBS_Player::Server_Release_Implementation()
+{
+    if (HoldItems.IsEmpty()) return;
+    if (!CurrentTile) return;
+    if (!CurrentTile->GetContainedItem().IsEmpty()) return;
+
+    GetCurrentTile();
+    FVector TargetPos = CurrentTile->GetActorLocation();
+    TargetPos.Z += 100;
+
+    if (HoldItems.Top()->ItemType == EItemType::Rail)
+    {
+        if (ATile* PreviousTile = CurrentTile->CheckRail())
+        {
+            HoldItems.Top()->Server_Detach();
+            HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
+            HoldItems.Top()->SetActorLocation(TargetPos);
+            CurrentTile->Server_SetRail(PreviousTile);
+            HoldItems.Pop();
+            return;
+        }
+    }
+
+    HoldItems[0]->Server_Detach();
+    HoldItems[0]->SetActorRotation(FRotator(0, 0, 0));
+    HoldItems[0]->SetActorLocation(TargetPos);
+    CurrentTile->Server_SetContainedItem(HoldItems);
+
+    HoldItems.Empty();
+    bIsholdingitem = false;
+}
+
+void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
+{
+    if (TargetItem && HoldItems.Num() > 0)
+    {
+       // TargetItem->Server_Attach(HoldItems.Top())
+    }
 }
 

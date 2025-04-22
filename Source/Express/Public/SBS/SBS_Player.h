@@ -88,8 +88,6 @@ public:
 	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
-	UPROPERTY(Replicated, EditAnywhere, Category = "Item")
-	bool bHasWater = false;
 
 	bool FindTrain();
 
@@ -102,13 +100,20 @@ public:
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(Replicated, BlueprintReadOnly)
-	float Rep_Yaw;
-	UPROPERTY(Replicated, BlueprintReadOnly)
-	FRotator Rep_Rotation;
 
 	UFUNCTION(Server, Reliable)
-	void Server_UdateRotation(float NewYaw);
+	void Server_UdateRotation(const FRotator& NewRotation);
+	UFUNCTION(Server, Reliable)
+	void Server_Interact();
+	UFUNCTION(Server, Reliable)
+	void Server_Release();
+	UFUNCTION(Server, Reliable)
+	void Server_AttachItems(AItem* TargetItem);
+
+	UPROPERTY(Replicated, EditAnywhere, Category = Item)
+	bool bHasWater = false;
+
+
 
 
 

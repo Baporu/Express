@@ -68,25 +68,42 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
 	class UMaterialInterface* BucketMaterial; //양동이 material
 
-	UPROPERTY(EditAnywhere)
-	bool IsTool = false;
-
-	UPROPERTY(EditAnywhere)
-	bool IsBucketEmpty = true;
 public:
 	void UpdateMeshMat();
 	void CreateItem(EItemType Type);
 
 //네트워크
-
+public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(Replicatedusing=OnRep_ItemType, EditAnywhere, BlueprintReadWrite)
 	EItemType ItemType; //아이템 타입
+	UPROPERTY(Replicatedusing = OnRep_IsTool, EditAnywhere, BlueprintReadWrite)
+	bool IsTool = false;
+	UPROPERTY(Replicatedusing = OnRep_IsBucketEmpty, EditAnywhere, BlueprintReadWrite)
+	bool IsBucketEmpty = false;
+	UPROPERTY(Replicated, EditAnywhere, Category = "Item")
+    bool bHasWater = false;
+
 	UFUNCTION()
 	void OnRep_ItemType();
+	UFUNCTION()
+	void OnRep_IsTool();
+	UFUNCTION()
+	void OnRep_IsBucketEmpty();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Attach(AActor* TargetActor, FName SocketName);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Attach(AActor* TargetActor, FName SocketName);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Detach();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Detach();
+
 	UFUNCTION(Server, Reliable)
 	void Server_CreateItem(EItemType Type);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_UpdateMeshMat();
+	//UFUNCTION(NetMulticast, Reliable)
+	//void Multicast_UpdateMeshMat();
 };

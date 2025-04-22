@@ -114,7 +114,10 @@ void ATile::HarvestTile()
 	else
 	{
 		NewItem->CreateItem(ItemType); // 아이템 생성
-		CurrentTile->ContainedItem.Add(NewItem); // 타일에 아이템 할당
+		TArray<AItem*> TempItem;
+		TempItem.Add(NewItem);
+		CurrentTile->Server_SetContainedItem(TempItem);
+		UE_LOG(LogTemp, Log, TEXT("HarvestTile: Item %s spawned on Tile %s"), *NewItem->GetName(), *CurrentTile->GetName());
 	}
 
 
@@ -169,7 +172,16 @@ void ATile::CreateTile(ETileType Type)
 }
 void ATile::SetContainedItem(TArray<AItem*> Item)
 {
-	ContainedItem = Item;
+	if (HasAuthority())
+	{
+		ContainedItem = Item;
+		Multicast_SetContainedItem(Item);
+
+	}
+	else
+	{
+		Server_SetContainedItem(Item);
+	}
 }
 
 ATile* ATile::CheckRail()
@@ -273,6 +285,47 @@ ATile* ATile::CheckRailItem()
 
 	// 전부 선로 안 깔려있으면 선로 연결 불가
 	return nullptr;
+}
+
+void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
+{
+	ContainedItem = Item;
+	OnRep_ContainedItem();
+}
+
+void ATile::Multicast_SetContainedItem_Implementation(const TArray<AItem*>& Item)
+{
+	ContainedItem = Item;
+	OnRep_ContainedItem();
+}
+
+void ATile::OnRep_ContainedItem()
+{
+	if (ContainedItem.IsEmpty())
+	{
+		return;
+	}
+
+	FVector BaseLocation = GetActorLocation() + FVector(0, 0, 100);
+	for (int i = 0; i < ContainedItem.Num(); i++)
+	{
+		if (!ContainedItem[i])
+		{
+			continue;
+		}
+
+		ContainedItem[i]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		ContainedItem[i]->SetActorLocation(BaseLocation);
+		if (i > 0)
+		{
+			ContainedItem[i]->AttachToActor(ContainedItem[i - 1], FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+		}
+	}
+}
+
+void ATile::Server_SetRail_Implementation(ATile* PreviousTile)
+{
+	SetRail(PreviousTile);
 }
 
 void ATile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
