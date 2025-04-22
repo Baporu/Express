@@ -499,8 +499,8 @@ bool ASBS_Player::FindTrain()
     // 화물차도 제작차도 아니니까 return false
     return false;
 }
-/*
-void ASBS_Player::Server_FindTrain_Implementation(TArray<AItem*> PlayerItems) {
+
+void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& PlayerItems) {
     // 현재 위치와 타일 크기로 전방의 타일 위치를 계산
     FVector CurLoc = GetActorLocation();
     FVector ForwardLoc = CurLoc + GetActorForwardVector() * TileSize;
@@ -528,14 +528,13 @@ void ASBS_Player::Server_FindTrain_Implementation(TArray<AItem*> PlayerItems) {
 
         // 손에 뭐 들고 있으면 넣기
         if (!PlayerItems.IsEmpty()) {
-            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo"));
+            PRINTTRAIN(TEXT("Player Interaction: Cargo"));
 
             // 유효한 자원인지 확인
             if (!cargo->CheckAddResource(PlayerItems[0]->ItemType)) return;
 
-            PlayerItems[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+            Multicast_DetachHoldItem(PlayerItems[0]);
             cargo->AddResource(PlayerItems);
-            PlayerItems.Empty();
 
             return;
         }
@@ -546,7 +545,7 @@ void ASBS_Player::Server_FindTrain_Implementation(TArray<AItem*> PlayerItems) {
             if (Hit.GetComponent()->GetName().Contains("Wood")) {
                 UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Wood"));
 
-                if (!cargo->CheckGetResource(EItemType::Wood)) return false;
+                if (!cargo->CheckGetResource(EItemType::Wood)) return;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Wood));
                 HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -555,13 +554,13 @@ void ASBS_Player::Server_FindTrain_Implementation(TArray<AItem*> PlayerItems) {
             else {
                 UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Stone"));
 
-                if (!cargo->CheckGetResource(EItemType::Stone)) return false;
+                if (!cargo->CheckGetResource(EItemType::Stone)) return;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Stone));
                 HoldItems[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
             }
 
-            return true;
+            return;
         }
     }
 
@@ -586,7 +585,11 @@ void ASBS_Player::Server_FindTrain_Implementation(TArray<AItem*> PlayerItems) {
     // 화물차도 제작차도 아니니까 return false
     return;
 }
-*/
+
+void ASBS_Player::Multicast_DetachHoldItem_Implementation(class AItem* PlayerItem) {
+    PlayerItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}
+
 void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness) {
     UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
 }
@@ -596,8 +599,6 @@ void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(ASBS_Player, HoldItems); //HoldItems 
     DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
-
-    DOREPLIFETIME(ASBS_Player, Rep_Yaw);
     DOREPLIFETIME(ASBS_Player, bHasWater);
 }
 

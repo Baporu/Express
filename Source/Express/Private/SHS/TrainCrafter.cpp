@@ -98,3 +98,11 @@ void ATrainCrafter::MakeRail()
 	// 더 만들 수 있으면 계속 만듦
 	CheckMakeRail();
 }
+
+void ATrainCrafter::Multicast_AttachRail_Implementation(AItem* Rail) {
+
+}
+
+void ATrainCrafter::Multicast_DetachRail_Implementation(AItem* Rail) {
+
+}

@@ -66,7 +66,7 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 
 			Woods.Append(Resources);
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
-			Resources[0]->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			Multicast_AttachResource(Resources[0]);
 			Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 50.0));
 
 			break;
@@ -77,7 +77,7 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 
 			Stones.Append(Resources);
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
-			Resources[0]->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			Multicast_AttachResource(Resources[0]);
 			Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 50.0));
 			break;
 
@@ -99,7 +99,7 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 			if (Woods.IsEmpty()) break;
 
 			items = Woods;
-			items[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Multicast_DetachResource(items[0]);
 			Woods.Empty();
 			break;
 
@@ -107,7 +107,7 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 			if (Stones.IsEmpty()) break;
 
 			items = Stones;
-			items[0]->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			Multicast_DetachResource(items[0]);
 			Stones.Empty();
 			break;
 		
@@ -117,4 +117,12 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 
 	// 해당하는 타입의 아이템(없으면 nullptr)을 반환
 	return items;
+}
+
+void ATrainCargo::Multicast_AttachResource_Implementation(AItem* Resource) {
+	Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+}
+
+void ATrainCargo::Multicast_DetachResource_Implementation(AItem* Resource) {
+	Resource->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
