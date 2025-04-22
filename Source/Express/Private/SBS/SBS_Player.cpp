@@ -139,7 +139,8 @@ void ASBS_Player::Tick(float DeltaTime)
 			//attach
 			Server_AttachItems(TargetItem[0]);
 			//배열에 추가
-			
+
+			HoldItems.Append(TargetItem);
 			CurrentTile->Server_SetContainedItem(TArray<AItem*>());
 			}
 			
@@ -726,7 +727,7 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
 {
     if (TargetItem && HoldItems.Num() > 0)
     {
-       // TargetItem->Server_Attach(HoldItems.Top())
+       TargetItem->Server_Attach(HoldItems.Top(), TEXT("ItemHead"));
     }
 }
 
