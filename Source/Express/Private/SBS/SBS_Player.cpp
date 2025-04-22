@@ -628,6 +628,7 @@ void ASBS_Player::Server_UpdateRotation_Implementation(const FRotator& NewRotati
 {
     ReplicatedRotation = NewRotation;
     SetActorRotation(NewRotation);
+    //ForceNetUpdate();
 }
 
 void ASBS_Player::Server_Interact_Implementation()
@@ -726,12 +727,12 @@ void ASBS_Player::Server_Release_Implementation()
     {
         if (ATile* PreviousTile = CurrentTile->CheckRail())
         {
-            HoldItems.Top()->Server_Detach();
-           HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
-            HoldItems.Top()->SetActorLocation(TargetPos);
-            CurrentTile->Server_SetRail(PreviousTile);
-            HoldItems.Pop();
-            return;
+			HoldItems.Top()->Server_Detach();
+			HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
+			HoldItems.Top()->SetActorLocation(TargetPos);
+			CurrentTile->Server_SetRail(PreviousTile);
+			HoldItems.Pop();
+			return;
         }
     }
 
@@ -755,5 +756,6 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
 void ASBS_Player::OnRep_Rotation()
 {
     SetActorRotation(ReplicatedRotation);
+    UE_LOG(LogTemp, Warning, TEXT("onrepcall"));
 }
 
