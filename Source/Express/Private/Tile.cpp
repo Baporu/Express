@@ -311,6 +311,7 @@ void ATile::OnRep_ContainedItem()
 {
 	if (ContainedItem.IsEmpty())
 	{
+		ContainedItem.Reset(); //emtpy면 replicate가 발동 안함! 따로 변화를 줘야함
 		return;
 	}
 
