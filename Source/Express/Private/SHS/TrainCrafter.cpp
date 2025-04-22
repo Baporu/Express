@@ -38,6 +38,9 @@ bool ATrainCrafter::CheckMakeRail()
 	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Stones.IsEmpty())
 		return false;
 
+	// 이미 만들고 있어도 return
+	if (bIsMaking) return false;
+
 	// 이미 레일을 다 만들었으면 return false
 	if (Rails.Num() == MaxStackSize)
 		return false;
@@ -97,4 +100,12 @@ void ATrainCrafter::MakeRail()
 
 	// 더 만들 수 있으면 계속 만듦
 	CheckMakeRail();
+}
+
+void ATrainCrafter::Multicast_AttachRail_Implementation(AItem* Rail) {
+
+}
+
+void ATrainCrafter::Multicast_DetachRail_Implementation(AItem* Rail) {
+
 }

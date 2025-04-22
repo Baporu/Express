@@ -46,4 +46,8 @@ private:
 
 	void MakeRail();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AttachRail(AItem* Rail);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DetachRail(AItem* Rail);
 };
