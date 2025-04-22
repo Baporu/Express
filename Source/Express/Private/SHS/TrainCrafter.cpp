@@ -4,11 +4,14 @@
 #include "SHS/TrainCrafter.h"
 #include "SHS/TrainCargo.h"
 #include "SBS/Item.h"
-#include "../Express.h"
+#include "Express/Express.h"
 
 void ATrainCrafter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 서버에서 실행
+	if (!HasAuthority()) return;
 
 	// 만드는 중 아니면 return
 	if (!bIsMaking) return;
@@ -74,6 +77,9 @@ TArray<AItem*> ATrainCrafter::GetRail()
 
 void ATrainCrafter::MakeRail()
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
 	AItem* rail = GetWorld()->SpawnActor<AItem>(BP_Rail, GetActorLocation(), GetActorRotation());
 	rail->CreateItem(EItemType::Rail);
 

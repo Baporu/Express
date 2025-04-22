@@ -5,9 +5,9 @@
 #include "Components/BoxComponent.h"
 #include "SHS/TrainEngine.h"
 #include "Express/Express.h"
-#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "SBS/SBS_Player.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATrainModule::ATrainModule()
@@ -39,10 +39,17 @@ ATrainModule::ATrainModule()
 		ChainComp->SetStaticMesh(tempMesh.Object);
 	}
 
+	FireComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("FireComp"));
+	FireComp->SetupAttachment(RootComponent);
+	FireComp->SetAutoActivate(false);
+
 	WaterComp = CreateDefaultSubobject<UBoxComponent>(TEXT("WaterComp"));
 	WaterComp->SetupAttachment(RootComponent);
 	WaterComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
 	WaterComp->OnComponentBeginOverlap.AddDynamic(this, &ATrainModule::OnWaterBeginOverlap);
+
+	SetReplicates(true);
+	SetReplicatingMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -50,32 +57,38 @@ void ATrainModule::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FireComp->SetTemplate(FireEffect);
 }
 
 // Called every frame
-void ATrainModule::Tick(float DeltaTime)
-{
+void ATrainModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+	// 서버에서 실행
+	if (!HasAuthority()) return;
 
 	if (!bIsStarted) return;
 
+	// 이동 및 회전 로직 실행
 	MoveTrain(DeltaTime);
 	RotateTrain(DeltaTime);
 
+	// 다음 타일에 도달했을 경우
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5) {
+		// Queue에 있는 다음 위치로 이동
 		if (!TileQueue.IsEmpty())
 			TileQueue.Dequeue(NextPos);
-
+		// Queue에 있는 다음 회전 값 적용
 		if (!RotatorQueue.IsEmpty())
 			RotatorQueue.Dequeue(NextRot);
 	}
-	
 
 	// 시간 다 채우면 화재 시작
 	if (FireTimer > FireTime) StartFire();
 
 	// 불 붙은 상태면 화재 확산 시작
 	if (bOnFire) OnFire(DeltaTime);
+
 }
 
 void ATrainModule::Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination)
@@ -97,21 +110,35 @@ UBoxComponent* ATrainModule::GetModuleComp()
 
 void ATrainModule::StartFire()
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
 	// 이미 불 붙은 상태면 return
 	if (bOnFire) return;
 
-	bOnFire = true;
-
-	// 화재 이펙트 소환
-	FireComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), FireEffect, GetActorTransform());
+	MulticastRPC_StartFire();
 }
 
 void ATrainModule::EndFire()
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
+	MulticastRPC_EndFire();
+	FireTimer = 0.0f;
+}
+
+void ATrainModule::MulticastRPC_StartFire_Implementation() {
+	bOnFire = true;
+
+	// 화재 이펙트 소환
+	FireComp->Activate(true);
+}
+
+void ATrainModule::MulticastRPC_EndFire_Implementation() {
 	FireComp->Deactivate();
 
 	bOnFire = false;
-	FireTimer = 0.0f;
 }
 
 void ATrainModule::SetModuleLocation(FVector CurrentLocation)
@@ -143,6 +170,9 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 
 void ATrainModule::MoveTrain(float DeltaTime)
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
 	FVector dir = NextPos - GetActorLocation();
 	FVector vt = dir.GetSafeNormal() * ModuleSpeed * DeltaTime;
 	SetActorLocation(GetActorLocation() + vt);
@@ -150,6 +180,9 @@ void ATrainModule::MoveTrain(float DeltaTime)
 
 void ATrainModule::RotateTrain(float DeltaTime)
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
 	double curRot = GetActorRotation().Yaw;
 	curRot = FMath::Lerp(curRot, NextRot, DeltaTime);
 
@@ -158,6 +191,9 @@ void ATrainModule::RotateTrain(float DeltaTime)
 
 void ATrainModule::OnFire(float DeltaTime)
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
 	// 뒤에 모듈이 있는지 확인
 	if (TrainEngine->CheckModule(ModuleNumber + 1))
 		TrainEngine->TrainModules[ModuleNumber + 1]->FireTimer += DeltaTime;
@@ -173,11 +209,20 @@ void ATrainModule::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
 
-	if (!player) return;
+	if (!player || !player->bHasWater) return;
 
 	player->bHasWater = false;
 	player->HoldItems[0]->IsBucketEmpty = true;
 	player->HoldItems[0]->UpdateMeshMat();
 	EndFire();
+}
+
+void ATrainModule::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATrainModule, FireTimer);
+	DOREPLIFETIME(ATrainModule, TrainEngine);
+	DOREPLIFETIME(ATrainModule, ModuleNumber);
 }
 

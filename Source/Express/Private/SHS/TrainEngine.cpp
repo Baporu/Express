@@ -10,6 +10,7 @@
 #include "Tile.h"
 #include "SHS/GridManager.h"
 #include "SBS/SBS_Player.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -24,10 +25,12 @@ void ATrainEngine::BeginPlay()
 	Super::BeginPlay();
 
 	TrainEngine = this;
-	TrainModules.Add(this);
 	ModuleNumber = 0;
 
-	SpawnDefaultModules();
+	if (HasAuthority()) {
+		TrainModules.Add(this);
+		SpawnDefaultModules();
+	}
 }
 
 // Called every frame
@@ -35,11 +38,14 @@ void ATrainEngine::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 서버에서만 실행
+	if (!HasAuthority()) return;
+
 	if (!bIsStarted) return;
 
+	// 타일 위치에 도달했을 경우, 다음 타일 검색
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5)
 		CheckNextTile();
-		//GetTileLocation();
 }
 
 void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Column)
@@ -127,6 +133,8 @@ void ATrainEngine::CheckMakeRail()
 
 void ATrainEngine::CheckNextTile()
 {
+	if (!HasAuthority()) return;
+
 	if (!GridManager) {
 		PRINTFATALLOG(TEXT("There is no GridManager."));
 		return;
@@ -204,7 +212,7 @@ void ATrainEngine::CheckNextTile()
 			return;
 		}
 
-	PRINTFATALLOG(TEXT("Current Rail: %s, There is no rail, Game Failed"), *CurrentTile->GetActorNameOrLabel());
+	//PRINTFATALLOG(TEXT("Current Rail: %s, There is no rail, Game Failed"), *CurrentTile->GetActorNameOrLabel());
 }
 
 void ATrainEngine::MoveTrain(float DeltaTime)
@@ -222,10 +230,12 @@ void ATrainEngine::OnFire(float DeltaTime)
 void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// 엔진도 물탱크도 불 안 붙었으면 return
-	if (!bOnFire && !TrainWaterTank->bOnFire) return;
+	if (!bOnFire && (TrainWaterTank && !TrainWaterTank->bOnFire)) return;
 
 	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
-	if (!player || !player->bHasWater) return;
+	if (!player || !player->IsLocallyControlled()) return;
+
+	if (!player->bHasWater || player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
 	// 공통 처리: 플레이어 물 없애기
 	player->bHasWater = false;
@@ -238,6 +248,15 @@ void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	// 물탱크에 불 붙은 경우
 	if (TrainWaterTank->bOnFire)
 		TrainWaterTank->EndFire();
+}
+
+void ATrainEngine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATrainEngine, TrainModules);
+	DOREPLIFETIME(ATrainEngine, GridManager);
+	DOREPLIFETIME(ATrainEngine, TrainWaterTank);
 }
 
 // ================================ 임시 함수들 ================================

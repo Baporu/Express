@@ -38,22 +38,13 @@ void ATrainWaterTank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!HasAuthority()) return;
+
 	if (!bIsStarted) return;
 
 	FireTimer += DeltaTime;
 
 	ChangeTankColor();
-}
-
-void ATrainWaterTank::EndFire()
-{
-	if (bOnFire) {
-		Super::EndFire();
-
-		return;
-	}
-
-	FireTimer = 0.0f;
 }
 
 void ATrainWaterTank::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -63,7 +54,9 @@ void ATrainWaterTank::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedCompone
 
 	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
 
-	if (!player || !player->bHasWater) return;
+	if (!player || !player->IsLocallyControlled()) return;
+
+	if (!player->bHasWater || player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
 	player->bHasWater = false;
 	player->HoldItems[0]->IsBucketEmpty = true;
@@ -73,6 +66,13 @@ void ATrainWaterTank::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedCompone
 
 void ATrainWaterTank::ChangeTankColor()
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
+	MulticastRPC_ChangeTankColor();
+}
+
+void ATrainWaterTank::MulticastRPC_ChangeTankColor_Implementation() {
 	float valueR = FireTimer / FireTime;
 	float valueB = 1.0f - valueR;
 

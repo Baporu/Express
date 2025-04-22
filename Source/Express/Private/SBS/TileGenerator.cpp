@@ -68,9 +68,20 @@ void ATileGenerator::BeginPlay()
                                 NewTile->CreateTile(ETileType::Water);
                                 break;
                             case ETileType::Rail:
-                                NewTile->CreateTile(ETileType::Rail);
-                                if (Col - 1 > 0 && TileTypes[Row][Col - 1] != ETileType::Station_A)
-                                    NewTile->bIsPassed = true;
+                                NewTile->CreateTile(ETileType::Ground);
+                                NewTile->TileType = ETileType::Rail;
+                                // 시작 역 바로 다음 선로가 아니면 기차가 못 지나가게 설정
+                                if (Col - 1 > 0 && TileTypes[Row][Col - 1] == ETileType::Station_A)
+                                    NewTile->bIsLastRail = true;
+                                else NewTile->bIsPassed = true;
+                                break;
+                            case ETileType::Station_A:
+                                NewTile->CreateTile(ETileType::Ground);
+                                NewTile->TileType = ETileType::Station_A;
+                                break;
+                            case ETileType::Station_Z:
+                                NewTile->CreateTile(ETileType::Ground);
+                                NewTile->TileType = ETileType::Station_Z;
                                 break;
                             default:
                                 NewTile->CreateTile(ETileType::Ground);
@@ -83,12 +94,10 @@ void ATileGenerator::BeginPlay()
                         NewTile->CreateTile(TileTypes[Row][Col]);
 
                         // 시작 역이면 기차 스폰
-                        if (TileTypes[Row][Col] == ETileType::Station_A)
-                            SetTrain(NewTile, Row, Col);
-                        // 시작 역 바로 다음 선로가 아니면 기차가 못 지나가게 설정
-                        else if (TileTypes[Row][Col] == ETileType::Rail)
-                            if (Col - 1 > 0 && TileTypes[Row][Col - 1] != ETileType::Station_A)
-                                NewTile->bIsPassed = true;
+                        if (TileTypes[Row][Col] == ETileType::Station_A) {
+                            if (HasAuthority())
+                                SetTrain(NewTile, Row, Col);
+                        }
                     }
                 }
                 else
@@ -97,8 +106,8 @@ void ATileGenerator::BeginPlay()
                 }
             }
         }
-
-        GridManager->Grid.Add(ColTiles);
+        if (HasAuthority())
+            GridManager->Grid.Add(ColTiles);
     }
 
     for (int i = 0; i < GridManager->Grid.Num(); i++) {
