@@ -48,7 +48,7 @@ ATrainModule::ATrainModule()
 	WaterComp->SetBoxExtent(FVector(70.0, 50.0, 50.0));
 	WaterComp->OnComponentBeginOverlap.AddDynamic(this, &ATrainModule::OnWaterBeginOverlap);
 
-	SetReplicates(true);
+	bReplicates = true;
 	SetReplicatingMovement(true);
 }
 
@@ -148,7 +148,7 @@ void ATrainModule::SetModuleLocation(FVector CurrentLocation)
 
 	TileQueue.Enqueue(CurrentLocation);
 
-	UE_LOG(LogTrain, Log, TEXT("%s: Set Next Location - X: %f, Y: %f, Z: %f"), *GetActorNameOrLabel(), NextPos.X, NextPos.Y, NextPos.Z);
+//	UE_LOG(LogTrain, Log, TEXT("%s: Set Next Location - X: %f, Y: %f, Z: %f"), *GetActorNameOrLabel(), NextPos.X, NextPos.Y, NextPos.Z);
 
 // 	// 현재 모듈이 가던 타일의 위치를 다음 모듈로 넘겨주고
 // 	if (TrainEngine->CheckModule(ModuleNumber + 1))

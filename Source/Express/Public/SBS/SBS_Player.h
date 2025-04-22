@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/InputActionValue.h"
+#include "InputActionValue.h"
 #include "Item.h"
 #include "Tile.h"
 #include "SBS_Player.generated.h"
@@ -90,6 +90,11 @@ public:
 public:
 
 	bool FindTrain();
+
+// 	UFUNCTION(Server, Reliable)
+// 	void Server_FindTrain(const TArray<class AItem*> PlayerItems);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_DrawRaycast(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness);
 
 //네트워크
 public:
