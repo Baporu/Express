@@ -98,10 +98,11 @@ public:
 	void Multicast_Attach(AActor* TargetActor, FName SocketName);
 
 	UFUNCTION(Server, Reliable)
+	void Server_SetItemLocation(const FVector& Newlocation);
+	UFUNCTION(Server, Reliable)
 	void Server_Detach();
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Detach();
-
 	UFUNCTION(Server, Reliable)
 	void Server_CreateItem(EItemType Type);
 	//UFUNCTION(NetMulticast, Reliable)

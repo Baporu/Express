@@ -705,7 +705,7 @@ void ASBS_Player::Server_Release_Implementation()
         if (ATile* PreviousTile = CurrentTile->CheckRail())
         {
             HoldItems.Top()->Server_Detach();
-            HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
+           HoldItems.Top()->SetActorRotation(FRotator(0, 0, 0));
             HoldItems.Top()->SetActorLocation(TargetPos);
             CurrentTile->Server_SetRail(PreviousTile);
             HoldItems.Pop();
