@@ -41,6 +41,9 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+
+
 	UpdateMeshMat();
 }
 //test
@@ -116,9 +119,14 @@ void ATile::UpdateMeshMat()
 void ATile::CreateTile(ETileType Type)
 {
 	TileType = Type;
-	UpdateMeshMat();
-	//UE_LOG(LogTemp, Warning, TEXT("CreateTile Success"));
+	if (TileType == ETileType::Wood)
+	{
+		static const TArray<float> Rotations = { 90.0f, 180.0f, 270.0f };
+		float RandRot = Rotations[FMath::RandHelper(Rotations.Num())];
 
+		SetActorRotation(FRotator(0, RandRot, 0));
+	}
+	UpdateMeshMat();
 }
 void ATile::SetContainedItem(TArray<AItem*> Item)
 {
