@@ -418,90 +418,96 @@ void ASBS_Player::GetLeftTile()
 
 bool ASBS_Player::FindTrain()
 {
-    // 현재 위치와 타일 크기로 전방의 타일 위치를 계산
-    FVector CurLoc = GetActorLocation();
-    FVector ForwardLoc = CurLoc + GetActorForwardVector() * TileSize;
+    Server_FindTrain(HoldItems);
 
-    // 계산된 타일의 위치를 타일 크기에 맞게 보정
-    int ForwardTileX = FMath::RoundToInt(ForwardLoc.X / TileSize) * TileSize;
-    int ForwardTileY = FMath::RoundToInt(ForwardLoc.Y / TileSize) * TileSize;
+    return bHasFound;
 
-    FVector Start = FVector(ForwardTileX, ForwardTileY, CurLoc.Z + 200.f);
-    FVector End = FVector(ForwardTileX, ForwardTileY, CurLoc.Z - 100.f);
-    FHitResult Hit;
-    FCollisionQueryParams params;
-    params.AddIgnoredActor(this);
+    {/*
+        // 현재 위치와 타일 크기로 전방의 타일 위치를 계산
+        FVector CurLoc = GetActorLocation();
+        FVector ForwardLoc = CurLoc + GetActorForwardVector() * TileSize;
 
-    // LineTrace가 실패한 경우 = 기차를 탐지하지 못 함
-    if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
-        return false;
+        // 계산된 타일의 위치를 타일 크기에 맞게 보정
+        int ForwardTileX = FMath::RoundToInt(ForwardLoc.X / TileSize) * TileSize;
+        int ForwardTileY = FMath::RoundToInt(ForwardLoc.Y / TileSize) * TileSize;
 
-    UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Green, 1, 15);
+        FVector Start = FVector(ForwardTileX, ForwardTileY, CurLoc.Z + 200.f);
+        FVector End = FVector(ForwardTileX, ForwardTileY, CurLoc.Z - 100.f);
+        FHitResult Hit;
+        FCollisionQueryParams params;
+        params.AddIgnoredActor(this);
 
-    // 화물차부터 탐색
-    if (ATrainCargo* cargo = Cast<ATrainCargo>(Hit.GetActor())) {
-        // 상호작용할 수 있는지 확인 (불이 붙어있으면 false를 return)
-        if (!cargo->CheckInteraction()) return false;
+        // LineTrace가 실패한 경우 = 기차를 탐지하지 못 함
+        if (!GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
+            return false;
 
-        // 손에 뭐 들고 있으면 넣기
-        if (!HoldItems.IsEmpty()) {
-            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo"));
+        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Green, 1, 15);
 
-            // 유효한 자원인지 확인
-            if (!cargo->CheckAddResource(HoldItems[0]->ItemType)) return false;
+        // 화물차부터 탐색
+        if (ATrainCargo* cargo = Cast<ATrainCargo>(Hit.GetActor())) {
+            // 상호작용할 수 있는지 확인 (불이 붙어있으면 false를 return)
+            if (!cargo->CheckInteraction()) return false;
 
-            HoldItems[0]->Server_Detach();
-            cargo->AddResource(HoldItems);
-            HoldItems.Empty();
+            // 손에 뭐 들고 있으면 넣기
+            if (!HoldItems.IsEmpty()) {
+                UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo"));
 
-            return true;
-        }
+                // 유효한 자원인지 확인
+                if (!cargo->CheckAddResource(HoldItems[0]->ItemType)) return false;
 
-        // 손에 없으면 빼오기 시도
-        else {
-            // 보관 장소가 나무면 나무, 돌이면 돌 가져오기 (2개의 Box Collider로 구분되어 있음)
-            if (Hit.GetComponent()->GetName().Contains("Wood")) {
-                UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Wood"));
+                HoldItems[0]->Server_Detach();
+                cargo->AddResource(HoldItems);
+                HoldItems.Empty();
 
-                if (!cargo->CheckGetResource(EItemType::Wood)) return false;
-
-                HoldItems.Append(cargo->GetResource(EItemType::Wood));
-                HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
+                return true;
             }
 
+            // 손에 없으면 빼오기 시도
             else {
-                UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Stone"));
+                // 보관 장소가 나무면 나무, 돌이면 돌 가져오기 (2개의 Box Collider로 구분되어 있음)
+                if (Hit.GetComponent()->GetName().Contains("Wood")) {
+                    UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Wood"));
 
-                if (!cargo->CheckGetResource(EItemType::Stone)) return false;
+                    if (!cargo->CheckGetResource(EItemType::Wood)) return false;
 
-                HoldItems.Append(cargo->GetResource(EItemType::Stone));
-                HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
+                    HoldItems.Append(cargo->GetResource(EItemType::Wood));
+                    HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
+                }
+
+                else {
+                    UE_LOG(LogTrain, Log, TEXT("Player Interaction: Cargo Stone"));
+
+                    if (!cargo->CheckGetResource(EItemType::Stone)) return false;
+
+                    HoldItems.Append(cargo->GetResource(EItemType::Stone));
+                    HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
+                }
+
+                return true;
             }
+        }
+
+        // 제작차 탐색
+        else if (ATrainCrafter* crafter = Cast<ATrainCrafter>(Hit.GetActor())) {
+            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter"));
+
+            // 손에 아이템 있으면 얘랑 상호작용할 필요 없음
+            if (!HoldItems.IsEmpty()) return false;
+
+            // 만들어진 선로 없으면 얘랑 상호작용할 필요 없음
+            if (!crafter->CheckRail()) return false;
+
+            UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Has Rails"));
+
+            HoldItems.Append(crafter->GetRail());
+            HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
 
             return true;
         }
-    }
 
-    // 제작차 탐색
-    else if (ATrainCrafter* crafter = Cast<ATrainCrafter>(Hit.GetActor())) {
-        UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter"));
-
-        // 손에 아이템 있으면 얘랑 상호작용할 필요 없음
-        if (!HoldItems.IsEmpty()) return false;
-
-        // 만들어진 선로 없으면 얘랑 상호작용할 필요 없음
-        if (!crafter->CheckRail()) return false;
-
-        UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Has Rails"));
-
-        HoldItems.Append(crafter->GetRail());
-        HoldItems[0]->Server_Attach(this, TEXT("TempHandMesh"));
-
-        return true;
-    }
-
-    // 화물차도 제작차도 아니니까 return false
-    return false;
+        // 화물차도 제작차도 아니니까 return false
+        return false;
+    */}
 }
 
 void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& PlayerItems) {

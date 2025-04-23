@@ -56,6 +56,9 @@ bool ATrainCargo::CheckGetResource(EItemType ResourceType)
 
 void ATrainCargo::AddResource(TArray<AItem*> Resources)
 {
+	if (!HasAuthority())
+		PRINTFATALLOG(TEXT("Client Can't Use This Function."));
+
 	switch (Resources[0]->ItemType)
 	{
 		case EItemType::Wood:
