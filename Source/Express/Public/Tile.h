@@ -66,7 +66,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TArray<AItem*> ContainedItem; //타일 위 아이템
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
+	UPROPERTY(ReplicatedUsing=OnRep_TileType, EditAnywhere, BlueprintReadWrite, Category = "Tile")
 	ETileType TileType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -125,8 +125,11 @@ public:
 	void Multicast_SetContainedItem(const TArray<AItem*>& Item);
 	UFUNCTION()
 	void OnRep_ContainedItem();
+	UFUNCTION()
+	void OnRep_TileType();
 	UFUNCTION(Server, Reliable)
 	void Server_SetRail(ATile* PreviousTile);
-
+	UFUNCTION(Server, Reliable)
+	void Server_HarvestTile();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

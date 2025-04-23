@@ -31,6 +31,7 @@ ATile::ATile()
 
 	MaxTileHP = 3;
 	CurTileHP = MaxTileHP;
+	SetReplicates(true);
 
 }
 
@@ -70,59 +71,7 @@ void ATile::ReduceHP()
 
 void ATile::HarvestTile()
 {
-	//if(!CanHarvest()) // 수확할수 없으면
-	//{
-	//	return;
-	//}
-
-	ATile* CurrentTile = nullptr;
-	AItem* NewItem;
-
-	EItemType ItemType = EItemType::Wood;
-	if (TileType == ETileType::Wood)
-	{
-		ItemType = EItemType::Wood;
-	}
-	else if(TileType == ETileType::Stone)
-	{
-		ItemType = EItemType::Stone;
-	}
-	else if (TileType == ETileType::Water)
-	{
-		return;
-	}
-	else
-	{
-		return;
-	}
-	FVector GroundLocation = FVector(GetActorLocation().X, GetActorLocation().Y, 0.f);
-	for (TActorIterator<ATile> It(GetWorld()); It; ++It)
-	{
-		if (It->GetActorLocation() == GroundLocation && It->TileType == ETileType::Ground)
-		{
-			CurrentTile = *It;
-			break;
-		}
-	}
-	FVector SpawnLocation = CurrentTile->GetActorLocation();
-	SpawnLocation.Z += 100;
-	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
-	if (!NewItem)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawn Fail"));
-	}
-	else
-	{
-		NewItem->CreateItem(ItemType); // 아이템 생성
-		TArray<AItem*> TempItem;
-		TempItem.Add(NewItem);
-		CurrentTile->Server_SetContainedItem(TempItem);
-		UE_LOG(LogTemp, Log, TEXT("HarvestTile: Item %s spawned on Tile %s"), *NewItem->GetName(), *CurrentTile->GetName());
-	}
-
-
-	Destroy(); // 타일 파괴
-	CurTileHP = MaxTileHP;
+	Server_HarvestTile();
 }
 
 void ATile::UpdateMeshMat()
@@ -293,7 +242,10 @@ ATile* ATile::CheckRailItem()
 void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
 {
 	ContainedItem = Item;
-	OnRep_ContainedItem();
+	//Multicast_SetContainedItem(Item);
+	ForceNetUpdate();
+	UE_LOG(LogTemp, Warning, TEXT("Server: Set ContainedItem, Count = %d"), Item.Num());
+	//OnRep_ContainedItem();
 }
 
 void ATile::Server_SetItemLocation_Implementation(const FVector& NewLocation)
@@ -311,6 +263,8 @@ void ATile::OnRep_ContainedItem()
 {
 	if (ContainedItem.IsEmpty())
 	{
+		
+		ContainedItem.Empty();
 		return;
 	}
 
@@ -319,11 +273,11 @@ void ATile::OnRep_ContainedItem()
 	{
 		if (!ContainedItem[i])
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Client: ContainedItem cleared"));
 			continue;
 		}
 
 		ContainedItem[i]->Server_Detach();
-		//ContainedItem[i]->Server_SetItemLocation(BaseLocation);
 		if (i > 0)
 		{
 			ContainedItem[i]->Server_Attach(ContainedItem[i - 1], FName(TEXT("ItemHead")));
@@ -331,14 +285,72 @@ void ATile::OnRep_ContainedItem()
 	}
 }
 
+void ATile::OnRep_TileType()
+{
+	UpdateMeshMat();
+}
+
 void ATile::Server_SetRail_Implementation(ATile* PreviousTile)
 {
 	SetRail(PreviousTile);
+}
+
+void ATile::Server_HarvestTile_Implementation()
+{
+	ATile* CurrentTile = nullptr;
+	AItem* NewItem;
+
+	EItemType ItemType = EItemType::Wood;
+	if (TileType == ETileType::Wood)
+	{
+		ItemType = EItemType::Wood;
+	}
+	else if (TileType == ETileType::Stone)
+	{
+		ItemType = EItemType::Stone;
+	}
+	else if (TileType == ETileType::Water)
+	{
+		return;
+	}
+	else
+	{
+		return;
+	}
+	FVector GroundLocation = FVector(GetActorLocation().X, GetActorLocation().Y, 0.f);
+	for (TActorIterator<ATile> It(GetWorld()); It; ++It)
+	{
+		if (It->GetActorLocation() == GroundLocation && It->TileType == ETileType::Ground)
+		{
+			CurrentTile = *It;
+			break;
+		}
+	}
+	FVector SpawnLocation = CurrentTile->GetActorLocation();
+	SpawnLocation.Z += 100;
+	NewItem = GetWorld()->SpawnActor<AItem>(AItem::StaticClass(), SpawnLocation, FRotator::ZeroRotator);
+	if (!NewItem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawn Fail"));
+		return;
+	}
+	NewItem->SetReplicates(true);
+	NewItem->CreateItem(ItemType); // 아이템 생성
+	TArray<AItem*> TempItem;
+	TempItem.Add(NewItem);
+	CurrentTile->Server_SetContainedItem(TempItem);
+	UE_LOG(LogTemp, Log, TEXT("HarvestTile: Item %s spawned on Tile %s"), *NewItem->GetName(), *CurrentTile->GetName());
+	
+
+
+	Destroy(); // 타일 파괴
 }
 
 void ATile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ATile, ContainedItem);
+	DOREPLIFETIME(ATile, TileType);
+
 }
 

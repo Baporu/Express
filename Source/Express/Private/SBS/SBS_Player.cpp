@@ -124,7 +124,7 @@ void ASBS_Player::Tick(float DeltaTime)
 		}
 	}
     //들고 있는게 자원이면
-	else 
+	else if(HasAuthority())
 	{
 		//손에 물건 들고있을 때 바닥타일 확인
 		GetCurrentTile();
@@ -136,12 +136,11 @@ void ASBS_Player::Tick(float DeltaTime)
             TargetItem = CurrentTile->GetContainedItem();
 			if(!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
 			{
-			//attach
-			Server_AttachItems(TargetItem[0]);
-			//배열에 추가
 
-			HoldItems.Append(TargetItem);
-			CurrentTile->Server_SetContainedItem(TArray<AItem*>());
+				Server_AttachItems(TargetItem[0]);
+				HoldItems.Append(TargetItem);
+				CurrentTile->Server_SetContainedItem(TArray<AItem*>());
+            
 			}
 			
 		}
@@ -189,19 +188,20 @@ void ASBS_Player::Move(const FInputActionValue& Value)
     if (Controller != nullptr)
     {
         FVector DIr = (FVector::ForwardVector * MovementVector.Y) + (FVector::RightVector * MovementVector.X);
+        FRotator TargetRotation = GetActorRotation();
         if (!DIr.IsNearlyZero())
         {
             DIr.Normalize();
-            FRotator TargetRotation = DIr.Rotation();
+            TargetRotation = DIr.Rotation();
             TargetRotation.Pitch = 0;
             TargetRotation.Roll = 0;
+            SetActorRotation(TargetRotation); //
             //서버는
             if (HasAuthority())
             {
                 //타겟로케이션을 받아서 rep yaw에 넣고
                 //Rep_Yaw = TargetRotation.Yaw;
                 //회전한다.
-                SetActorRotation(TargetRotation); //
     
             }
             //클라는
@@ -626,13 +626,13 @@ void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
     DOREPLIFETIME(ASBS_Player, bIsholdingitem); //bIsholdingitem
 
     DOREPLIFETIME(ASBS_Player, bHasWater);
-    DOREPLIFETIME(ASBS_Player, ReplicatedRotation);
+    //DOREPLIFETIME(ASBS_Player, ReplicatedRotation);
 
 }
 
 void ASBS_Player::Server_UpdateRotation_Implementation(const FRotator& NewRotation)
 {
-    ReplicatedRotation = NewRotation;
+    //ReplicatedRotation = NewRotation;
     SetActorRotation(NewRotation);
     //ForceNetUpdate();
 }
@@ -756,12 +756,13 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
     if (TargetItem && HoldItems.Num() > 0)
     {
        TargetItem->Server_Attach(HoldItems.Top(), TEXT("ItemHead"));
+       ForceNetUpdate();
     }
 }
 
-void ASBS_Player::OnRep_Rotation()
-{
-    SetActorRotation(ReplicatedRotation);
-    UE_LOG(LogTemp, Warning, TEXT("onrepcall"));
-}
+//void ASBS_Player::OnRep_Rotation()
+//{
+//    SetActorRotation(ReplicatedRotation);
+//    UE_LOG(LogTemp, Warning, TEXT("onrepcall"));
+//}
 

@@ -120,11 +120,11 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, Category = Item)
 	bool bHasWater = false;
 
-	UPROPERTY(ReplicatedUsing=OnRep_Rotation)
-	FRotator ReplicatedRotation;
+	//UPROPERTY(ReplicatedUsing=OnRep_Rotation)
+	//FRotator ReplicatedRotation;
 
-	UFUNCTION()
-	void OnRep_Rotation();
+	//UFUNCTION()
+	//void OnRep_Rotation();
 
 
 
