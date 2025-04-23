@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Exp_GameMode.h"
 #include "SBS/Item.h"
+#include "../Express.h"
 #include "Tile.generated.h"
 
 UENUM(BlueprintType)
@@ -90,7 +91,7 @@ public:
 
 	bool CheckContainedItem() { if (ContainedItem.IsEmpty()) return false; else return true; };
 	void SetContainedItem(TArray<AItem*> Item);//Set item
-	TArray<AItem*> GetContainedItem() const{ return ContainedItem;} // Get Item
+	TArray<AItem*> GetContainedItem() const { return ContainedItem; } // Get Item
 	void RemoveContainedItem() { ContainedItem.Empty(); };
 
 	

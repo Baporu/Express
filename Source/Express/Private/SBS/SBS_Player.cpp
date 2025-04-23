@@ -134,7 +134,6 @@ void ASBS_Player::Tick(float DeltaTime)
 		//helditme이 바닥 타일에 있는 아이템과 같으면 attach하고 helditem스택에 추가.
 		if (CurrentTile)
 		{
-			
             TargetItem = CurrentTile->GetContainedItem();
 			if(!TargetItem.IsEmpty() && HoldItems[0]->ItemType == TargetItem[0]->ItemType)
 			{
@@ -620,6 +619,14 @@ void ASBS_Player::Multicast_RemoveHoldItem_Implementation() {
 
 void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness) {
     UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
+}
+
+void ASBS_Player::Client_EndFire_Implementation(class ATrainModule* TrainModule, ASBS_Player* player) {
+    Server_EndFire(TrainModule, player);
+}
+
+void ASBS_Player::Server_EndFire_Implementation(class ATrainModule* TrainModule, ASBS_Player* player) {
+    TrainModule->Server_PlayerEndFire(player);
 }
 
 void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
