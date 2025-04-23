@@ -11,6 +11,8 @@
 #include "SHS/GridManager.h"
 #include "SBS/SBS_Player.h"
 #include "Net/UnrealNetwork.h"
+#include "Camera/CameraActor.h"
+#include "EngineUtils.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -28,6 +30,7 @@ void ATrainEngine::BeginPlay()
 	ModuleNumber = 0;
 
 	if (HasAuthority()) {
+		GetMainCamera();
 		TrainModules.Add(this);
 		SpawnDefaultModules();
 	}
@@ -222,6 +225,9 @@ void ATrainEngine::MoveTrain(float DeltaTime)
 	FVector dir = NextPos - GetActorLocation();
 	FVector vt = dir.GetSafeNormal() * TrainSpeed * DeltaTime;
 	SetActorLocation(GetActorLocation() + vt);
+
+	// 카메라도 같이 이동
+	MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, vt.Y, 0.0));
 }
 
 void ATrainEngine::OnFire(float DeltaTime)
@@ -313,5 +319,17 @@ void ATrainEngine::SpawnDefaultModules()
 	Cargo->SetModuleIndex(2);
 	AttachModule(Crafter, 2);
 	Crafter->SetModuleIndex(3);
+}
+
+void ATrainEngine::GetMainCamera() {
+	for (TActorIterator<ACameraActor> it(GetWorld()); it; ++it) {
+		ACameraActor* Camera = *it;
+		if (Camera && Camera->GetName().Contains("MainCamera")) {
+			MainCam = Camera;
+			PRINTTRAIN(TEXT("MainCam: %s"), *MainCam->GetName());
+			return;
+		}
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Camera Fail"));
 }
 

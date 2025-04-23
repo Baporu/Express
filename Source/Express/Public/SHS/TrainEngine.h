@@ -87,9 +87,12 @@ private:
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Fire")
 	class ATrainWaterTank* TrainWaterTank;
 
+	UPROPERTY(VisibleAnywhere, Category = "Move")
+	class ACameraActor* MainCam;
+
 	// 임시 함수들
 	void GetTileLocation();
 	void SpawnDefaultModules();
 
-
+	void GetMainCamera();
 };
