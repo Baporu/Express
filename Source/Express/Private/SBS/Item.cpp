@@ -247,7 +247,6 @@ void AItem::Server_CreateItem_Implementation(EItemType Type)
 {
 	ItemType = Type;
     IsTool = (Type == EItemType::Axe || Type == EItemType::Pickaxe || Type == EItemType::Bucket);
-    IsBucketEmpty = (Type == EItemType::Bucket); // 변경: 명시적 초기화
     UpdateMeshMat();
 	//Multicast_UpdateMeshMat();
 }
