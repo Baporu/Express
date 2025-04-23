@@ -98,9 +98,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	bool bIsPassed = false;
 	// 끝 선로인지 확인하는 변수
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	bool bIsLastRail = false;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	bool bIsFinished = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Tile")

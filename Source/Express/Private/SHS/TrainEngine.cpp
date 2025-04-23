@@ -44,8 +44,10 @@ void ATrainEngine::Tick(float DeltaTime)
 	if (!bIsStarted) return;
 
 	// 타일 위치에 도달했을 경우, 다음 타일 검색
-	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5)
-		CheckNextTile();
+	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5) {
+		if (CurrentTile->bIsFinished) { PRINTFATALLOG(TEXT("GAME CLEAR!")); }
+		else { CheckNextTile(); }
+	}
 }
 
 void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Column)
@@ -229,27 +231,20 @@ void ATrainEngine::OnFire(float DeltaTime)
 
 void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!HasAuthority()) return;
-
 	// 엔진도 물탱크도 불 안 붙었으면 return
 	if (!bOnFire && (TrainWaterTank && !TrainWaterTank->bOnFire)) return;
 
 	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
 	if (!player || !player->IsLocallyControlled()) return;
 
-	if (!player->bHasWater || player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
-
-	// 공통 처리: 플레이어 물 없애기
-	player->bHasWater = false;
-	player->HoldItems[0]->IsBucketEmpty = true;
-	player->HoldItems[0]->UpdateMeshMat();
+	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
 	// 엔진에 불 붙은 경우
-	if (bOnFire) EndFire();
+	if (bOnFire) Server_EndFire(player);
 
 	// 물탱크에 불 붙은 경우
 	if (TrainWaterTank->bOnFire)
-		TrainWaterTank->EndFire();
+		TrainWaterTank->Server_EndFire(player);
 }
 
 void ATrainEngine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

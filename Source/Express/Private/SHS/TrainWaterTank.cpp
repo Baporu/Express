@@ -56,12 +56,9 @@ void ATrainWaterTank::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedCompone
 
 	if (!player || !player->IsLocallyControlled()) return;
 
-	if (!player->bHasWater || player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
+	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
-	player->bHasWater = false;
-	player->HoldItems[0]->IsBucketEmpty = true;
-	player->HoldItems[0]->UpdateMeshMat();
-	EndFire();
+	Server_EndFire(player);
 }
 
 void ATrainWaterTank::ChangeTankColor()

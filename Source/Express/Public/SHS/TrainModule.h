@@ -101,6 +101,11 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(Server, Reliable)
+	void Server_EndFire(class ASBS_Player* player);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ResetWater(class ASBS_Player* player);
+
 private:
 	friend ATrainEngine;
 };
