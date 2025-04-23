@@ -152,8 +152,8 @@ void ASBS_Player::Tick(float DeltaTime)
 	//if (!HasAuthority())
 	//{
 	//	FRotator CurrentRotaion = GetActorRotation();
-	//    FRotator TargetRotation(0,Rep_Yaw, 0);
-	//	FRotator NewRotation = FMath::RInterpTo(CurrentRotaion, TargetRotation, DeltaTime, RotationLerpRate);
+	//	FRotator TargetRotation();
+	//	FRotator NewRotation = FMath::RInterpTo(CurrentRotaion, TargetRotation, //DeltaTime, RotationLerpRate);
 	//	SetActorRotation(NewRotation);
 	//}
 
@@ -204,6 +204,7 @@ void ASBS_Player::Move(const FInputActionValue& Value)
                 //타겟로케이션을 받아서 rep yaw에 넣고
                 //Rep_Yaw = TargetRotation.Yaw;
                 //회전한다.
+
     
             }
             //클라는

@@ -57,6 +57,7 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UBoxComponent* WaterComp;
 
+
 	// 열차의 모듈 배열을 가진 클래스
 	UPROPERTY(Replicated, VisibleAnywhere, Category = "Module")
 	ATrainEngine* TrainEngine;

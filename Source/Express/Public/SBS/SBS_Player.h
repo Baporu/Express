@@ -72,6 +72,7 @@ public:
 	float HarvestTimer = 0;
 	int HarvestCount = 0;
 	ATile* LastHarvestTile = nullptr;
+	float Rep_Yaw;
 
 public:
 
