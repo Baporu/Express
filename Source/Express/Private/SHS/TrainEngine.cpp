@@ -198,7 +198,7 @@ void ATrainEngine::CheckNextTile()
 			CurrentTile->bIsPassed = true;
 			NextPos.Z += 115.0;
 			// 왼쪽으로 회전
-			NextRot = 270.0;
+			NextRot = -90.0;
 
 			ColIndex--;
 			return;
