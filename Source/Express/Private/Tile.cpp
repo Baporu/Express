@@ -119,7 +119,7 @@ void ATile::UpdateMeshMat()
 void ATile::CreateTile(ETileType Type)
 {
 	TileType = Type;
-	if (TileType == ETileType::Wood)
+	if (TileType == ETileType::Wood || TileType == ETileType::Stone)
 	{
 		static const TArray<float> Rotations = { 90.0f, 180.0f, 270.0f };
 		float RandRot = Rotations[FMath::RandHelper(Rotations.Num())];
