@@ -103,6 +103,11 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawRaycast(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness);
 
+	UFUNCTION(Client, Reliable)
+	void Client_EndFire(class ATrainModule* TrainModule, ASBS_Player* player);
+	UFUNCTION(Server, Reliable)
+	void Server_EndFire(class ATrainModule* TrainModule, ASBS_Player* player);
+
 //네트워크
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

@@ -168,6 +168,10 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 	RotatorQueue.Enqueue(CurrentYaw);
 }
 
+void ATrainModule::Server_PlayerEndFire_Implementation(ASBS_Player* player) {
+	Server_EndFire(player);
+}
+
 void ATrainModule::MoveTrain(float DeltaTime)
 {
 	if (!HasAuthority())

@@ -45,6 +45,9 @@ public:
 	void SetModuleLocation(FVector CurrentLocation);
 	void SetModuleRotation(double CurrentYaw);
 
+	UFUNCTION(Server, Reliable)
+	void Server_PlayerEndFire(class ASBS_Player* player);
+
 protected:
 	UPROPERTY(EditAnywhere)
 	class USceneComponent* SceneComp;

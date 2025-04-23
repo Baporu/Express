@@ -240,11 +240,11 @@ void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
 	// 엔진에 불 붙은 경우
-	if (bOnFire) Server_EndFire(player);
+	if (bOnFire) player->Client_EndFire(this, player);
 
 	// 물탱크에 불 붙은 경우
 	if (TrainWaterTank->bOnFire)
-		TrainWaterTank->Server_EndFire(player);
+		player->Client_EndFire(TrainWaterTank, player);
 }
 
 void ATrainEngine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

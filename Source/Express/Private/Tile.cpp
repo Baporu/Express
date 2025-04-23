@@ -297,6 +297,8 @@ void ATile::OnRep_ContainedItem()
 
 void ATile::OnRep_TileType()
 {
+	if (TileType == ETileType::Rail) return;
+
 	UpdateMeshMat();
 }
 
