@@ -10,13 +10,15 @@ AItem::AItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-    SetReplicates(true);
+    bReplicates = true;
+	//bReplicateMovement = true;
+	//SetReplicates(true);
     SetReplicateMovement(true);
 
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
-    MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
-    MeshComp->SetMaterial(0, nullptr); // 초기 재질 비우기
+	//MeshComp->SetStaticMesh(nullptr); // 초기 메쉬 비우기
+	//MeshComp->SetMaterial(0, nullptr); // 초기 재질 비우기
     MeshComp->SetCollisionProfileName(TEXT("Item"));
 	ItemType = EItemType::Wood;
     //Mesh 설정
@@ -31,12 +33,12 @@ AItem::AItem()
         StoneMesh = StoneMeshFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UStaticMesh> RailMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Rail.Item_Rail"));
-    if (StoneMeshFinder.Succeeded())
+    if (RailMeshFinder.Succeeded())
     {
         RailMesh = RailMeshFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UStaticMesh> AxeMeshFinder(TEXT("/Game/SBS/MeshTex/Item_Axe.Item_Axe"));
-    if (StoneMeshFinder.Succeeded())
+    if (AxeMeshFinder.Succeeded())
     {
         AxeMesh = AxeMeshFinder.Object;
     }
@@ -68,22 +70,22 @@ AItem::AItem()
         StoneMaterial = StoneMaterialFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> RailMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Rail.M_Rail"));
-    if (StoneMaterialFinder.Succeeded())
+    if (RailMaterialFinder.Succeeded())
     {
         RailMaterial = RailMaterialFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> AxeMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Axe.M_Axe"));
-    if (StoneMaterialFinder.Succeeded())
+    if (AxeMaterialFinder.Succeeded())
     {
         AxeMaterial = AxeMaterialFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> PickaxeMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Pickaxe.M_Pickaxe"));
-    if (StoneMaterialFinder.Succeeded())
+    if (PickaxeMaterialFinder.Succeeded())
     {
         PickaxeMaterial = PickaxeMaterialFinder.Object;
     }
     static ConstructorHelpers::FObjectFinder<UMaterialInterface> BucketMaterialFinder(TEXT("/Game/SBS/MeshTex/M_Bucket.M_Bucket"));
-    if (StoneMaterialFinder.Succeeded())
+    if (BucketMaterialFinder.Succeeded())
     {
         BucketMaterial = BucketMaterialFinder.Object;
     }
@@ -94,7 +96,7 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-    if(HasAuthority())
+   // if(HasAuthority())
 	    UpdateMeshMat();
 }
 

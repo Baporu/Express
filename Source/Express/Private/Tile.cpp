@@ -31,7 +31,8 @@ ATile::ATile()
 
 	MaxTileHP = 3;
 	CurTileHP = MaxTileHP;
-	SetReplicates(true);
+	bReplicates = true;
+	//SetReplicates(true);
 
 }
 
@@ -242,8 +243,7 @@ ATile* ATile::CheckRailItem()
 void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
 {
 	ContainedItem = Item;
-	//Multicast_SetContainedItem(Item);
-	ForceNetUpdate();
+	Multicast_SetContainedItem(Item);
 	UE_LOG(LogTemp, Warning, TEXT("Server: Set ContainedItem, Count = %d"), Item.Num());
 	//OnRep_ContainedItem();
 }
@@ -264,7 +264,9 @@ void ATile::OnRep_ContainedItem()
 	if (ContainedItem.IsEmpty())
 	{
 		
-		ContainedItem.Empty();
+		//ContainedItem.Empty();
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_ContainedItem: Item is null"));
+
 		return;
 	}
 
@@ -320,7 +322,7 @@ void ATile::Server_HarvestTile_Implementation()
 	FVector GroundLocation = FVector(GetActorLocation().X, GetActorLocation().Y, 0.f);
 	for (TActorIterator<ATile> It(GetWorld()); It; ++It)
 	{
-		if (It->GetActorLocation() == GroundLocation && It->TileType == ETileType::Ground)
+		if (It->GetActorLocation() == GroundLocation)// && It->TileType == ETileType::Ground)
 		{
 			CurrentTile = *It;
 			break;
@@ -335,14 +337,12 @@ void ATile::Server_HarvestTile_Implementation()
 		return;
 	}
 	NewItem->SetReplicates(true);
+	NewItem->ForceNetUpdate();
 	NewItem->CreateItem(ItemType); // 아이템 생성
 	TArray<AItem*> TempItem;
 	TempItem.Add(NewItem);
 	CurrentTile->Server_SetContainedItem(TempItem);
 	UE_LOG(LogTemp, Log, TEXT("HarvestTile: Item %s spawned on Tile %s"), *NewItem->GetName(), *CurrentTile->GetName());
-	
-
-
 	Destroy(); // 타일 파괴
 }
 

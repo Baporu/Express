@@ -28,9 +28,11 @@ ASBS_Player::ASBS_Player()
     //네트워크
     SetNetUpdateFrequency(100);
 
-    SetReplicates(true);
-    SetReplicateMovement(true);
-
+	//SetReplicates(true);
+    bReplicates = true;
+	SetReplicateMovement(true);
+    //bReplicateMovement = true;
+ 
 
 }
 
