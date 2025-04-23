@@ -49,7 +49,7 @@ TArray<AItem*> ATrainCrafter::GetRail()
 	TArray<AItem*> items;
 
 	items = Rails;
-	Multicast_DetachRail(items[0]);
+	Client_DetachRail(items[0]);
 	Rails.Empty();
 
 	return items;
@@ -64,11 +64,11 @@ void ATrainCrafter::MakeRail()
 	rail->CreateItem(EItemType::Rail);
 
 	if (!CheckRail()) {
-		Multicast_AttachRail(rail, this);
+		Client_AttachRail(rail, this);
 		rail->SetActorRelativeLocation(FVector(0.0, 0.0, 50.0));
 	}
 	else
-		Multicast_AttachRail(rail, Rails.Top());
+		Client_AttachRail(rail, Rails.Top());
 	Rails.Add(rail);
 
 
@@ -106,10 +106,10 @@ void ATrainCrafter::Server_CheckMakeRail_Implementation() {
 	return;
 }
 
-void ATrainCrafter::Multicast_AttachRail_Implementation(AItem* Rail, AActor* ParentActor) {
+void ATrainCrafter::Client_AttachRail_Implementation(AItem* Rail, AActor* ParentActor) {
 	Rail->AttachToActor(ParentActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
 }
 
-void ATrainCrafter::Multicast_DetachRail_Implementation(AItem* Rail) {
+void ATrainCrafter::Client_DetachRail_Implementation(AItem* Rail) {
 	Rail->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 }

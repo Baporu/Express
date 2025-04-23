@@ -546,7 +546,7 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
             // 유효한 자원인지 확인
             if (!cargo->CheckAddResource(PlayerItems[0]->ItemType)) return;
 
-            Multicast_DetachHoldItem(PlayerItems[0]);
+            Client_DetachHoldItem(PlayerItems[0]);
             cargo->AddResource(PlayerItems);
             Multicast_RemoveHoldItem();
 
@@ -563,7 +563,7 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
                 if (!cargo->CheckGetResource(EItemType::Wood)) return;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Wood));
-                Multicast_AttachHoldItem(HoldItems[0]);
+                Client_AttachHoldItem(HoldItems[0]);
             }
 
             else {
@@ -572,7 +572,7 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
                 if (!cargo->CheckGetResource(EItemType::Stone)) return;
 
                 HoldItems.Append(cargo->GetResource(EItemType::Stone));
-                Multicast_AttachHoldItem(HoldItems[0]);
+                Client_AttachHoldItem(HoldItems[0]);
             }
 
             bHasFound = true;
@@ -593,7 +593,7 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
         UE_LOG(LogTrain, Log, TEXT("Player Interaction: Crafter Has Rails"));
 
         HoldItems.Append(crafter->GetRail());
-        Multicast_AttachHoldItem(HoldItems[0]);
+        Client_AttachHoldItem(HoldItems[0]);
 
         bHasFound = true;
         return;
@@ -603,11 +603,11 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
     return;
 }
 
-void ASBS_Player::Multicast_AttachHoldItem_Implementation(class AItem* PlayerItem) {
+void ASBS_Player::Client_AttachHoldItem_Implementation(class AItem* PlayerItem) {
     PlayerItem->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
-void ASBS_Player::Multicast_DetachHoldItem_Implementation(class AItem* PlayerItem) {
+void ASBS_Player::Client_DetachHoldItem_Implementation(class AItem* PlayerItem) {
     PlayerItem->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
 
@@ -639,8 +639,6 @@ void ASBS_Player::Server_UpdateRotation_Implementation(const FRotator& NewRotati
 
 void ASBS_Player::Server_Interact_Implementation()
 {
-    if (FindTrain()) return;
-
     TArray<AItem*> TargetItem;
     TargetItem.Empty();
     GetCurrentTile();

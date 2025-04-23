@@ -68,11 +68,11 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
 
 			if (Woods.IsEmpty()) {
-				Multicast_AttachResource(Resources[0]);
+				Client_AttachResource(Resources[0]);
 				Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 50.0));
 			}
 			else {
-				Multicast_AttachResourceToParent(Resources[0], Woods.Top());
+				Client_AttachResourceToParent(Resources[0], Woods.Top());
 			}
 
 			Woods.Append(Resources);
@@ -85,11 +85,11 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
 			
 			if (Stones.IsEmpty()) {
-				Multicast_AttachResource(Resources[0]);
+				Client_AttachResource(Resources[0]);
 				Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 50.0));
 			}
 			else {
-				Multicast_AttachResourceToParent(Resources[0], Stones.Top());
+				Client_AttachResourceToParent(Resources[0], Stones.Top());
 			}
 
 			Stones.Append(Resources);
@@ -113,7 +113,7 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 			if (Woods.IsEmpty()) break;
 
 			items = Woods;
-			Multicast_DetachResource(items[0]);
+			Client_DetachResource(items[0]);
 			Woods.Empty();
 			break;
 
@@ -121,7 +121,7 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 			if (Stones.IsEmpty()) break;
 
 			items = Stones;
-			Multicast_DetachResource(items[0]);
+			Client_DetachResource(items[0]);
 			Stones.Empty();
 			break;
 		
@@ -133,14 +133,14 @@ TArray<AItem*> ATrainCargo::GetResource(EItemType ResourceType)
 	return items;
 }
 
-void ATrainCargo::Multicast_AttachResource_Implementation(AItem* Resource) {
+void ATrainCargo::Client_AttachResource_Implementation(AItem* Resource) {
 	Resource->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
 
-void ATrainCargo::Multicast_AttachResourceToParent_Implementation(AItem* Resource, AActor* ParentActor) {
+void ATrainCargo::Client_AttachResourceToParent_Implementation(AItem* Resource, AActor* ParentActor) {
 	Resource->AttachToActor(ParentActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("ItemHead"));
 }
 
-void ATrainCargo::Multicast_DetachResource_Implementation(AItem* Resource) {
+void ATrainCargo::Client_DetachResource_Implementation(AItem* Resource) {
 	Resource->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }

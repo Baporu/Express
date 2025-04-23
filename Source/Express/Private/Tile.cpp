@@ -207,8 +207,8 @@ void ATile::SetRail(ATile* PreviousTile)
 
 	// 바닥에 연결 가능한 선로 아이템이 있는지 확인
 	if (ATile* NextTile = CheckRailItem()) {
-		NextTile->SetRail(this);
 		NextTile->ContainedItem.Empty();
+		NextTile->SetRail(this);
 	}
 }
 

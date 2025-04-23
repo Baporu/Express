@@ -229,6 +229,8 @@ void ATrainEngine::OnFire(float DeltaTime)
 
 void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!HasAuthority()) return;
+
 	// 엔진도 물탱크도 불 안 붙었으면 return
 	if (!bOnFire && (TrainWaterTank && !TrainWaterTank->bOnFire)) return;
 

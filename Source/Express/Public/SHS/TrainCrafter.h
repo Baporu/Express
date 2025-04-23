@@ -48,8 +48,8 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void Server_CheckMakeRail();
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AttachRail(AItem* Rail, AActor* ParentActor);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_DetachRail(AItem* Rail);
+	UFUNCTION(Client, Reliable)
+	void Client_AttachRail(AItem* Rail, AActor* ParentActor);
+	UFUNCTION(Client, Reliable)
+	void Client_DetachRail(AItem* Rail);
 };
