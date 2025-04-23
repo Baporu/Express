@@ -31,7 +31,7 @@ public:
 	int32 MaxStackSize = 3;
 
 	void Init(ATrainEngine* EngineModule, float TrainSpeed, FVector Destination, ATrainCargo* CargoModule);
-	bool CheckMakeRail();
+	void CheckMakeRail();
 
 	bool CheckRail();
 	TArray<AItem*> GetRail();
@@ -46,8 +46,10 @@ private:
 
 	void MakeRail();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AttachRail(AItem* Rail);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_DetachRail(AItem* Rail);
+	UFUNCTION(Server, Reliable)
+	void Server_CheckMakeRail();
+	UFUNCTION(Client, Reliable)
+	void Client_AttachRail(AItem* Rail, AActor* ParentActor);
+	UFUNCTION(Client, Reliable)
+	void Client_DetachRail(AItem* Rail);
 };

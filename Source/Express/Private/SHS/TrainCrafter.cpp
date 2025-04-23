@@ -32,32 +32,9 @@ void ATrainCrafter::Init(ATrainEngine* EngineModule, float TrainSpeed, FVector D
 	TrainCargo = CargoModule;
 }
 
-bool ATrainCrafter::CheckMakeRail()
+void ATrainCrafter::CheckMakeRail()
 {
-	// 재료가 부족하거나
-	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Stones.IsEmpty())
-		return false;
-
-	// 이미 만들고 있어도 return
-	if (bIsMaking) return false;
-
-	// 이미 레일을 다 만들었으면 return false
-	if (Rails.Num() == MaxStackSize)
-		return false;
-
-	AItem* wood = TrainCargo->Woods.Top();
-	TrainCargo->Woods.Pop();
-	wood->Destroy();
-	UE_LOG(LogTrain, Warning, TEXT("Wood Destroyed"));
-
-	AItem* stone = TrainCargo->Stones.Top();
-	TrainCargo->Stones.Pop();
-	stone->Destroy();
-	UE_LOG(LogTrain, Warning, TEXT("Stone Destroyed"));
-
-	bIsMaking = true;
-
-	return true;
+	Server_CheckMakeRail();
 }
 
 bool ATrainCrafter::CheckRail()
@@ -72,7 +49,7 @@ TArray<AItem*> ATrainCrafter::GetRail()
 	TArray<AItem*> items;
 
 	items = Rails;
-	items[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	Client_DetachRail(items[0]);
 	Rails.Empty();
 
 	return items;
@@ -87,11 +64,11 @@ void ATrainCrafter::MakeRail()
 	rail->CreateItem(EItemType::Rail);
 
 	if (!CheckRail()) {
-		rail->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+		Client_AttachRail(rail, this);
 		rail->SetActorRelativeLocation(FVector(0.0, 0.0, 50.0));
 	}
 	else
-		rail->AttachToActor(Rails.Top(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+		Client_AttachRail(rail, Rails.Top());
 	Rails.Add(rail);
 
 
@@ -102,10 +79,37 @@ void ATrainCrafter::MakeRail()
 	CheckMakeRail();
 }
 
-void ATrainCrafter::Multicast_AttachRail_Implementation(AItem* Rail) {
+void ATrainCrafter::Server_CheckMakeRail_Implementation() {
+	// 재료가 부족하거나
+	if (TrainCargo->Woods.IsEmpty() || TrainCargo->Stones.IsEmpty())
+		return;
 
+	// 이미 만들고 있어도 return
+	if (bIsMaking) return;
+
+	// 이미 레일을 다 만들었으면 return false
+	if (Rails.Num() == MaxStackSize)
+		return;
+
+	AItem* wood = TrainCargo->Woods.Top();
+	TrainCargo->Woods.Pop();
+	wood->Destroy();
+	UE_LOG(LogTrain, Warning, TEXT("Wood Destroyed"));
+
+	AItem* stone = TrainCargo->Stones.Top();
+	TrainCargo->Stones.Pop();
+	stone->Destroy();
+	UE_LOG(LogTrain, Warning, TEXT("Stone Destroyed"));
+
+	bIsMaking = true;
+
+	return;
 }
 
-void ATrainCrafter::Multicast_DetachRail_Implementation(AItem* Rail) {
+void ATrainCrafter::Client_AttachRail_Implementation(AItem* Rail, AActor* ParentActor) {
+	Rail->AttachToActor(ParentActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("ItemHead")));
+}
 
+void ATrainCrafter::Client_DetachRail_Implementation(AItem* Rail) {
+	Rail->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 }

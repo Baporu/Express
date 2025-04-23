@@ -209,12 +209,11 @@ void ATrainModule::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	ASBS_Player* player = Cast<ASBS_Player>(OtherActor);
 
-	if (!player || !player->bHasWater) return;
+	if (!player || !player->IsLocallyControlled()) return;
 
-	player->bHasWater = false;
-	player->HoldItems[0]->IsBucketEmpty = true;
-	player->HoldItems[0]->UpdateMeshMat();
-	EndFire();
+	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
+
+	Server_EndFire(player);
 }
 
 void ATrainModule::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -224,5 +223,16 @@ void ATrainModule::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ATrainModule, FireTimer);
 	DOREPLIFETIME(ATrainModule, TrainEngine);
 	DOREPLIFETIME(ATrainModule, ModuleNumber);
+}
+
+void ATrainModule::Server_EndFire_Implementation(class ASBS_Player* player) {
+	Multicast_ResetWater(player);
+
+	EndFire();
+}
+
+void ATrainModule::Multicast_ResetWater_Implementation(class ASBS_Player* player) {
+	player->HoldItems[0]->IsBucketEmpty = true;
+	player->HoldItems[0]->UpdateMeshMat();
 }
 

@@ -95,9 +95,9 @@ public:
  	UFUNCTION(Server, Reliable)
  	void Server_FindTrain(const TArray<class AItem*>& PlayerItems);
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_AttachHoldItem(class AItem* PlayerItem);
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_DetachHoldItem(class AItem* PlayerItem);
+	void Client_AttachHoldItem(class AItem* PlayerItem);
+	UFUNCTION(Client, Unreliable)
+	void Client_DetachHoldItem(class AItem* PlayerItem);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_RemoveHoldItem();
 	UFUNCTION(NetMulticast, Unreliable)

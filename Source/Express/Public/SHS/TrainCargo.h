@@ -38,12 +38,12 @@ public:
 	void AddResource(TArray<AItem*> Resources);
 	TArray<AItem*> GetResource(EItemType ResourceType);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AttachResource(AItem* Resource);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AttachResourceToParent(AItem* Resource, AActor* ParentActor);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_DetachResource(AItem* Resource);
+	UFUNCTION(Client, Reliable)
+	void Client_AttachResource(AItem* Resource);
+	UFUNCTION(Client, Reliable)
+	void Client_AttachResourceToParent(AItem* Resource, AActor* ParentActor);
+	UFUNCTION(Client, Reliable)
+	void Client_DetachResource(AItem* Resource);
 
 protected:
 	// 화물차가 담을 수 있는 최대 수량
