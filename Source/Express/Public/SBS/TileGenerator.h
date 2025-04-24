@@ -66,6 +66,10 @@ public:
 
 	void GenerateMap();
 
+protected:
+    UPROPERTY(EditAnywhere, Category = "Test")
+    bool bOnTest = false;
+
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Train")
 	TSubclassOf<class ATrainEngine> TrainFactory;

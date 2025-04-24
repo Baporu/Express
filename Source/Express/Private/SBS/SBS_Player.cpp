@@ -621,12 +621,8 @@ void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldConte
     UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
 }
 
-void ASBS_Player::Client_EndFire_Implementation(class ATrainModule* TrainModule, ASBS_Player* player) {
-    Server_EndFire(TrainModule, player);
-}
-
-void ASBS_Player::Server_EndFire_Implementation(class ATrainModule* TrainModule, ASBS_Player* player) {
-    TrainModule->Server_PlayerEndFire(player);
+void ASBS_Player::Server_RequestEndFire_Implementation(class ATrainModule* TrainModule) {
+    TrainModule->Server_EndFire(this);
 }
 
 void ASBS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

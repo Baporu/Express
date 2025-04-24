@@ -13,6 +13,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Camera/CameraActor.h"
 #include "EngineUtils.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Exp_GameState.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -28,8 +30,10 @@ void ATrainEngine::BeginPlay()
 
 	TrainEngine = this;
 	ModuleNumber = 0;
+	MinSpeed = TrainSpeed;
 
 	if (HasAuthority()) {
+		Cast<AExp_GameState>(GetWorld()->GetGameState())->SetTrainEngine(this);
 		GetMainCamera();
 		TrainModules.Add(this);
 		SpawnDefaultModules();
@@ -46,10 +50,11 @@ void ATrainEngine::Tick(float DeltaTime)
 
 	if (!bIsStarted) return;
 
+	if (bIsFinished) AccelModules(DeltaTime);
+
 	// 타일 위치에 도달했을 경우, 다음 타일 검색
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5) {
-		if (CurrentTile->bIsFinished) { PRINTFATALLOG(TEXT("GAME CLEAR!")); }
-		else { CheckNextTile(); }
+		CheckNextTile();
 	}
 }
 
@@ -136,6 +141,11 @@ void ATrainEngine::CheckMakeRail()
 			crafter->CheckMakeRail();
 }
 
+void ATrainEngine::AccelModules() {
+	for (int i = 0; i < TrainModules.Num(); ++i)
+		TrainModules[i]->bIsFinished = true;
+}
+
 void ATrainEngine::CheckNextTile()
 {
 	if (!HasAuthority()) return;
@@ -163,7 +173,7 @@ void ATrainEngine::CheckNextTile()
 	// 상하 탐색
 	if (RowIndex - 1 > 0)
 		// 선로가 깔린 타일이고, 아직 지나가지 않은 길이면
-		if (grid[RowIndex - 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) {
+		if ((grid[RowIndex - 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex - 1][ColIndex]->bIsPassed == false) || grid[RowIndex - 1][ColIndex]->TileType == ETileType::Station_Z) {
 			CurrentTile = grid[RowIndex - 1][ColIndex];
 
 			NextPos = CurrentTile->GetActorLocation();
@@ -176,7 +186,7 @@ void ATrainEngine::CheckNextTile()
 			return;
 		}
 	if (RowIndex + 1 < grid.Num())
-		if (grid[RowIndex + 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex + 1][ColIndex]->bIsPassed == false) {
+		if ((grid[RowIndex + 1][ColIndex]->TileType == ETileType::Rail && grid[RowIndex + 1][ColIndex]->bIsPassed == false) || grid[RowIndex + 1][ColIndex]->TileType == ETileType::Station_Z) {
 			CurrentTile = grid[RowIndex + 1][ColIndex];
 
 			NextPos = CurrentTile->GetActorLocation();
@@ -191,7 +201,7 @@ void ATrainEngine::CheckNextTile()
 
 	// 좌우 탐색
 	if (ColIndex - 1 > 0)
-		if (grid[RowIndex][ColIndex - 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) {
+		if ((grid[RowIndex][ColIndex - 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex - 1]->bIsPassed == false) || grid[RowIndex][ColIndex - 1]->TileType == ETileType::Station_Z) {
 			CurrentTile = grid[RowIndex][ColIndex - 1];
 
 			NextPos = CurrentTile->GetActorLocation();
@@ -204,7 +214,7 @@ void ATrainEngine::CheckNextTile()
 			return;
 		}
 	if (ColIndex + 1 < grid[RowIndex].Num())
-		if (grid[RowIndex][ColIndex + 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex + 1]->bIsPassed == false) {
+		if ((grid[RowIndex][ColIndex + 1]->TileType == ETileType::Rail && grid[RowIndex][ColIndex + 1]->bIsPassed == false) || grid[RowIndex][ColIndex + 1]->TileType == ETileType::Station_Z) {
 			CurrentTile = grid[RowIndex][ColIndex + 1];
 
 			NextPos = CurrentTile->GetActorLocation();
@@ -216,6 +226,9 @@ void ATrainEngine::CheckNextTile()
 			ColIndex++;
 			return;
 		}
+
+	if (CurrentTile->TileType == ETileType::Station_Z)
+		UKismetSystemLibrary::PrintString(GetWorld(), FString(TEXT("GAME CLEAR!!!")), true, true, FLinearColor::Yellow, 1.0f);
 
 	//PRINTFATALLOG(TEXT("Current Rail: %s, There is no rail, Game Failed"), *CurrentTile->GetActorNameOrLabel());
 }
@@ -246,11 +259,11 @@ void ATrainEngine::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
 	// 엔진에 불 붙은 경우
-	if (bOnFire) player->Client_EndFire(this, player);
+	if (bOnFire) player->Server_RequestEndFire(this);
 
 	// 물탱크에 불 붙은 경우
 	if (TrainWaterTank->bOnFire)
-		player->Client_EndFire(TrainWaterTank, player);
+		player->Server_RequestEndFire(TrainWaterTank);
 }
 
 void ATrainEngine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -260,42 +273,6 @@ void ATrainEngine::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ATrainEngine, TrainModules);
 	DOREPLIFETIME(ATrainEngine, GridManager);
 	DOREPLIFETIME(ATrainEngine, TrainWaterTank);
-}
-
-// ================================ 임시 함수들 ================================
-void ATrainEngine::GetTileLocation()
-{	
-	// 현재 위치를 다음 모듈에게 넘겨주고
-	TrainModules[1]->SetModuleLocation(NextPos);
-	TrainModules[1]->SetModuleRotation(NextRot);
-
-	int rand = FMath::RandRange(1, 4);
-
-	switch (rand)
-	{
-		// 전
-		case 1:
-			NextPos.X += 100.0f;
-			NextRot = 0.0;
-			break;
-		// 후
-		case 2:
-			NextPos.X -= 100.0f;
-			NextRot = 180.0;
-			break;
-		// 좌
-		case 3:
-			NextPos.Y += 100.0f;
-			NextRot = 90.0;
-			break;
-		// 우
-		case 4:
-			NextPos.Y -= 100.0f;
-			NextRot = -90.0;
-			break;
-	}
-
-	UE_LOG(LogTrain, Log, TEXT("Next Position Changed"));
 }
 
 void ATrainEngine::SpawnDefaultModules()
@@ -331,5 +308,15 @@ void ATrainEngine::GetMainCamera() {
 		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Camera Fail"));
+}
+
+void ATrainEngine::AccelModules(float DeltaTime) {
+	// 4초에 걸쳐서 가속
+	EasingAlpha += DeltaTime / 4;
+
+	TrainSpeed = FMath::Lerp(MinSpeed, MaxSpeed, FMath::Clamp((FMath::InterpEaseIn(0.0f, 1.0f, EasingAlpha, 2.0f)), 0.0f, 1.0f));
+
+	for (int i = 1; i < TrainModules.Num(); ++i)
+		TrainModules[i]->ModuleSpeed = TrainSpeed;
 }
 

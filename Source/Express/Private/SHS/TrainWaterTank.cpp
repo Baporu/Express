@@ -40,7 +40,7 @@ void ATrainWaterTank::Tick(float DeltaTime)
 
 	if (!HasAuthority()) return;
 
-	if (!bIsStarted) return;
+	if (!bIsStarted || bIsFinished) return;
 
 	FireTimer += DeltaTime;
 
@@ -58,7 +58,7 @@ void ATrainWaterTank::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedCompone
 
 	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
-	player->Client_EndFire(this, player);
+	player->Server_RequestEndFire(this);
 }
 
 void ATrainWaterTank::ChangeTankColor()

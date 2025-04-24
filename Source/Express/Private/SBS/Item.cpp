@@ -174,7 +174,6 @@ void AItem::CreateItem(EItemType Type)
     {
 	    ItemType = Type;
         IsTool = (Type == EItemType::Axe || Type == EItemType::Pickaxe || Type == EItemType::Bucket);
-		IsBucketEmpty = (Type == EItemType::Bucket);
 		UpdateMeshMat();
 		//Multicast_UpdateMeshMat();
     }

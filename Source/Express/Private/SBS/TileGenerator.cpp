@@ -78,7 +78,7 @@ void ATileGenerator::BeginPlay()
                                 // 시작 역 바로 다음 선로가 아니면 기차가 못 지나가게 설정
                                 if (Col - 1 > 0 && TileTypes[Row][Col - 1] == ETileType::Station_A)
                                     NewTile->bIsLastRail = true;
-                                else NewTile->bIsPassed = true;
+                                else bOnTest ? NewTile->bIsPassed = false : NewTile->bIsPassed = true;
                                 break;
                             case ETileType::Station_A:
                                 NewTile->CreateTile(ETileType::Ground);

@@ -14,6 +14,7 @@
 #include "SHS/TrainEngine.h"
 #include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
+#include "Exp_GameState.h"
 
 
 // Sets default values
@@ -153,13 +154,13 @@ ATile* ATile::CheckRail()
 	if (gridRow - 1 > 0 && GridManager->Grid[gridRow - 1][gridColumn]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
 		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
-			bIsFinished = true;
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 		// 위쪽이 도착 역인지 확인
 		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
-			bIsFinished = true;
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 		// 아래쪽이 도착 역인지 확인
 		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
-			bIsFinished = true;
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 
 		return GridManager->Grid[gridRow - 1][gridColumn];
 	}
@@ -168,7 +169,10 @@ ATile* ATile::CheckRail()
 	if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
 		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
-			bIsFinished = true;
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+		// 아래쪽이 도착 역인지 확인
+		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 
 		return GridManager->Grid[gridRow][gridColumn - 1];
 	}
@@ -176,16 +180,22 @@ ATile* ATile::CheckRail()
 	if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
 		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
-			bIsFinished = true;
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 		// 위쪽이 도착 역인지 확인
 		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
-			bIsFinished = true;
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 
 		return GridManager->Grid[gridRow][gridColumn + 1];
 	}
 	// 오른쪽 타일 탐색 (게임 구조 상 오른쪽 타일 검색할 일이 제일 적어서 아래로 뺌)
 	if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->bIsLastRail) {
-		// 도착 역은 오른쪽에서 접근할 수 없음
+		// 위쪽이 도착 역인지 확인
+		if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
+		Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+		// 아래쪽이 도착 역인지 확인
+		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+
 		return GridManager->Grid[gridRow + 1][gridColumn];
 	}
 
@@ -288,6 +298,7 @@ void ATile::OnRep_ContainedItem()
 		}
 
 		ContainedItem[i]->Server_Detach();
+		PRINTLOG(TEXT("Fix Here"));
 		if (i > 0)
 		{
 			ContainedItem[i]->Server_Attach(ContainedItem[i - 1], FName(TEXT("ItemHead")));

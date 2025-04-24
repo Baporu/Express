@@ -20,7 +20,7 @@ void ATrainCrafter::Tick(float DeltaTime)
 
 	MakeTimer += DeltaTime;
 
-	if (MakeTimer >= MakeTime)
+	if (MakeTimer >= MakeTime && !bIsFinished)
 		MakeRail();
 }
 

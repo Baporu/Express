@@ -83,6 +83,8 @@ void ATrainModule::Tick(float DeltaTime) {
 			RotatorQueue.Dequeue(NextRot);
 	}
 
+	if (bIsFinished) return;
+
 	// 시간 다 채우면 화재 시작
 	if (FireTimer > FireTime) StartFire();
 
@@ -168,8 +170,10 @@ void ATrainModule::SetModuleRotation(double CurrentYaw)
 	RotatorQueue.Enqueue(CurrentYaw);
 }
 
-void ATrainModule::Server_PlayerEndFire_Implementation(ASBS_Player* player) {
-	Server_EndFire(player);
+void ATrainModule::Server_EndFire_Implementation(class ASBS_Player* player) {
+	Multicast_ResetWater(player);
+
+	EndFire();
 }
 
 void ATrainModule::MoveTrain(float DeltaTime)
@@ -217,7 +221,7 @@ void ATrainModule::OnWaterBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 
 	if (player->HoldItems.IsEmpty() || player->HoldItems[0]->IsBucketEmpty) return;
 
-	Server_EndFire(player);
+	player->Server_RequestEndFire(this);
 }
 
 void ATrainModule::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -227,12 +231,7 @@ void ATrainModule::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ATrainModule, FireTimer);
 	DOREPLIFETIME(ATrainModule, TrainEngine);
 	DOREPLIFETIME(ATrainModule, ModuleNumber);
-}
-
-void ATrainModule::Server_EndFire_Implementation(class ASBS_Player* player) {
-	Multicast_ResetWater(player);
-
-	EndFire();
+	DOREPLIFETIME(ATrainModule, bIsFinished);
 }
 
 void ATrainModule::Multicast_ResetWater_Implementation(class ASBS_Player* player) {

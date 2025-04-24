@@ -48,6 +48,8 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<ATrainModule*> TrainModules;
 
+	void AccelModules();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
 	float TrainSpeed = 25.0f;
@@ -90,9 +92,15 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Move")
 	class ACameraActor* MainCam;
 
-	// 임시 함수들
-	void GetTileLocation();
+	// 초기화 함수들, Init()에서 호출됨
 	void SpawnDefaultModules();
-
 	void GetMainCamera();
+
+
+	float MinSpeed = 25.0f;
+	float MaxSpeed = 100.0f;
+	float EasingAlpha = 0.0f;
+
+	// 게임 끝날 때 Tick()에서 호출하는 함수
+	void AccelModules(float DeltaTime);
 };

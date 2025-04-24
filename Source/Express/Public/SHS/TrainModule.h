@@ -46,7 +46,10 @@ public:
 	void SetModuleRotation(double CurrentYaw);
 
 	UFUNCTION(Server, Reliable)
-	void Server_PlayerEndFire(class ASBS_Player* player);
+	void Server_EndFire(class ASBS_Player* player);
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Train")
+	bool bIsFinished = false;
 
 protected:
 	UPROPERTY(EditAnywhere)
@@ -105,8 +108,6 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION(Server, Reliable)
-	void Server_EndFire(class ASBS_Player* player);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ResetWater(class ASBS_Player* player);
 
