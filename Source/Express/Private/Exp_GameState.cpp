@@ -15,3 +15,10 @@ void AExp_GameState::AccelTrain() {
 
 	TrainEngine->AccelModules();
 }
+
+void AExp_GameState::DecelTrain() {
+	if (!HasAuthority())
+		UE_LOG(LogTrain, Error, TEXT("CLIENT TRIED TO ACCESS THIS FUNCTION"));
+
+	TrainEngine->DecelModules();
+}

@@ -17,6 +17,7 @@ class EXPRESS_API AExp_GameState : public AGameStateBase
 public:
 	void SetTrainEngine(class ATrainEngine* Engine);
 	void AccelTrain();
+	void DecelTrain();
 
 private:
 	class ATrainEngine* TrainEngine;

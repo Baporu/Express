@@ -22,6 +22,10 @@ public:
 	bool bIsToolsSpawned = false;
 	UFUNCTION(Exec)
 	void CoolDownTank();
+	UFUNCTION(Exec)
+	void AccelTrain();
+	UFUNCTION(Exec)
+	void DecelTrain();
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 };

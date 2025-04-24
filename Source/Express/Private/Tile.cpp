@@ -153,14 +153,20 @@ ATile* ATile::CheckRail()
 	// 왼쪽 타일 탐색, 타일에 선로가 깔려있으면 선로 연결 가능
 	if (gridRow - 1 > 0 && GridManager->Grid[gridRow - 1][gridColumn]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
-		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
+		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 		// 위쪽이 도착 역인지 확인
-		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
+		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 		// 아래쪽이 도착 역인지 확인
-		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
+		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 
 		return GridManager->Grid[gridRow - 1][gridColumn];
 	}
@@ -168,33 +174,45 @@ ATile* ATile::CheckRail()
 	// 위쪽 타일 탐색
 	if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
-		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
+		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 		// 아래쪽이 도착 역인지 확인
-		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
+		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 
 		return GridManager->Grid[gridRow][gridColumn - 1];
 	}
 	// 아래쪽 타일 탐색
 	if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
-		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z)
+		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 		// 위쪽이 도착 역인지 확인
-		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
+		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 
 		return GridManager->Grid[gridRow][gridColumn + 1];
 	}
 	// 오른쪽 타일 탐색 (게임 구조 상 오른쪽 타일 검색할 일이 제일 적어서 아래로 뺌)
 	if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->bIsLastRail) {
 		// 위쪽이 도착 역인지 확인
-		if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z)
-		Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
-		// 아래쪽이 도착 역인지 확인
-		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z)
+		if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
+		// 아래쪽이 도착 역인지 확인
+		else if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && GridManager->Grid[gridRow][gridColumn + 1]->TileType == ETileType::Station_Z) {
+			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
+			bIsFinished = true;
+		}
 
 		return GridManager->Grid[gridRow + 1][gridColumn];
 	}

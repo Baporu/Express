@@ -101,6 +101,8 @@ public:
 	// 끝 선로인지 확인하는 변수
 	UPROPERTY(EditAnywhere)
 	bool bIsLastRail = false;
+	UPROPERTY(EditAnywhere)
+	bool bIsFinished = false;
 
 	UPROPERTY(VisibleAnywhere, Category = "Tile")
 	int32 gridRow = -1;

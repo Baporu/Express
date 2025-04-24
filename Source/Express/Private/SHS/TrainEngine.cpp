@@ -50,7 +50,7 @@ void ATrainEngine::Tick(float DeltaTime)
 
 	if (!bIsStarted) return;
 
-	if (bIsFinished) AccelModules(DeltaTime);
+	if (bIsFinished) bOnAccel ? AccelModules(DeltaTime) : DecelModules(DeltaTime);
 
 	// 타일 위치에 도달했을 경우, 다음 타일 검색
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5) {
@@ -146,6 +146,11 @@ void ATrainEngine::AccelModules() {
 		TrainModules[i]->bIsFinished = true;
 }
 
+void ATrainEngine::DecelModules() {
+	bOnAccel = false;
+	EasingAlpha = 0.f;
+}
+
 void ATrainEngine::CheckNextTile()
 {
 	if (!HasAuthority()) return;
@@ -169,6 +174,11 @@ void ATrainEngine::CheckNextTile()
 	TrainModules[1]->SetModuleRotation(NextRot);
 
 //	PRINTLOG(TEXT("Location Enqueued"));
+
+	if (CurrentTile->bIsFinished) {
+		bOnAccel = false;
+		EasingAlpha = 0.0f;
+	}
 
 	// 상하 탐색
 	if (RowIndex - 1 > 0)
@@ -239,8 +249,18 @@ void ATrainEngine::MoveTrain(float DeltaTime)
 	FVector vt = dir.GetSafeNormal() * TrainSpeed * DeltaTime;
 	SetActorLocation(GetActorLocation() + vt);
 
-	// 카메라도 같이 이동
-	MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, vt.Y, 0.0));
+	// 목표 위치에 도달하거나 지나칠 경우
+	if (FVector::Dist2D(GetActorLocation(), NextPos) <= vt.Size()) {
+		// 목표 위치에 정확하게 도달하도록 강제로 설정
+		SetActorLocation(NextPos);
+		MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, dir.Y, 0.0));
+	}
+	else {
+		// 목표 위치에 도달하지 않았다면 계속 이동
+		SetActorLocation(GetActorLocation() + vt);
+		// 카메라도 같이 이동
+		MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, vt.Y, 0.0));
+	}
 }
 
 void ATrainEngine::OnFire(float DeltaTime)
@@ -315,6 +335,17 @@ void ATrainEngine::AccelModules(float DeltaTime) {
 	EasingAlpha += DeltaTime / 4;
 
 	TrainSpeed = FMath::Lerp(MinSpeed, MaxSpeed, FMath::Clamp((FMath::InterpEaseIn(0.0f, 1.0f, EasingAlpha, 2.0f)), 0.0f, 1.0f));
+
+	for (int i = 1; i < TrainModules.Num(); ++i)
+		TrainModules[i]->ModuleSpeed = TrainSpeed;
+}
+
+void ATrainEngine::DecelModules(float DeltaTime) {
+	// 1초에 걸쳐서 감속
+	EasingAlpha += DeltaTime;
+	EasingAlpha = FMath::Clamp(EasingAlpha, 0.f, 1.f);
+
+	TrainSpeed = FMath::Lerp(MaxSpeed, MinSpeed, FMath::Clamp((FMath::InterpEaseOut(0.0f, 1.0f, EasingAlpha, 2.0f)), 0.0f, 1.0f));
 
 	for (int i = 1; i < TrainModules.Num(); ++i)
 		TrainModules[i]->ModuleSpeed = TrainSpeed;

@@ -184,6 +184,16 @@ void ATrainModule::MoveTrain(float DeltaTime)
 	FVector dir = NextPos - GetActorLocation();
 	FVector vt = dir.GetSafeNormal() * ModuleSpeed * DeltaTime;
 	SetActorLocation(GetActorLocation() + vt);
+
+	// 목표 위치에 도달하거나 지나칠 경우
+	if (FVector::Dist2D(GetActorLocation(), NextPos) <= vt.Size()) {
+		// 목표 위치에 정확하게 도달하도록 강제로 설정
+		SetActorLocation(NextPos);
+	}
+	else {
+		// 목표 위치에 도달하지 않았다면 계속 이동
+		SetActorLocation(GetActorLocation() + vt);
+	}
 }
 
 void ATrainModule::RotateTrain(float DeltaTime)

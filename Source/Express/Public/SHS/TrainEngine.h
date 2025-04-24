@@ -49,6 +49,7 @@ public:
 	TArray<ATrainModule*> TrainModules;
 
 	void AccelModules();
+	void DecelModules();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
@@ -100,7 +101,9 @@ private:
 	float MinSpeed = 25.0f;
 	float MaxSpeed = 100.0f;
 	float EasingAlpha = 0.0f;
+	bool bOnAccel = true;
 
 	// 게임 끝날 때 Tick()에서 호출하는 함수
 	void AccelModules(float DeltaTime);
+	void DecelModules(float DeltaTime);
 };
