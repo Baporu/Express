@@ -691,18 +691,23 @@ void ASBS_Player::Server_Interact_Implementation()
             if (HoldItems.Top()->ItemType != TargetItem[0]->ItemType)
             {
                 ATile* PlaceTile = CurrentTile;
-                //TArray<AItem*> temp = TargetItem;
+               
                 if (PlaceTile && PlaceTile->TileType == ETileType::Ground)
                 {
                     //¼Õ¿¡¼­ ¶©´Ù.
+                    HoldItems[0]->SetOwner(this);
                     HoldItems[0]->Server_Detach();
                     FVector TargetPos = PlaceTile->GetActorLocation();
                     TargetPos.Z += 100;
                     HoldItems[0]->SetActorLocation(TargetPos);
                     //temp[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
                     //temp[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+                    TargetItem[0]->SetOwner(this);
                     TargetItem[0]->Server_Attach(this, FName(TEXT("HandSocket")));
+
+                    //TArray<AItem*> temp = TargetItem;
                     PlaceTile->Server_SetContainedItem(HoldItems);
+
                     HoldItems.Empty();
                     HoldItems.Append(TargetItem);
 
@@ -737,11 +742,11 @@ void ASBS_Player::Server_Interact_Implementation()
 
 void ASBS_Player::Server_Release_Implementation()
 {
+    GetCurrentTile();
     if (HoldItems.IsEmpty()) return;
     if (!CurrentTile) return;
     if (!CurrentTile->GetContainedItem().IsEmpty()) return;
 
-    GetCurrentTile();
     FVector TargetPos = CurrentTile->GetActorLocation();
     TargetPos.Z += 100;
 

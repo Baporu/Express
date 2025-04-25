@@ -266,12 +266,15 @@ void AItem::Server_SetItemLocation_Implementation(const FVector& NewLocation)
 void AItem::Server_Detach_Implementation()
 {
     DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    SetActorRotation(FRotator(0,0,0));
     Multicast_Detach();
 }
 
 void AItem::Multicast_Detach_Implementation()
 {
     DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+    SetActorRotation(FRotator(0, 0, 0));
+
 }
 
 void AItem::Server_CreateItem_Implementation(EItemType Type)
