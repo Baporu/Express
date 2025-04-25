@@ -66,14 +66,14 @@ public:
 
 	void GenerateMap();
 
-protected:
-    UPROPERTY(EditAnywhere, Category = "Test")
-    bool bOnTest = false;
-
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Train")
 	TSubclassOf<class ATrainEngine> TrainFactory;
+	
+    TTuple<int32, int32> StationPos;
 
+
+    void SetRailOptions();
 
 	void SetTrain(ATile* Tile, int32 TileRow, int32 TileColumn);
 

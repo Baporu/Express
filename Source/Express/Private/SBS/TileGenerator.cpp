@@ -75,14 +75,18 @@ void ATileGenerator::BeginPlay()
                             case ETileType::Rail:
                                 NewTile->CreateTile(ETileType::Ground);
                                 NewTile->TileType = ETileType::Rail;
-                                // 시작 역 바로 다음 선로가 아니면 기차가 못 지나가게 설정
+                                NewTile->bIsChecked = false;
+                                // 시작 역 바로 다음 선로를 종단 선로로 설정
                                 if (Col - 1 > 0 && TileTypes[Row][Col - 1] == ETileType::Station_A)
                                     NewTile->bIsLastRail = true;
-                                else bOnTest ? NewTile->bIsPassed = false : NewTile->bIsPassed = true;
                                 break;
                             case ETileType::Station_A:
                                 NewTile->CreateTile(ETileType::Ground);
                                 NewTile->TileType = ETileType::Station_A;
+
+								StationPos.Get<0>() = Row;
+								StationPos.Get<1>() = Col;
+
                                 break;
                             case ETileType::Station_Z:
                                 NewTile->CreateTile(ETileType::Ground);
@@ -114,6 +118,8 @@ void ATileGenerator::BeginPlay()
         if (HasAuthority())
             GridManager->Grid.Add(ColTiles);
     }
+
+    SetRailOptions();
 
     for (int i = 0; i < GridManager->Grid.Num(); i++) {
         for (int j = 0; j < GridManager->Grid[i].Num(); j++)
@@ -186,6 +192,28 @@ void ATileGenerator::GenerateMap()
 			}
 		}
         
+    }
+}
+
+void ATileGenerator::SetRailOptions() {
+    int row = StationPos.Get<0>();
+
+    for (int col = 0; col < GridManager->Grid[row].Num(); ++col) {
+        if (GridManager->Grid[row][col]->TileType != ETileType::Rail)
+            continue;
+
+        // 시작 역보다 왼쪽에 있는 선로들은 전부 데코용이므로 지나간 판정을 넣어준다.
+        if (col < StationPos.Get<1>()) {
+            GridManager->Grid[row][col]->bIsPassed = true;
+            GridManager->Grid[row][col]->bIsChecked = true;
+        }
+
+        else if (GridManager->Grid[row][col]->bIsLastRail) {
+            ATile* StartRail = GridManager->Grid[row][col];
+            StartRail->FindLastRail();
+
+            break;
+        }
     }
 }
 

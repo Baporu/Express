@@ -143,6 +143,62 @@ void ATile::SetContainedItem(TArray<AItem*> Item)
 	}
 }
 
+void ATile::FindLastRail() {
+	if (!GridManager || GridManager->Grid.IsEmpty())
+		UE_LOG(LogTemp, Fatal, TEXT("Error: Tile - CheckRail(), There is no grid."));
+
+	TArray<ATile*> Stack;
+	Stack.Push(this);
+
+	ATile* LastRailTile = this;
+
+	while (Stack.Num() > 0) {
+		ATile* Current = Stack.Pop();
+
+		if (!Current || Current->bIsChecked)
+			continue;
+
+		Current->bIsChecked = true;
+		Current->bIsLastRail = false;
+		LastRailTile = Current;
+
+		int32 Row = Current->gridRow;
+		int32 Col = Current->gridColumn;
+
+		// 오른쪽
+		if (Row + 1 < GridManager->Grid.Num()) {
+			ATile* Right = GridManager->Grid[Row + 1][Col];
+			if (Right && Right->TileType == ETileType::Rail && !Right->bIsChecked)
+				Stack.Push(Right);
+		}
+
+		// 왼쪽
+		if (Row - 1 >= 0) {
+			ATile* Left = GridManager->Grid[Row - 1][Col];
+			if (Left && Left->TileType == ETileType::Rail && !Left->bIsChecked)
+				Stack.Push(Left);
+		}
+
+		// 위쪽
+		if (Col - 1 >= 0) {
+			ATile* Up = GridManager->Grid[Row][Col - 1];
+			if (Up && Up->TileType == ETileType::Rail && !Up->bIsChecked)
+				Stack.Push(Up);
+		}
+
+		// 아래쪽
+		if (Col + 1 < GridManager->Grid[Row].Num()) {
+			ATile* Down = GridManager->Grid[Row][Col + 1];
+			if (Down && Down->TileType == ETileType::Rail && !Down->bIsChecked)
+				Stack.Push(Down);
+		}
+	}
+
+	// 전부 순회한 뒤, 마지막 방문한 타일에만 표시
+	if (LastRailTile)
+		LastRailTile->bIsLastRail = true;
+}
+
 ATile* ATile::CheckRail()
 {
 	if (!GridManager || GridManager->Grid.IsEmpty()) {
@@ -151,14 +207,14 @@ ATile* ATile::CheckRail()
 	}
 
 	// 왼쪽 타일 탐색, 타일에 선로가 깔려있으면 선로 연결 가능
-	if (gridRow - 1 > 0 && GridManager->Grid[gridRow - 1][gridColumn]->bIsLastRail) {
+	if (gridRow - 1 >= 0 && GridManager->Grid[gridRow - 1][gridColumn]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
 		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 			bIsFinished = true;
 		}
 		// 위쪽이 도착 역인지 확인
-		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
+		else if (gridColumn - 1 >= 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 			bIsFinished = true;
 		}
@@ -172,7 +228,7 @@ ATile* ATile::CheckRail()
 	}
 
 	// 위쪽 타일 탐색
-	if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->bIsLastRail) {
+	if (gridColumn - 1 >= 0 && GridManager->Grid[gridRow][gridColumn - 1]->bIsLastRail) {
 		// 오른쪽이 도착 역인지 확인
 		if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
@@ -194,7 +250,7 @@ ATile* ATile::CheckRail()
 			bIsFinished = true;
 		}
 		// 위쪽이 도착 역인지 확인
-		else if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
+		else if (gridColumn - 1 >= 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 			bIsFinished = true;
 		}
@@ -204,7 +260,7 @@ ATile* ATile::CheckRail()
 	// 오른쪽 타일 탐색 (게임 구조 상 오른쪽 타일 검색할 일이 제일 적어서 아래로 뺌)
 	if (gridRow + 1 < GridManager->Grid.Num() && GridManager->Grid[gridRow + 1][gridColumn]->bIsLastRail) {
 		// 위쪽이 도착 역인지 확인
-		if (gridColumn - 1 > 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
+		if (gridColumn - 1 >= 0 && GridManager->Grid[gridRow][gridColumn - 1]->TileType == ETileType::Station_Z) {
 			Cast<AExp_GameState>(GetWorld()->GetGameState())->AccelTrain();
 			bIsFinished = true;
 		}
@@ -265,11 +321,11 @@ ATile* ATile::CheckRailItem()
 		return GridManager->Grid[gridRow][gridColumn + 1];
 
 	// 위쪽 타일 탐색
-	if (gridColumn - 1 > 0 && !GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.Num() == 1)
+	if (gridColumn - 1 >= 0 && !GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.Num() == 1)
 		return GridManager->Grid[gridRow][gridColumn - 1];
 
 	// 왼쪽 타일 탐색 (게임 구조 상 가장 검색할 일이 적을 것 같아서 아래로 둠)
-	if (gridRow - 1 > 0 && !GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.Num() == 1)
+	if (gridRow - 1 >= 0 && !GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.Num() == 1)
 		return GridManager->Grid[gridRow - 1][gridColumn];
 
 	// 전부 선로 안 깔려있으면 선로 연결 불가

@@ -103,6 +103,8 @@ public:
 	bool bIsLastRail = false;
 	UPROPERTY(EditAnywhere)
 	bool bIsFinished = false;
+	UPROPERTY(VisibleAnywhere)
+	bool bIsChecked = true;
 
 	UPROPERTY(VisibleAnywhere, Category = "Tile")
 	int32 gridRow = -1;
@@ -112,7 +114,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Grid")
 	class AGridManager* GridManager;
 
-
+	void FindLastRail();
 	ATile* CheckRail();
 	void SetRail(ATile* PreviousTile);
 	ATile* CheckRailItem();
