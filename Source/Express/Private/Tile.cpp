@@ -345,6 +345,9 @@ ATile* ATile::CheckRailItem()
 
 void ATile::Server_SetContainedItem_Implementation(const TArray<AItem*>& Item)
 {
+
+	//Item[0]->SetOwner(GetWorld()->GetFirstPlayerController()); // 또는 타일 소유자
+
 	ContainedItem = Item;
 	Multicast_SetContainedItem(Item);
 	UE_LOG(LogTemp, Warning, TEXT("Server: Set ContainedItem, Count = %d"), Item.Num());
@@ -381,12 +384,15 @@ void ATile::OnRep_ContainedItem()
 			UE_LOG(LogTemp, Warning, TEXT("Client: ContainedItem cleared"));
 			continue;
 		}
-
-		ContainedItem[i]->Server_Detach();
-		PRINTLOG(TEXT("Fix Here"));
-		if (i > 0)
+		if (HasAuthority())
 		{
-			ContainedItem[i]->Server_Attach(ContainedItem[i - 1], FName(TEXT("ItemHead")));
+			ContainedItem[i]->SetOwner(GetWorld()->GetFirstPlayerController()); // 소유권 설정
+			ContainedItem[i]->Server_Detach();
+			//PRINTLOG(TEXT("Fix Here"));
+			if (i > 0)
+			{
+				ContainedItem[i]->Server_Attach(ContainedItem[i - 1], FName(TEXT("ItemHead")));
+			}
 		}
 	}
 }
@@ -426,7 +432,7 @@ void ATile::Server_HarvestTile_Implementation()
 		return;
 	}
 	FVector GroundLocation = FVector(GetActorLocation().X, GetActorLocation().Y, 0.f);
-	for (TActorIterator<ATile> It(GetWorld()); It; ++It)
+	for(TActorIterator<ATile> It(GetWorld()); It; ++It)
 	{
 		if (It->GetActorLocation() == GroundLocation)// && It->TileType == ETileType::Ground)
 		{
