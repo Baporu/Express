@@ -99,6 +99,8 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetItemLocation(const FVector& Newlocation);
+	//UFUNCTION(Server, Reliable)
+	//void Server_SetItemLocation(const FVector& Newlocation);
 	UFUNCTION(Server, Reliable)
 	void Server_Detach();
 	UFUNCTION(NetMulticast, Reliable)
