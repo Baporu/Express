@@ -22,8 +22,8 @@
 ASBS_Player::ASBS_Player()
 {
     PrimaryActorTick.bCanEverTick = true;
-    TempHandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TempHandMesh"));
-    TempHandMesh->SetupAttachment(GetMesh());
+	//TempHandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TempHandMesh"));
+	//TempHandMesh->SetupAttachment(GetMesh());
 
     //네트워크
     SetNetUpdateFrequency(100);
@@ -606,7 +606,7 @@ void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& Pl
 }
 
 void ASBS_Player::Client_AttachHoldItem_Implementation(class AItem* PlayerItem) {
-    PlayerItem->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    PlayerItem->AttachToComponent(this->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("HandSocket"));
 }
 
 void ASBS_Player::Client_DetachHoldItem_Implementation(class AItem* PlayerItem) {
@@ -689,7 +689,7 @@ void ASBS_Player::Server_Interact_Implementation()
                     HoldItems[0]->SetActorLocation(TargetPos);
                     //temp[0]->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
                     //temp[0]->AttachToComponent(TempHandMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-                    TargetItem[0]->Server_Attach(this, FName(TEXT("TempHandMesh")));
+                    TargetItem[0]->Server_Attach(this, FName(TEXT("HandSocket")));
                     PlaceTile->Server_SetContainedItem(HoldItems);
                     HoldItems.Empty();
                     HoldItems.Append(TargetItem);
@@ -702,7 +702,7 @@ void ASBS_Player::Server_Interact_Implementation()
         else //물건 안들고 있으면 =====줍기=====
         {
             //attach 하고 스택에 추가
-            TargetItem[0]->Server_Attach(this, FName(TEXT("TempHandMesh")));
+            TargetItem[0]->Server_Attach(this, FName(TEXT("HandSocket")));
             HoldItems.Append(TargetItem);
 
             //타일에서 아이템 들었으니까 타일의 아이템 제거
@@ -759,8 +759,8 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
 {
     if (TargetItem && HoldItems.Num() > 0)
     {
-       TargetItem->Server_Attach(HoldItems.Top(), TEXT("ItemHead"));
-       ForceNetUpdate();
+       TargetItem->Server_Attach(HoldItems.Top(), FName(TEXT("ItemHead")));
+       //ForceNetUpdate();
     }
 }
 

@@ -4,6 +4,7 @@
 #include "SBS/Item.h"
 #include "Components/StaticMeshComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "SBS/SBS_Player.h"
 
 // Sets default values
 AItem::AItem()
@@ -212,8 +213,23 @@ void AItem::Server_Attach_Implementation(AActor* TargetActor, FName SocketName)
     if (TargetActor)
     {
         DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
-        Multicast_Attach(TargetActor, SocketName);
+        if (ASBS_Player* Character = Cast<ASBS_Player>(TargetActor))
+        {
+            AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+            Multicast_Attach(TargetActor, SocketName);
+
+        }
+        else
+        {
+            AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+            Multicast_Attach(TargetActor, SocketName);
+        }
+        if (IsTool)
+        {
+            this->SetActorRelativeRotation(FRotator(0, 90, 90));
+            this->SetActorRelativeLocation(FVector(-20, -13, 26));
+        }
+
     }
 }
 
@@ -222,7 +238,23 @@ void AItem::Multicast_Attach_Implementation(AActor* TargetActor, FName SocketNam
     if (TargetActor)
     {
         DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-        AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+        if (ASBS_Player* Character = Cast<ASBS_Player>(TargetActor))
+        {
+            AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+
+
+        }
+        else
+        {
+            AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+
+        }
+
+        if (IsTool)
+        {
+            this->SetActorRelativeRotation(FRotator(0, 90, 90));
+            this->SetActorRelativeLocation(FVector(-20, -13, 26));
+        }
     }
 }
 
