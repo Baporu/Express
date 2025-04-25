@@ -250,17 +250,15 @@ void ATrainEngine::MoveTrain(float DeltaTime)
 	SetActorLocation(GetActorLocation() + vt);
 
 	// 목표 위치에 도달하거나 지나칠 경우
-	if (FVector::Dist2D(GetActorLocation(), NextPos) <= vt.Size()) {
+	if (FVector::Dist2D(GetActorLocation(), NextPos) <= vt.Size())
 		// 목표 위치에 정확하게 도달하도록 강제로 설정
 		SetActorLocation(NextPos);
-		MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, dir.Y, 0.0));
-	}
-	else {
+	else
 		// 목표 위치에 도달하지 않았다면 계속 이동
 		SetActorLocation(GetActorLocation() + vt);
-		// 카메라도 같이 이동
-		MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, vt.Y, 0.0));
-	}
+
+	// 카메라도 같이 이동
+	MainCam->SetActorLocation(MainCam->GetActorLocation() + FVector(0.0, vt.Y * 1.5, 0.0));
 }
 
 void ATrainEngine::OnFire(float DeltaTime)
