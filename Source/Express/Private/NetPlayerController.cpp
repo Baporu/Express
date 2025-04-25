@@ -5,6 +5,8 @@
 #include "Camera/CameraActor.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "SBS/SBS_Player.h"
+#include "../Express.h"
 
 void ANetPlayerController::BeginPlay()
 {
@@ -37,4 +39,12 @@ void ANetPlayerController::SetMainCamera()
 void ANetPlayerController::Server_SetMainCamera_Implementation()
 {
 	SetMainCamera();
+}
+
+void ANetPlayerController::Client_DisableInput_Implementation() {
+	auto player = Cast<ASBS_Player>(GetPawn());
+	if (!player) return;
+
+	player->bIsEnded = true;
+	PRINTLOG(TEXT("Disabled Player Input"));
 }

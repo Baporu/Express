@@ -59,6 +59,9 @@ void ASBS_Player::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    // 게임 끝나면 상호작용 중지
+    if (bIsEnded) return;
+
     //손에 물건 안들고있으면 암것도 안함
     if (HoldItems.IsEmpty()) return;
     //물건을 들고 있드면
@@ -185,6 +188,9 @@ void ASBS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ASBS_Player::Move(const FInputActionValue& Value)
 {
+    // 게임 끝나면 상호작용 중지
+    if (bIsEnded) { PRINTLOG(TEXT("Input Disabled, Can't Move")); return; }
+
     FVector2D MovementVector = Value.Get<FVector2D>();
     if (Controller != nullptr)
     {
@@ -223,6 +229,9 @@ void ASBS_Player::Move(const FInputActionValue& Value)
 
 void ASBS_Player::Interact(const FInputActionValue& Value)
 {
+    // 게임 끝나면 상호작용 중지
+    if (bIsEnded) { PRINTLOG(TEXT("Input Disabled, Can't Interact")); return; }
+
     // 기차와 먼저 상호작용을 시도하고, 성공했으면 추가 상호작용을 하지 않음
     if (!IsLocallyControlled()) return;
 
@@ -236,6 +245,9 @@ void ASBS_Player::Interact(const FInputActionValue& Value)
 
 void ASBS_Player::Release(const FInputActionValue& Value)
 {
+    // 게임 끝나면 상호작용 중지
+    if (bIsEnded) { PRINTLOG(TEXT("Input Disabled, Can't Release")); return; }
+
     //내려놓기
    Server_Release();
 }

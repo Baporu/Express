@@ -21,4 +21,6 @@ public:
 
 private:
 	class ATrainEngine* TrainEngine;
+
+	void DisablePlayersInput();
 };

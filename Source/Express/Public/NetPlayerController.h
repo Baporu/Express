@@ -37,4 +37,8 @@ public:
 	//UPROPERTY()
 	//class UMainUI* mainUI;
 
+
+public:
+	UFUNCTION(Client, Reliable)
+	void Client_DisableInput();
 };
