@@ -46,5 +46,6 @@ void ANetPlayerController::Client_DisableInput_Implementation() {
 	if (!player) return;
 
 	player->bIsEnded = true;
+	player->PlayClearAnim();
 	PRINTLOG(TEXT("Disabled Player Input"));
 }

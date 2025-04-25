@@ -16,6 +16,7 @@
 #include "SHS/TrainCrafter.h"
 #include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
+#include "ClearAnimWidget.h"
 
 
 // Sets default values
@@ -53,6 +54,10 @@ void ASBS_Player::BeginPlay()
             }
         }
     }
+
+    if (!IsLocallyControlled()) return;
+    ClearAnim = Cast<UClearAnimWidget>(CreateWidget(GetWorld(), ClearAnimFactory));
+    ClearAnim->AddToViewport();
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -428,6 +433,10 @@ void ASBS_Player::GetLeftTile()
 
         }
     }
+}
+
+void ASBS_Player::PlayClearAnim() {
+    ClearAnim->PlayClearAnimation();
 }
 
 bool ASBS_Player::FindTrain()

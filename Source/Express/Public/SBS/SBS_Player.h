@@ -94,6 +94,12 @@ public:
 
 	// 게임 끝나는 거 탐지하는 변수
 	bool bIsEnded = false;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UClearAnimWidget> ClearAnimFactory;
+	// 게임 클리어 UI 애니메이션 변수
+	class UClearAnimWidget* ClearAnim;
+
+	void PlayClearAnim();
 
 	bool FindTrain();
 
