@@ -68,6 +68,7 @@ void ATile::ReduceHP()
 		return;
 	}
 	CurTileHP--;
+	UpdateMeshMat();
 	if (CurTileHP <= 0)
 	{
 		HarvestTile();
@@ -88,9 +89,19 @@ void ATile::UpdateMeshMat()
 			//TileMesh->SetMaterial(0, GroundMat);
 			break;
 		case ETileType::Wood:
+			if(CurTileHP == 2)
+				TileMesh->SetStaticMesh(WoodMesh2);
+			else if(CurTileHP == 1)
+				TileMesh->SetStaticMesh(WoodMesh3);
+			else
 			TileMesh->SetStaticMesh(WoodMesh);
 			break;
 		case ETileType::Stone:
+			if (CurTileHP == 2)
+				TileMesh->SetStaticMesh(StoneMesh2);
+			else if (CurTileHP == 1)
+				TileMesh->SetStaticMesh(StoneMesh3);
+			else
 			TileMesh->SetStaticMesh(StoneMesh);
 			break;
 		case ETileType::Rock:

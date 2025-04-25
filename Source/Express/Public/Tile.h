@@ -50,7 +50,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* StoneMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* StoneMesh2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* StoneMesh3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* WoodMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* WoodMesh2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class UStaticMesh* WoodMesh3;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* RockMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
@@ -74,7 +82,8 @@ public:
 	bool bTrigger = false;
 	
 
-	int MaxTileHP;
+	int MaxTileHP;\
+	UPROPERTY(VisibleAnywhere)
 	int CurTileHP;
 
 
