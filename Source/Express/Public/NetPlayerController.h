@@ -41,4 +41,12 @@ public:
 public:
 	UFUNCTION(Client, Reliable)
 	void Client_DisableInput();
+	UFUNCTION(Client, Reliable)
+	void Client_ShowClearUI();
+	UFUNCTION(Client, Reliable)
+	void Client_ShowFailUI();
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UUserWidget> ClearUI;
 };

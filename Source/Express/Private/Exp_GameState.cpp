@@ -6,6 +6,7 @@
 #include "SHS/TrainEngine.h"
 #include "GameFramework/PlayerState.h"
 #include "NetPlayerController.h"
+#include "Net/UnrealNetwork.h"
 
 void AExp_GameState::SetTrainEngine(class ATrainEngine* Engine) {
 	if (!TrainEngine) TrainEngine = Engine;
@@ -26,7 +27,30 @@ void AExp_GameState::DecelTrain() {
 	TrainEngine->DecelModules();
 }
 
+void AExp_GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AExp_GameState, bIsGameCleared);
+	DOREPLIFETIME(AExp_GameState, bIsGameFailed);
+}
+
 void AExp_GameState::DisablePlayersInput() {
+	for (APlayerState* ps : PlayerArray) {
+		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
+
+		if (pc) { pc->Client_DisableInput(); PRINTLOG(TEXT("Trying to disable players' input..")); }
+	}
+}
+
+void AExp_GameState::OnRep_GameCleared() {
+	for (APlayerState* ps : PlayerArray) {
+		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
+
+		if (pc) { pc->Client_DisableInput(); PRINTLOG(TEXT("Trying to disable players' input..")); }
+	}
+}
+
+void AExp_GameState::OnRep_GameFailed() {
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
 

@@ -102,6 +102,7 @@ private:
 	float MaxSpeed = 100.0f;
 	float EasingAlpha = 0.0f;
 	bool bOnAccel = true;
+	bool bIsCleared = false;
 
 	// 게임 끝날 때 Tick()에서 호출하는 함수
 	void AccelModules(float DeltaTime);

@@ -13,7 +13,6 @@
 #include "Net/UnrealNetwork.h"
 #include "Camera/CameraActor.h"
 #include "EngineUtils.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Exp_GameState.h"
 
 // Sets default values
@@ -49,6 +48,8 @@ void ATrainEngine::Tick(float DeltaTime)
 	if (!HasAuthority()) return;
 
 	if (!bIsStarted) return;
+
+	if (bIsCleared) return;
 
 	if (bIsFinished) bOnAccel ? AccelModules(DeltaTime) : DecelModules(DeltaTime);
 
@@ -155,6 +156,8 @@ void ATrainEngine::CheckNextTile()
 {
 	if (!HasAuthority()) return;
 
+	if (bIsCleared) return;
+
 	if (!GridManager) {
 		PRINTFATALLOG(TEXT("There is no GridManager."));
 		return;
@@ -237,10 +240,15 @@ void ATrainEngine::CheckNextTile()
 			return;
 		}
 
-	if (CurrentTile->TileType == ETileType::Station_Z)
-		UKismetSystemLibrary::PrintString(GetWorld(), FString(TEXT("GAME CLEAR!!!")), true, true, FLinearColor::Yellow, 1.0f);
+	auto gs = Cast<AExp_GameState>(GetWorld()->GetAuthGameMode());
+	if (!gs) PRINTFATALLOG(TEXT("There isn't the appropriate game state."));
 
-	//PRINTFATALLOG(TEXT("Current Rail: %s, There is no rail, Game Failed"), *CurrentTile->GetActorNameOrLabel());
+	bIsCleared = true;
+
+	if (CurrentTile->TileType == ETileType::Station_Z)
+		gs->bIsGameCleared = true;
+	else
+		gs->bIsGameFailed = true;
 }
 
 void ATrainEngine::MoveTrain(float DeltaTime)

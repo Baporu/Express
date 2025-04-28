@@ -75,6 +75,18 @@ public:
 	// 세션입장 콜백
 	void OnJoinSessionCompleted(FName sessionName, EOnJoinSessionCompleteResult::Type result);
 
+	// 게임 재시작 함수들
+	void RestartRoom();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_RestartRoom();
+
+	// 방 퇴장 함수들
+	void ExitRoom();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ExitRoom();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiRPC_ExitRoom();
+
 	// 다국어 인코딩
 	FString StringBase64Encode(const FString& str);
 	FString StringBase64Decode(const FString& str);

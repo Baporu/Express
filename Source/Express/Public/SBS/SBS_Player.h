@@ -99,7 +99,16 @@ public:
 	// 게임 클리어 UI 애니메이션 변수
 	class UClearAnimWidget* ClearAnim;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class USimpleUI> ClearUIFactory;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class USimpleUI> FailedUIFactory;
+	class USimpleUI* GameClearUI;
+	class USimpleUI* GameFailedUI;
+
 	void PlayClearAnim();
+	void ShowClearUI();
+	void ShowFailUI();
 
 	bool FindTrain();
 

@@ -19,7 +19,9 @@ class EXPRESS_API AExp_GameMode : public AGameModeBase
 
 public:
 	class ATrainWaterTank* WaterTank;
+	
 	bool bIsToolsSpawned = false;
+
 	UFUNCTION(Exec)
 	void CoolDownTank();
 	UFUNCTION(Exec)

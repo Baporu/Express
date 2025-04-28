@@ -97,7 +97,7 @@ void UNetGameInstance::FindOtherSession()
 
 void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
-	// 찾기 실패시
+	// 찾기 실패 시
 	if (bWasSuccessful == false)
 	{
 		onSearchState.Broadcast(false);
@@ -105,7 +105,7 @@ void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 		return;
 	}
 
-	// 세션검색결과 배열
+	// 세션 검색 결과 배열
 	auto results = sessionSearch->SearchResults;
 	PRINTLOG(TEXT("Search Result Count : %d"), results.Num());
 
@@ -184,6 +184,32 @@ void UNetGameInstance::OnJoinSessionCompleted(FName sessionName, EOnJoinSessionC
 	{
 		PRINTLOG(TEXT("Join Session failed : %d"), result);
 	}
+}
+
+void UNetGameInstance::RestartRoom() {
+	// 서버한테 재시작 요청
+	ServerRPC_RestartRoom();
+}
+
+void UNetGameInstance::ServerRPC_RestartRoom_Implementation() {
+	// ServerTravel()은 서버 전용 함수로, 접속된 모든 클라이언트도 따라간다.
+	// 나중에 로비 맵으로 이름 변경하기
+	GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+}
+
+void UNetGameInstance::ExitRoom() {
+	// 서버한테 퇴장 요청
+	ServerRPC_ExitRoom();
+}
+
+void UNetGameInstance::ServerRPC_ExitRoom_Implementation() {
+	// 서버와 모든 클라이언트한테서 정보를 없애야 하므로 Multicast
+	MultiRPC_ExitRoom();
+}
+
+void UNetGameInstance::MultiRPC_ExitRoom_Implementation() {
+	// 플레이어 퇴장 처리
+	sessionInterface->DestroySession(FName(*mySessionName));
 }
 
 FString UNetGameInstance::StringBase64Encode(const FString& str)

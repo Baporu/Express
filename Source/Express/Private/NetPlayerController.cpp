@@ -49,3 +49,23 @@ void ANetPlayerController::Client_DisableInput_Implementation() {
 	player->PlayClearAnim();
 	PRINTLOG(TEXT("Disabled Player Input"));
 }
+
+void ANetPlayerController::Client_ShowClearUI_Implementation() {
+	auto player = Cast<ASBS_Player>(GetPawn());
+	if (!player) return;
+
+	player->ShowClearUI();
+	bShowMouseCursor = true;
+	SetInputMode(FInputModeUIOnly());
+	PRINTLOG(TEXT("Show Clear UI"));
+}
+
+void ANetPlayerController::Client_ShowFailUI_Implementation() {
+	auto player = Cast<ASBS_Player>(GetPawn());
+	if (!player) return;
+
+	player->ShowFailUI();
+	bShowMouseCursor = true;
+	SetInputMode(FInputModeUIOnly());
+	PRINTLOG(TEXT("Show Failed UI"));
+}
