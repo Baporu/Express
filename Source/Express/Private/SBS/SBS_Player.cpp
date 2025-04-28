@@ -335,7 +335,7 @@ void ASBS_Player::GetCurrentTile()
     {
         UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             CurrentTile = HitTile;
@@ -366,7 +366,7 @@ void ASBS_Player::GetFrontTile()
     params.AddIgnoredActor(this);
     if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 1, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 1, 15);
 
         if (ATile* Tile = Cast<ATile>(Hit.GetActor()))
         {
@@ -397,7 +397,7 @@ void ASBS_Player::GetRightTile()
     {
         UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             RightTile = HitTile;
@@ -425,7 +425,7 @@ void ASBS_Player::GetLeftTile()
     {
         UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             LeftTile = HitTile;
@@ -639,7 +639,7 @@ void ASBS_Player::Multicast_RemoveHoldItem_Implementation() {
 }
 
 void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness) {
-    UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
+    //UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
 }
 
 void ASBS_Player::Server_RequestEndFire_Implementation(class ATrainModule* TrainModule) {
