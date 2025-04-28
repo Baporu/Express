@@ -3,7 +3,7 @@
 
 #include "NetGameInstance.h"
 #include "OnlineSubsystem.h"
-#include "OnlineSessionSettings.h"
+#include "OnlineSessionSettings.h"	
 #include "../Express.h"
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 
@@ -15,12 +15,13 @@ void UNetGameInstance::Init()
 	{
 		// 서브시스템으로부터 세션인터페이스 가져오기
 		sessionInterface = subsys->GetSessionInterface();
+		if (sessionInterface.IsValid())
+		{
+			sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnCreateSessionComplete);
+			sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UNetGameInstance::OnFindSessionsComplete);
+			sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnJoinSessionCompleted);
 
-		sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnCreateSessionComplete);
-
-		sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UNetGameInstance::OnFindSessionsComplete);
-
-		sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnJoinSessionCompleted);
+		}
 	}
 }
 
@@ -72,7 +73,9 @@ void UNetGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucce
 
 	if (bWasSuccessful == true)
 	{
-		GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+		//GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Network/WaitingMap?listen"));
+
 	}
 }
 
@@ -97,6 +100,20 @@ void UNetGameInstance::FindOtherSession()
 
 void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
+	if (!sessionInterface.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("OnFindSessionsComplete: sessionInterface is null"));
+		onSearchState.Broadcast(false);
+		return;
+	}
+
+	// sessionSearch 유효성 검사
+	if (!sessionSearch.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("OnFindSessionsComplete: sessionSearch is null"));
+		onSearchState.Broadcast(false);
+		return;
+	}
 	// 찾기 실패시
 	if (bWasSuccessful == false)
 	{
@@ -107,7 +124,7 @@ void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 
 	// 세션검색결과 배열
 	auto results = sessionSearch->SearchResults;
-	PRINTLOG(TEXT("Search Result Count : %d"), results.Num());
+	//PRINTLOG(TEXT("Search Result Count : %d"), results.Num());
 
 	for (int i = 0; i < results.Num(); i++)
 	{
