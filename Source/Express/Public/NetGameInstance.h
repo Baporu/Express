@@ -48,6 +48,7 @@ class EXPRESS_API UNetGameInstance : public UGameInstance
 public:
 	IOnlineSessionPtr sessionInterface;
 
+	UFUNCTION(BlueprintCallable)
 	void CreateMySession(FString roomName, int32 playerCount);
 
 	// 세션(호스트) 이름

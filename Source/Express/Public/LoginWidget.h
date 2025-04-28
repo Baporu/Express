@@ -69,7 +69,7 @@ public:
 
 	// 검색중 메시지
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
-	class UTextBlock*	txt_findingMsg;
+	class UTextBlock* txt_findingMsg;
 
 
 
