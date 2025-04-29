@@ -54,6 +54,18 @@ void AExp_GameState::DisablePlayersInput() {
 	}
 }
 
+void AExp_GameState::ResetInputMode() {
+	PRINTLOG(TEXT("Input Mode Reset Started"));
+
+	for (APlayerState* ps : PlayerArray) {
+		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
+
+		if (pc) { pc->Client_ResetInputMode(); }
+	}
+
+	PRINTLOG(TEXT("Input Mode Reset Finished"));
+}
+
 void AExp_GameState::OnRep_GameCleared() {
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());

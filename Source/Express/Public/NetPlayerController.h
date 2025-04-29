@@ -52,4 +52,7 @@ public:	// UI
 	void Client_ShowClearUI();
 	UFUNCTION(Client, Reliable)
 	void Client_ShowFailUI();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ResetInputMode();
 };

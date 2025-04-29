@@ -81,3 +81,9 @@ void ANetPlayerController::Client_ShowFailUI_Implementation() {
 	SetInputMode(FInputModeUIOnly());
 	PRINTLOG(TEXT("Show Failed UI"));
 }
+
+void ANetPlayerController::Client_ResetInputMode_Implementation() {
+	SetInputMode(FInputModeGameAndUI());
+
+	PRINTLOG(TEXT("Input Mode Reset"));
+}

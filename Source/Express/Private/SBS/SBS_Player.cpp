@@ -39,8 +39,6 @@ void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
 
-    Cast<APlayerController>(GetController())->SetInputMode(FInputModeGameAndUI());
-
     //회전 변수 초기화
     if (HasAuthority())
     {

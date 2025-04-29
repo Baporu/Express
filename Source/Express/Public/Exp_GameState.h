@@ -27,6 +27,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	void OnServer_GameEnd(bool bIsCleared);
+	void ResetInputMode();
 
 private:
 	class ATrainEngine* TrainEngine;

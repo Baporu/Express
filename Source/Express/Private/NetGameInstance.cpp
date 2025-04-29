@@ -6,6 +6,9 @@
 #include "OnlineSessionSettings.h"	
 #include "../Express.h"
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
+#include "NetPlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "Exp_GameState.h"
 
 void UNetGameInstance::Init()
 {
@@ -204,13 +207,15 @@ void UNetGameInstance::OnJoinSessionCompleted(FName sessionName, EOnJoinSessionC
 }
 
 void UNetGameInstance::RestartRoom() {
+	// GameState한테 Input Mode 초기화 요청
+	Cast<AExp_GameState>(GetWorld()->GetGameState())->ResetInputMode();
+
 	// 서버한테 재시작 요청
 	ServerRPC_RestartRoom();
 }
 
 void UNetGameInstance::ServerRPC_RestartRoom_Implementation() {
 	// ServerTravel()은 서버 전용 함수로, 접속된 모든 클라이언트도 따라간다.
-	// 나중에 로비 맵으로 이름 변경하기
 	GetWorld()->ServerTravel(TEXT("/Game/Network/WaitingMap?listen"));
 }
 
