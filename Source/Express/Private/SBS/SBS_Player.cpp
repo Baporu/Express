@@ -4,8 +4,6 @@
 #include "SBS/SBS_Player.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Interface_Tile.h"
 #include "SBS/Item.h"
 #include "EngineUtils.h"
@@ -23,18 +21,18 @@
 ASBS_Player::ASBS_Player()
 {
     PrimaryActorTick.bCanEverTick = true;
-	//TempHandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TempHandMesh"));
-	//TempHandMesh->SetupAttachment(GetMesh());
+    MyArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyArrowMesh"));
+    MyArrowMesh->SetupAttachment(RootComponent);
+
+    MyArrowMesh->SetVisibility(false);
+    MyArrowMesh->SetOnlyOwnerSee(false);
+    MyArrowMesh->bHiddenInGame = true;
+    MyArrowMesh->SetIsReplicated(false); //복제 방지
 
     //네트워크
     SetNetUpdateFrequency(100);
-
-	//SetReplicates(true);
     bReplicates = true;
 	SetReplicateMovement(true);
-    //bReplicateMovement = true;
- 
-
 }
 
 void ASBS_Player::BeginPlay()
@@ -42,7 +40,6 @@ void ASBS_Player::BeginPlay()
     Super::BeginPlay();
 
     //회전 변수 초기화
-    //Rep_Yaw = GetActorRotation().Yaw;
     if (HasAuthority())
     {
         if (AExp_GameMode* gamemode = GetWorld()->GetAuthGameMode<AExp_GameMode>())
@@ -54,7 +51,12 @@ void ASBS_Player::BeginPlay()
             }
         }
     }
-
+	auto pc = Cast<APlayerController>(GetController());
+	if (pc && pc->IsLocalController())
+	{
+        MyArrowMesh->SetVisibility(true);
+        MyArrowMesh->bHiddenInGame = false;
+	}
     if (!IsLocallyControlled()) return;
     ClearAnim = Cast<UClearAnimWidget>(CreateWidget(GetWorld(), ClearAnimFactory));
     ClearAnim->AddToViewport();
@@ -789,10 +791,3 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
        //ForceNetUpdate();
     }
 }
-
-//void ASBS_Player::OnRep_Rotation()
-//{
-//    SetActorRotation(ReplicatedRotation);
-//    UE_LOG(LogTemp, Warning, TEXT("onrepcall"));
-//}
-
