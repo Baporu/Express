@@ -86,6 +86,7 @@ public:
 	void ServerRPC_ExitRoom();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiRPC_ExitRoom();
+	void OnMyExitRoomCompleted(FName sessionName, bool bWasSuccessful);
 
 	// 다국어 인코딩
 	FString StringBase64Encode(const FString& str);

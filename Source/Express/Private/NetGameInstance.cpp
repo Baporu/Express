@@ -21,6 +21,8 @@ void UNetGameInstance::Init()
 		sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UNetGameInstance::OnFindSessionsComplete);
 
 		sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnJoinSessionCompleted);
+
+		sessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnMyExitRoomCompleted);
 	}
 }
 
@@ -210,6 +212,12 @@ void UNetGameInstance::ServerRPC_ExitRoom_Implementation() {
 void UNetGameInstance::MultiRPC_ExitRoom_Implementation() {
 	// 플레이어 퇴장 처리
 	sessionInterface->DestroySession(FName(*mySessionName));
+}
+
+void UNetGameInstance::OnMyExitRoomCompleted(FName sessionName, bool bWasSuccessful) {
+	auto pc = GetWorld()->GetFirstPlayerController();
+	FString url = TEXT("/Game/Network/LobbyMap");
+	pc->ClientTravel(url, TRAVEL_Absolute);
 }
 
 FString UNetGameInstance::StringBase64Encode(const FString& str)
