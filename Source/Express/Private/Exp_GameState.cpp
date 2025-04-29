@@ -66,6 +66,27 @@ void AExp_GameState::ResetInputMode() {
 	PRINTLOG(TEXT("Input Mode Reset Finished"));
 }
 
+void AExp_GameState::Server_CheckLoading_Implementation() {
+	bool bFullyLoaded = true;
+
+	PRINTTRAIN(TEXT("Check Loading Progress"));
+	for (APlayerState* ps : PlayerArray) {
+		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
+
+		if (!pc) continue;
+
+		bFullyLoaded &= pc->bIsLoaded;
+
+		// false 됐으면 더 볼 필요 없으니까 return
+		if (!bFullyLoaded) return;
+	}
+
+	// 전부 로드됐으면 기차 출발 (false는 for문 안에서 return됨)
+	if (TrainEngine->GetIsStarted()) return;
+	TrainEngine->SetInitTimer();
+	PRINTTRAIN(TEXT("Set Train Timer"));
+}
+
 void AExp_GameState::OnRep_GameCleared() {
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());

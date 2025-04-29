@@ -15,6 +15,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
 #include "ClearAnimWidget.h"
+#include "NetPlayerController.h"
+#include "Exp_GameState.h"
 
 
 // Sets default values
@@ -51,11 +53,16 @@ void ASBS_Player::BeginPlay()
             }
         }
     }
-	auto pc = Cast<APlayerController>(GetController());
+	auto pc = Cast<ANetPlayerController>(GetController());
 	if (pc && pc->IsLocalController())
 	{
         MyArrowMesh->SetVisibility(true);
         MyArrowMesh->bHiddenInGame = false;
+
+        pc->bIsLoaded = true;
+
+        auto gs = Cast<AExp_GameState>(GetWorld()->GetGameState());
+        gs->Server_CheckLoading();
 	}
 }
 
