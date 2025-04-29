@@ -240,15 +240,19 @@ void ATrainEngine::CheckNextTile()
 			return;
 		}
 
-	auto gs = Cast<AExp_GameState>(GetWorld()->GetAuthGameMode());
+	auto gs = Cast<AExp_GameState>(GetWorld()->GetGameState());
 	if (!gs) PRINTFATALLOG(TEXT("There isn't the appropriate game state."));
 
 	bIsCleared = true;
 
-	if (CurrentTile->TileType == ETileType::Station_Z)
+	if (CurrentTile->TileType == ETileType::Station_Z) {
 		gs->bIsGameCleared = true;
-	else
+		gs->OnServer_GameEnd(true);
+	}
+	else {
 		gs->bIsGameFailed = true;
+		gs->OnServer_GameEnd(false);
+	}
 }
 
 void ATrainEngine::MoveTrain(float DeltaTime)

@@ -19,6 +19,9 @@ public:
 	bool bHasAuthority = false;
 
 	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* txt_info;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* btn_restart;
 	// Restart 대기 중인지 확인하는 변수
 	bool bIsWaiting = false;

@@ -38,15 +38,18 @@ public:
 	//class UMainUI* mainUI;
 
 
-public:
+public:	// UI
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class UClearAnimWidget> ClearAnimFactory;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class USimpleUI> ClearUIFactory;
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<class USimpleUI> FailUIFactory;
+
 	UFUNCTION(Client, Reliable)
 	void Client_DisableInput();
 	UFUNCTION(Client, Reliable)
 	void Client_ShowClearUI();
 	UFUNCTION(Client, Reliable)
 	void Client_ShowFailUI();
-
-public:
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UUserWidget> ClearUI;
 };

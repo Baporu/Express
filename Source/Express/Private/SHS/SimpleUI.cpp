@@ -11,8 +11,6 @@ void USimpleUI::NativeConstruct() {
 
 	btn_restart->OnClicked.AddDynamic(this, &USimpleUI::OnRestart);
 	btn_exit->OnClicked.AddDynamic(this, &USimpleUI::OnExit);
-
-	txt_wait->SetIsEnabled(false);
 }
 
 void USimpleUI::OnRestart() {
@@ -27,8 +25,9 @@ void USimpleUI::OnRestart() {
 	else {
 		bIsWaiting = !bIsWaiting;
 
-		btn_exit->SetIsEnabled(bIsWaiting);
-		txt_wait->SetIsEnabled(true);
+		btn_exit->SetIsEnabled(!bIsWaiting);
+		txt_info->SetVisibility(ESlateVisibility::Hidden);
+		txt_wait->SetVisibility(ESlateVisibility::Visible);
 
 		GetWorld()->GetTimerManager().SetTimer(WaitHandle, this, &USimpleUI::OnWaitTimerExpired, 1.0f, true);
 	}
@@ -49,4 +48,6 @@ void USimpleUI::OnWaitTimerExpired() {
 		str += FString(TEXT(". "));
 
 	if (++WaitNum > 3) WaitNum = 1;
+
+	txt_wait->SetText(FText::FromString(str));
 }

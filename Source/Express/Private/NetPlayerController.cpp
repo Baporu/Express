@@ -7,6 +7,8 @@
 #include "EngineUtils.h"
 #include "SBS/SBS_Player.h"
 #include "../Express.h"
+#include "ClearAnimWidget.h"
+#include "SHS/SimpleUI.h"
 
 void ANetPlayerController::BeginPlay()
 {
@@ -46,7 +48,11 @@ void ANetPlayerController::Client_DisableInput_Implementation() {
 	if (!player) return;
 
 	player->bIsEnded = true;
-	player->PlayClearAnim();
+	
+	auto ClearAnim = CreateWidget<UClearAnimWidget>(this, ClearAnimFactory);
+	ClearAnim->AddToViewport();
+	ClearAnim->PlayClearAnimation();
+
 	PRINTLOG(TEXT("Disabled Player Input"));
 }
 
@@ -54,7 +60,10 @@ void ANetPlayerController::Client_ShowClearUI_Implementation() {
 	auto player = Cast<ASBS_Player>(GetPawn());
 	if (!player) return;
 
-	player->ShowClearUI();
+	auto ClearUI = CreateWidget<USimpleUI>(this, ClearUIFactory);
+	ClearUI->bHasAuthority = HasAuthority();
+	ClearUI->AddToViewport();
+
 	bShowMouseCursor = true;
 	SetInputMode(FInputModeUIOnly());
 	PRINTLOG(TEXT("Show Clear UI"));
@@ -64,7 +73,10 @@ void ANetPlayerController::Client_ShowFailUI_Implementation() {
 	auto player = Cast<ASBS_Player>(GetPawn());
 	if (!player) return;
 
-	player->ShowFailUI();
+	auto FailUI = CreateWidget<USimpleUI>(this, FailUIFactory);
+	FailUI->bHasAuthority = HasAuthority();
+	FailUI->AddToViewport();
+	
 	bShowMouseCursor = true;
 	SetInputMode(FInputModeUIOnly());
 	PRINTLOG(TEXT("Show Failed UI"));

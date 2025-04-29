@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "../../../../Plugins/Online/OnlineSubsystem/Source/Public/Interfaces/OnlineSessionInterface.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "NetGameInstance.generated.h"
 
 USTRUCT(BlueprintType)

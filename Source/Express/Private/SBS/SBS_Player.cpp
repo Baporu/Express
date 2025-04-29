@@ -16,8 +16,6 @@
 #include "SHS/TrainCrafter.h"
 #include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
-#include "ClearAnimWidget.h"
-#include "SHS/SimpleUI.h"
 
 
 // Sets default values
@@ -42,6 +40,8 @@ void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
 
+    Cast<APlayerController>(GetController())->SetInputMode(FInputModeGameAndUI());
+
     //회전 변수 초기화
     //Rep_Yaw = GetActorRotation().Yaw;
     if (HasAuthority())
@@ -55,13 +55,6 @@ void ASBS_Player::BeginPlay()
             }
         }
     }
-
-    if (!IsLocallyControlled()) return;
-
-    ClearAnim = Cast<UClearAnimWidget>(CreateWidget(GetWorld(), ClearAnimFactory));
-    ClearAnim->AddToViewport();
-    GameClearUI = Cast<USimpleUI>(CreateWidget(GetWorld(), ClearUIFactory));
-    GameFailedUI = Cast<USimpleUI>(CreateWidget(GetWorld(), FailedUIFactory));
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -437,18 +430,6 @@ void ASBS_Player::GetLeftTile()
 
         }
     }
-}
-
-void ASBS_Player::PlayClearAnim() {
-    ClearAnim->PlayClearAnimation();
-}
-
-void ASBS_Player::ShowClearUI() {
-    GameClearUI->AddToViewport(0);
-}
-
-void ASBS_Player::ShowFailUI() {
-    GameFailedUI->AddToViewport(0);
 }
 
 bool ASBS_Player::FindTrain()

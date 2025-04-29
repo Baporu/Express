@@ -34,6 +34,18 @@ void AExp_GameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(AExp_GameState, bIsGameFailed);
 }
 
+void AExp_GameState::OnServer_GameEnd(bool bIsCleared) {
+	for (APlayerState* ps : PlayerArray) {
+		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
+
+		if (!pc || !pc->IsLocalController()) continue;
+
+		bIsCleared ? pc->Client_ShowClearUI() : pc->Client_ShowFailUI();
+
+		return;
+	}
+}
+
 void AExp_GameState::DisablePlayersInput() {
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
@@ -46,7 +58,7 @@ void AExp_GameState::OnRep_GameCleared() {
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
 
-		if (pc) { pc->Client_DisableInput(); PRINTLOG(TEXT("Trying to disable players' input..")); }
+		if (pc) { pc->Client_ShowClearUI(); PRINTLOG(TEXT("Trying to show clear UI..")); }
 	}
 }
 
@@ -54,6 +66,6 @@ void AExp_GameState::OnRep_GameFailed() {
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
 
-		if (pc) { pc->Client_DisableInput(); PRINTLOG(TEXT("Trying to disable players' input..")); }
+		if (pc) { pc->Client_ShowFailUI(); PRINTLOG(TEXT("Trying to show fail ui..")); }
 	}
 }

@@ -93,22 +93,8 @@ public:
 	bool bHasFound = false;
 
 	// 게임 끝나는 거 탐지하는 변수
+	UPROPERTY(VisibleAnywhere, Category = "State")
 	bool bIsEnded = false;
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class UClearAnimWidget> ClearAnimFactory;
-	// 게임 클리어 UI 애니메이션 변수
-	class UClearAnimWidget* ClearAnim;
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class USimpleUI> ClearUIFactory;
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<class USimpleUI> FailedUIFactory;
-	class USimpleUI* GameClearUI;
-	class USimpleUI* GameFailedUI;
-
-	void PlayClearAnim();
-	void ShowClearUI();
-	void ShowFailUI();
 
 	bool FindTrain();
 
