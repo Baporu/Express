@@ -39,6 +39,8 @@ void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
 
+    Cast<APlayerController>(GetController())->SetInputMode(FInputModeGameAndUI());
+
     //회전 변수 초기화
     if (HasAuthority())
     {
@@ -57,9 +59,6 @@ void ASBS_Player::BeginPlay()
         MyArrowMesh->SetVisibility(true);
         MyArrowMesh->bHiddenInGame = false;
 	}
-    if (!IsLocallyControlled()) return;
-    ClearAnim = Cast<UClearAnimWidget>(CreateWidget(GetWorld(), ClearAnimFactory));
-    ClearAnim->AddToViewport();
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -435,10 +434,6 @@ void ASBS_Player::GetLeftTile()
 
         }
     }
-}
-
-void ASBS_Player::PlayClearAnim() {
-    ClearAnim->PlayClearAnimation();
 }
 
 bool ASBS_Player::FindTrain()

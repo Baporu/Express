@@ -20,7 +20,7 @@ void UNetGameInstance::Init()
 			sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnCreateSessionComplete);
 			sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UNetGameInstance::OnFindSessionsComplete);
 			sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnJoinSessionCompleted);
-
+			sessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnMyExitRoomCompleted);
 		}
 	}
 }
@@ -201,6 +201,38 @@ void UNetGameInstance::OnJoinSessionCompleted(FName sessionName, EOnJoinSessionC
 	{
 		PRINTLOG(TEXT("Join Session failed : %d"), result);
 	}
+}
+
+void UNetGameInstance::RestartRoom() {
+	// 서버한테 재시작 요청
+	ServerRPC_RestartRoom();
+}
+
+void UNetGameInstance::ServerRPC_RestartRoom_Implementation() {
+	// ServerTravel()은 서버 전용 함수로, 접속된 모든 클라이언트도 따라간다.
+	// 나중에 로비 맵으로 이름 변경하기
+	GetWorld()->ServerTravel(TEXT("/Game/Network/WaitingMap?listen"));
+}
+
+void UNetGameInstance::ExitRoom() {
+	// 서버한테 퇴장 요청
+	ServerRPC_ExitRoom();
+}
+
+void UNetGameInstance::ServerRPC_ExitRoom_Implementation() {
+	// 서버와 모든 클라이언트한테서 정보를 없애야 하므로 Multicast
+	MultiRPC_ExitRoom();
+}
+
+void UNetGameInstance::MultiRPC_ExitRoom_Implementation() {
+	// 플레이어 퇴장 처리
+	sessionInterface->DestroySession(FName(*mySessionName));
+}
+
+void UNetGameInstance::OnMyExitRoomCompleted(FName sessionName, bool bWasSuccessful) {
+	auto pc = GetWorld()->GetFirstPlayerController();
+	FString url = TEXT("/Game/Network/LobbyMap");
+	pc->ClientTravel(url, TRAVEL_Absolute);
 }
 
 FString UNetGameInstance::StringBase64Encode(const FString& str)
