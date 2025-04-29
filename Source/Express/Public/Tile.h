@@ -67,7 +67,21 @@ public:
 	class UStaticMesh* RailMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
 	class UStaticMesh* StationMesh;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class USoundBase* Sound_Wood;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class USoundBase* Sound_Stone;
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Mesh)
+	class USoundBase* Sound_Water;
 	
+	
+
+
+
+
+
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
 	class UTile_FSM* TileFSM;
 
