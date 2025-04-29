@@ -91,6 +91,8 @@ public:
 	//void HarvestTile(UPrimitiveComponent*OverlappedComponent, AActor* OtherActor, UPrimitiveComponent*OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public:
+	virtual void PossessedBy(AController* NewController) override;
+
 	// FindTrain()을 RPC로 바꾸면서 void로 바뀌어서 대신 넣은 변수
 	bool bHasFound = false;
 

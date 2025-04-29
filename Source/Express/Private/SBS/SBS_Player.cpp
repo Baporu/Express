@@ -53,16 +53,11 @@ void ASBS_Player::BeginPlay()
             }
         }
     }
-	auto pc = Cast<ANetPlayerController>(GetController());
+	auto pc = Cast<APlayerController>(GetController());
 	if (pc && pc->IsLocalController())
 	{
         MyArrowMesh->SetVisibility(true);
         MyArrowMesh->bHiddenInGame = false;
-
-        pc->bIsLoaded = true;
-
-        auto gs = Cast<AExp_GameState>(GetWorld()->GetGameState());
-        gs->Server_CheckLoading();
 	}
 }
 
@@ -439,6 +434,16 @@ void ASBS_Player::GetLeftTile()
 
         }
     }
+}
+
+void ASBS_Player::PossessedBy(AController* NewController) {
+    Super::PossessedBy(NewController);
+
+    auto pc = Cast<ANetPlayerController>(GetController());
+    if (pc) pc->bIsLoaded = true;
+
+    auto gs = Cast<AExp_GameState>(GetWorld()->GetGameState());
+    gs->Server_CheckLoading();
 }
 
 bool ASBS_Player::FindTrain()
