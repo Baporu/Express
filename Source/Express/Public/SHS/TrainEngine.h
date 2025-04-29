@@ -34,6 +34,7 @@ public:
 	TSubclassOf<class ATrainCrafter> BP_Crafter;
 
 	void Init(class AGridManager* Grid, class ATile* NextTile, int32 Row, int32 Column);
+	void SetInitTimer();
 
 	bool CheckModule(int32 ModuleIndex);
 	ATrainModule* GetFrontModule(int32 CurrentModuleIndex);
@@ -50,6 +51,8 @@ public:
 
 	void AccelModules();
 	void DecelModules();
+
+	bool GetIsStarted();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")

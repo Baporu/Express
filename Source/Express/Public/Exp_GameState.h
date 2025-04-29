@@ -29,6 +29,9 @@ public:
 	void OnServer_GameEnd(bool bIsCleared);
 	void ResetInputMode();
 
+	UFUNCTION(Server, Reliable)
+	void Server_CheckLoading();
+
 private:
 	class ATrainEngine* TrainEngine;
 

@@ -17,10 +17,9 @@ class EXPRESS_API ANetPlayerController : public APlayerController
 public:
 	UPROPERTY()
 	class AExp_GameMode* gm;
+	bool bIsLoaded = false;
 
 	virtual void BeginPlay() override;
-
-
 
 	UFUNCTION(BlueprintCallable)
     void SetMainCamera();

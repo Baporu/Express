@@ -66,7 +66,7 @@ void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Co
 	RowIndex = Row;
 	ColIndex = Column;
 
-	NextPos = CurrentTile->GetActorLocation();
+	NextPos = GetActorLocation();
 	
 	FVector CurPos = GetActorLocation();
 
@@ -77,7 +77,9 @@ void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Co
 	else if (NextPos.X >= CurPos.X)
 		NextRot = 0.0;
 	else NextRot = 180.0;
+}
 
+void ATrainEngine::SetInitTimer() {
 	FTimerHandle InitHandle;
 	GetWorld()->GetTimerManager().SetTimer(InitHandle, FTimerDelegate::CreateLambda([&]
 																					{
@@ -150,6 +152,10 @@ void ATrainEngine::AccelModules() {
 void ATrainEngine::DecelModules() {
 	bOnAccel = false;
 	EasingAlpha = 0.f;
+}
+
+bool ATrainEngine::GetIsStarted() {
+	return bIsStarted;
 }
 
 void ATrainEngine::CheckNextTile()
