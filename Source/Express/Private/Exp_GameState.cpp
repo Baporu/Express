@@ -67,6 +67,8 @@ void AExp_GameState::ResetInputMode() {
 }
 
 void AExp_GameState::Server_CheckLoading_Implementation() {
+	if (!TrainEngine) return;
+
 	bool bFullyLoaded = true;
 
 	PRINTTRAIN(TEXT("Check Loading Progress"));
