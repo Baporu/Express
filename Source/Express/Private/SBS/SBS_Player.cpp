@@ -4,8 +4,6 @@
 #include "SBS/SBS_Player.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "Interface_Tile.h"
 #include "SBS/Item.h"
 #include "EngineUtils.h"
@@ -16,34 +14,32 @@
 #include "SHS/TrainCrafter.h"
 #include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
+#include "ClearAnimWidget.h"
 
 
 // Sets default values
 ASBS_Player::ASBS_Player()
 {
     PrimaryActorTick.bCanEverTick = true;
-	//TempHandMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TempHandMesh"));
-	//TempHandMesh->SetupAttachment(GetMesh());
+    MyArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MyArrowMesh"));
+    MyArrowMesh->SetupAttachment(RootComponent);
+
+    MyArrowMesh->SetVisibility(false);
+    MyArrowMesh->SetOnlyOwnerSee(false);
+    MyArrowMesh->bHiddenInGame = true;
+    MyArrowMesh->SetIsReplicated(false); //복제 방지
 
     //네트워크
     SetNetUpdateFrequency(100);
-
-	//SetReplicates(true);
     bReplicates = true;
 	SetReplicateMovement(true);
-    //bReplicateMovement = true;
- 
-
 }
 
 void ASBS_Player::BeginPlay()
 {
     Super::BeginPlay();
 
-    Cast<APlayerController>(GetController())->SetInputMode(FInputModeGameAndUI());
-
     //회전 변수 초기화
-    //Rep_Yaw = GetActorRotation().Yaw;
     if (HasAuthority())
     {
         if (AExp_GameMode* gamemode = GetWorld()->GetAuthGameMode<AExp_GameMode>())
@@ -55,6 +51,15 @@ void ASBS_Player::BeginPlay()
             }
         }
     }
+	auto pc = Cast<APlayerController>(GetController());
+	if (pc && pc->IsLocalController())
+	{
+        MyArrowMesh->SetVisibility(true);
+        MyArrowMesh->bHiddenInGame = false;
+	}
+    if (!IsLocallyControlled()) return;
+    ClearAnim = Cast<UClearAnimWidget>(CreateWidget(GetWorld(), ClearAnimFactory));
+    ClearAnim->AddToViewport();
 }
 
 void ASBS_Player::Tick(float DeltaTime)
@@ -332,7 +337,7 @@ void ASBS_Player::GetCurrentTile()
     {
         UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             CurrentTile = HitTile;
@@ -363,7 +368,7 @@ void ASBS_Player::GetFrontTile()
     params.AddIgnoredActor(this);
     if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 1, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Blue, 1, 15);
 
         if (ATile* Tile = Cast<ATile>(Hit.GetActor()))
         {
@@ -394,7 +399,7 @@ void ASBS_Player::GetRightTile()
     {
         UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             RightTile = HitTile;
@@ -422,7 +427,7 @@ void ASBS_Player::GetLeftTile()
     {
         UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
-        UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
+        //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             LeftTile = HitTile;
@@ -430,6 +435,10 @@ void ASBS_Player::GetLeftTile()
 
         }
     }
+}
+
+void ASBS_Player::PlayClearAnim() {
+    ClearAnim->PlayClearAnimation();
 }
 
 bool ASBS_Player::FindTrain()
@@ -632,7 +641,7 @@ void ASBS_Player::Multicast_RemoveHoldItem_Implementation() {
 }
 
 void ASBS_Player::Multicast_DrawRaycast_Implementation(const UObject* WorldContextObject, FVector const LineStart, FVector const LineEnd, FLinearColor Color, float LifeTime, float Thickness) {
-    UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
+    //UKismetSystemLibrary::DrawDebugLine(WorldContextObject, LineStart, LineEnd, Color, LifeTime, Thickness);
 }
 
 void ASBS_Player::Server_RequestEndFire_Implementation(class ATrainModule* TrainModule) {
@@ -782,10 +791,3 @@ void ASBS_Player::Server_AttachItems_Implementation(AItem* TargetItem)
        //ForceNetUpdate();
     }
 }
-
-//void ASBS_Player::OnRep_Rotation()
-//{
-//    SetActorRotation(ReplicatedRotation);
-//    UE_LOG(LogTemp, Warning, TEXT("onrepcall"));
-//}
-

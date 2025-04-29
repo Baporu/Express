@@ -7,3 +7,7 @@ ALobbyGameMode::ALobbyGameMode()
 {
 	bUseSeamlessTravel = false;
 }
+void ALobbyGameMode::GoToMap()
+{
+	GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+}

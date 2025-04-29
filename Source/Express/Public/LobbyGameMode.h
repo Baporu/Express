@@ -16,4 +16,7 @@ class EXPRESS_API ALobbyGameMode : public AGameMode
 	
 public:
 	ALobbyGameMode();
+
+	UFUNCTION(BlueprintCallable)
+	void GoToMap();
 };

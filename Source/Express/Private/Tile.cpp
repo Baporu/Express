@@ -42,7 +42,7 @@ void ATile::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	
 
 
 	UpdateMeshMat();
@@ -113,6 +113,7 @@ void ATile::UpdateMeshMat()
 			break;
 		case ETileType::Water:
 			TileMesh->SetStaticMesh(WaterMesh);
+			TileCollision->SetBoxExtent(FVector(32, 32, 100));
 			break;
 		case ETileType::Station_A:
 			TileMesh->SetStaticMesh(StationMesh);

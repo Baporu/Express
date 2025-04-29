@@ -3,7 +3,7 @@
 
 #include "NetGameInstance.h"
 #include "OnlineSubsystem.h"
-#include "OnlineSessionSettings.h"
+#include "OnlineSessionSettings.h"	
 #include "../Express.h"
 #include "../../../../Plugins/Online/OnlineBase/Source/Public/Online/OnlineSessionNames.h"
 
@@ -15,14 +15,13 @@ void UNetGameInstance::Init()
 	{
 		// 서브시스템으로부터 세션인터페이스 가져오기
 		sessionInterface = subsys->GetSessionInterface();
+		if (sessionInterface.IsValid())
+		{
+			sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnCreateSessionComplete);
+			sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UNetGameInstance::OnFindSessionsComplete);
+			sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnJoinSessionCompleted);
 
-		sessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnCreateSessionComplete);
-
-		sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UNetGameInstance::OnFindSessionsComplete);
-
-		sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnJoinSessionCompleted);
-
-		sessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UNetGameInstance::OnMyExitRoomCompleted);
+		}
 	}
 }
 
@@ -74,7 +73,9 @@ void UNetGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucce
 
 	if (bWasSuccessful == true)
 	{
-		GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+		//GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+		GetWorld()->ServerTravel(TEXT("/Game/Network/WaitingMap?listen"));
+
 	}
 }
 
@@ -99,7 +100,21 @@ void UNetGameInstance::FindOtherSession()
 
 void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 {
-	// 찾기 실패 시
+	if (!sessionInterface.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("OnFindSessionsComplete: sessionInterface is null"));
+		onSearchState.Broadcast(false);
+		return;
+	}
+
+	// sessionSearch 유효성 검사
+	if (!sessionSearch.IsValid())
+	{
+		UE_LOG(LogTemp, Error, TEXT("OnFindSessionsComplete: sessionSearch is null"));
+		onSearchState.Broadcast(false);
+		return;
+	}
+	// 찾기 실패시
 	if (bWasSuccessful == false)
 	{
 		onSearchState.Broadcast(false);
@@ -107,9 +122,9 @@ void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 		return;
 	}
 
-	// 세션 검색 결과 배열
+	// 세션검색결과 배열
 	auto results = sessionSearch->SearchResults;
-	PRINTLOG(TEXT("Search Result Count : %d"), results.Num());
+	//PRINTLOG(TEXT("Search Result Count : %d"), results.Num());
 
 	for (int i = 0; i < results.Num(); i++)
 	{
@@ -186,38 +201,6 @@ void UNetGameInstance::OnJoinSessionCompleted(FName sessionName, EOnJoinSessionC
 	{
 		PRINTLOG(TEXT("Join Session failed : %d"), result);
 	}
-}
-
-void UNetGameInstance::RestartRoom() {
-	// 서버한테 재시작 요청
-	ServerRPC_RestartRoom();
-}
-
-void UNetGameInstance::ServerRPC_RestartRoom_Implementation() {
-	// ServerTravel()은 서버 전용 함수로, 접속된 모든 클라이언트도 따라간다.
-	// 나중에 로비 맵으로 이름 변경하기
-	GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
-}
-
-void UNetGameInstance::ExitRoom() {
-	// 서버한테 퇴장 요청
-	ServerRPC_ExitRoom();
-}
-
-void UNetGameInstance::ServerRPC_ExitRoom_Implementation() {
-	// 서버와 모든 클라이언트한테서 정보를 없애야 하므로 Multicast
-	MultiRPC_ExitRoom();
-}
-
-void UNetGameInstance::MultiRPC_ExitRoom_Implementation() {
-	// 플레이어 퇴장 처리
-	sessionInterface->DestroySession(FName(*mySessionName));
-}
-
-void UNetGameInstance::OnMyExitRoomCompleted(FName sessionName, bool bWasSuccessful) {
-	auto pc = GetWorld()->GetFirstPlayerController();
-	FString url = TEXT("/Game/Network/LobbyMap");
-	pc->ClientTravel(url, TRAVEL_Absolute);
 }
 
 FString UNetGameInstance::StringBase64Encode(const FString& str)

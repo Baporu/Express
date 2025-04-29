@@ -21,6 +21,11 @@ void AExp_GameMode::DecelTrain() {
 	Cast<AExp_GameState>(GameState)->DecelTrain();
 }
 
+void AExp_GameMode::GoToMap()
+{
+	GetWorld()->ServerTravel(TEXT("/Game/SBS/SBS_Level?listen"));
+}
+
 void AExp_GameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);

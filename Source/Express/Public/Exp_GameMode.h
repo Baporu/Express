@@ -28,6 +28,8 @@ public:
 	void AccelTrain();
 	UFUNCTION(Exec)
 	void DecelTrain();
+	UFUNCTION(BlueprintCallable)
+	void GoToMap();
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 };

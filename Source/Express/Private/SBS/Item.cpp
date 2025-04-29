@@ -224,7 +224,7 @@ void AItem::Server_Attach_Implementation(AActor* TargetActor, FName SocketName)
             AttachToActor(TargetActor, FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
             Multicast_Attach(TargetActor, SocketName);
         }
-        if (IsTool)
+        if (ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe)
         {
             this->SetActorRelativeRotation(FRotator(0, 90, 90));
             this->SetActorRelativeLocation(FVector(-20, -13, 26));
@@ -250,7 +250,7 @@ void AItem::Multicast_Attach_Implementation(AActor* TargetActor, FName SocketNam
 
         }
 
-        if (IsTool)
+        if (ItemType == EItemType::Axe || ItemType == EItemType::Pickaxe)
         {
             this->SetActorRelativeRotation(FRotator(0, 90, 90));
             this->SetActorRelativeLocation(FVector(-20, -13, 26));

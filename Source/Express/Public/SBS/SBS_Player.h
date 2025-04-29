@@ -36,6 +36,8 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
 	class UStaticMeshComponent* TempHandMesh;
+	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
+	class UStaticMeshComponent* MyArrowMesh;
 	UPROPERTY(EditDefaultsOnly, Category = "Collision")
 	class UBoxComponent* FrontBoxcomp;
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
@@ -130,12 +132,8 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, Category = Item)
 	bool bHasWater = false;
 
-	//UPROPERTY(ReplicatedUsing=OnRep_Rotation)
-	//FRotator ReplicatedRotation;
-
-	//UFUNCTION()
-	//void OnRep_Rotation();
-
+	//UFUNCTION(Client,Reliable)
+	//void ArrowVisible();
 
 
 
