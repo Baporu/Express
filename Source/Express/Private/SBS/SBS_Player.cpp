@@ -334,13 +334,13 @@ void ASBS_Player::GetCurrentTile()
     params.AddIgnoredActor(this);
     if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, params))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
+        //UE_LOG(LogTemp, Warning, TEXT("Hit Actor Name: %s"), *Hit.GetActor()->GetActorNameOrLabel());
         ATile* HitTile = Cast<ATile>(Hit.GetActor());
         //UKismetSystemLibrary::DrawDebugLine(GetWorld(), Start, End, FLinearColor::Red, 0.01, 15);
         if (HitTile) //타일이 채취 불가능일때
         {
             CurrentTile = HitTile;
-            UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
+            //UE_LOG(LogTemp, Warning, TEXT("Current Tile HIt!!!"));
 
         }
     }

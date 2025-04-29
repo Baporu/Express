@@ -325,19 +325,19 @@ ATile* ATile::CheckRailItem()
 	}
 
 	// 오른쪽 타일 탐색, 타일에 선로 아이템이 딱 하나 떨어져 있었다면 연결 가능
-	if (gridRow + 1 < GridManager->Grid.Num() && !GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem.Num() == 1)
+	if (gridRow + 1 < GridManager->Grid.Num() && !GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem[0]->ItemType == EItemType::Rail && GridManager->Grid[gridRow + 1][gridColumn]->ContainedItem.Num() == 1)
 		return GridManager->Grid[gridRow + 1][gridColumn];
 
 	// 아래쪽 타일 탐색
-	if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && !GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem.Num() == 1)
+	if (gridColumn + 1 < GridManager->Grid[gridRow].Num() && !GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem[0]->ItemType == EItemType::Rail && GridManager->Grid[gridRow][gridColumn + 1]->ContainedItem.Num() == 1)
 		return GridManager->Grid[gridRow][gridColumn + 1];
 
 	// 위쪽 타일 탐색
-	if (gridColumn - 1 >= 0 && !GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.Num() == 1)
+	if (gridColumn - 1 >= 0 && !GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem[0]->ItemType == EItemType::Rail && GridManager->Grid[gridRow][gridColumn - 1]->ContainedItem.Num() == 1)
 		return GridManager->Grid[gridRow][gridColumn - 1];
 
 	// 왼쪽 타일 탐색 (게임 구조 상 가장 검색할 일이 적을 것 같아서 아래로 둠)
-	if (gridRow - 1 >= 0 && !GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.Num() == 1)
+	if (gridRow - 1 >= 0 && !GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.IsEmpty() && GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem[0]->ItemType == EItemType::Rail && GridManager->Grid[gridRow - 1][gridColumn]->ContainedItem.Num() == 1)
 		return GridManager->Grid[gridRow - 1][gridColumn];
 
 	// 전부 선로 안 깔려있으면 선로 연결 불가

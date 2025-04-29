@@ -56,14 +56,14 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Train")
-	float TrainSpeed = 25.0f;
+	float TrainSpeed = 15.0f;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Tile")
 	class AGridManager* GridManager;
 
 	// 기차가 움직이기 전 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = "Move")
-	float InitTime = 10.0f;
+	float InitTime = 30.0f;
 
 	// 이동할 목표 타일
 	UPROPERTY(VisibleAnywhere, Category = "Move")
@@ -101,7 +101,7 @@ private:
 	void GetMainCamera();
 
 
-	float MinSpeed = 25.0f;
+	float MinSpeed = 15.0f;
 	float MaxSpeed = 100.0f;
 	float EasingAlpha = 0.0f;
 	bool bOnAccel = true;
