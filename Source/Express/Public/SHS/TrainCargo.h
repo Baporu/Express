@@ -21,6 +21,10 @@ public:
 	ATrainCargo();
 
 public:
+	// 아이템 보관 시 높이
+	UPROPERTY(EditAnywhere, Category = "Item")
+	double ItemHeight = 50.0;
+
 	// 나무 컨테이너
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	TArray<AItem*> Woods;
