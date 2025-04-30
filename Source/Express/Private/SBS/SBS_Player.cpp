@@ -768,6 +768,8 @@ void ASBS_Player::Server_Release_Implementation()
 
     if (HoldItems.Top()->ItemType == EItemType::Rail)
     {
+        if (CurrentTile->TileType == ETileType::Rail) return;
+
         if (ATile* PreviousTile = CurrentTile->CheckRail())
         {
 			HoldItems.Top()->Server_Detach();

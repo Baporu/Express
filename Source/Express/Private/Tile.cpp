@@ -153,6 +153,11 @@ void ATile::CreateTile(ETileType Type)
 
 		SetActorRotation(FRotator(0, RandRot, 0));
 	}
+
+	if (TileType == ETileType::Rail) {
+		TileMesh->SetCollisionProfileName(FName(TEXT("Item")));
+	}
+
 	UpdateMeshMat();
 }
 void ATile::SetContainedItem(TArray<AItem*> Item)
