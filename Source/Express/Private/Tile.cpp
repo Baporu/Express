@@ -122,19 +122,30 @@ void ATile::UpdateMeshMat()
 			TileMesh->SetStaticMesh(RockMesh);
 			break;
 		case ETileType::Rail:
-			TileMesh->SetStaticMesh(RailMesh);
-			TileCollision->SetCollisionProfileName(TEXT("Item"));
+			if (GetActorLocation().Z != 0) {
+				TileMesh->SetStaticMesh(RailMesh);
+				TileCollision->SetCollisionProfileName(TEXT("Item"));
+			}
+			else {
+				TileMesh->SetStaticMesh(GroundMesh);
+			}
 			break;
 		case ETileType::Water:
 			TileMesh->SetStaticMesh(WaterMesh);
 			TileCollision->SetBoxExtent(FVector(32, 32, 100));
 			break;
 		case ETileType::Station_A:
-			TileMesh->SetStaticMesh(StationMesh);
+			if (GetActorLocation().Z != 0)
+				TileMesh->SetStaticMesh(StationMesh);
+			else
+				TileMesh->SetStaticMesh(GroundMesh);
 			TileCollision->SetCollisionProfileName(TEXT("Item"));
 			break;
 		case ETileType::Station_Z:
-			TileMesh->SetStaticMesh(StationMesh);
+			if (GetActorLocation().Z != 0)
+				TileMesh->SetStaticMesh(StationMesh);
+			else
+				TileMesh->SetStaticMesh(GroundMesh); 
 			TileCollision->SetCollisionProfileName(TEXT("Item"));
 			break;
 		default:
