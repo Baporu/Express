@@ -58,14 +58,14 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly,  Category = "Train")
-	float TrainSpeed = 15.0f;
+	float TrainSpeed = 5.0f;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Tile")
 	class AGridManager* GridManager;
 
 	// 기차가 움직이기 전 대기 시간
 	UPROPERTY(EditDefaultsOnly, Category = "Move")
-	float InitTime = 30.0f;
+	float InitTime = 20.0f;
 
 	// 이동할 목표 타일
 	UPROPERTY(VisibleAnywhere, Category = "Move")
@@ -102,6 +102,8 @@ private:
 	void SpawnDefaultModules();
 	void GetMainCamera();
 
+	// 기차 가속, Tick()에서 호출
+	void AddTrainSpeed(float DeltaTime);
 
 	float MinSpeed = 15.0f;
 	float MaxSpeed = 100.0f;

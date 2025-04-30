@@ -12,6 +12,9 @@ ATrainWaterTank::ATrainWaterTank()
 {
 	ConstructorHelpers::FObjectFinder<UMaterial> tempMat(TEXT("/Script/Engine.Material'/Game/SHS/Designs/M_WaterTank.M_WaterTank'"));
 	if (tempMat.Succeeded()) MeshComp->SetMaterial(1, tempMat.Object);
+
+	// 물탱크는 발화 시간 30초
+	FireTime = 30.0f;
 }
 
 // Called when the game starts or when spawned
