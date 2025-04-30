@@ -62,9 +62,6 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 	switch (Resources[0]->ItemType)
 	{
 		case EItemType::Wood:
-			// 컨테이너가 이미 최대 수량이면 못 받고 return
-			if (Woods.Num() > MaxCount) return;
-
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
 
 			if (Woods.IsEmpty()) {
@@ -79,9 +76,6 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 			break;
 
 		case EItemType::Stone:
-			// 컨테이너가 이미 최대 수량이면 못 받고 return
-			if (Stones.Num() > MaxCount) return;
-
 			Resources[0]->SetActorRotation(FRotator::ZeroRotator);
 			
 			if (Stones.IsEmpty()) {
