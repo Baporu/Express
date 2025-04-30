@@ -69,7 +69,7 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 
 			if (Woods.IsEmpty()) {
 				Client_AttachResource(Resources[0]);
-				Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, ItemHeight));
+				Resources[0]->SetActorLocation(GetActorLocation() + FVector(-40.0, 0.0, 70.0));
 			}
 			else {
 				Client_AttachResourceToParent(Resources[0], Woods.Top());
@@ -86,7 +86,7 @@ void ATrainCargo::AddResource(TArray<AItem*> Resources)
 			
 			if (Stones.IsEmpty()) {
 				Client_AttachResource(Resources[0]);
-				Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, ItemHeight));
+				Resources[0]->SetActorLocation(GetActorLocation() + FVector(40.0, 0.0, 70.0));
 			}
 			else {
 				Client_AttachResourceToParent(Resources[0], Stones.Top());
