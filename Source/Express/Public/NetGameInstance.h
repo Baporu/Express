@@ -92,4 +92,10 @@ public:
 	// 다국어 인코딩
 	FString StringBase64Encode(const FString& str);
 	FString StringBase64Decode(const FString& str);
+
+
+public:
+	FName currentSessionName;
+
+	int32 GetMaxPlayer();
 };
