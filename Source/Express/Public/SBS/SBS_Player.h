@@ -101,6 +101,7 @@ public:
 	bool bIsEnded = false;
 
 	bool FindTrain();
+	void BillboardArrow();
 
  	UFUNCTION(Server, Reliable)
  	void Server_FindTrain(const TArray<class AItem*>& PlayerItems);

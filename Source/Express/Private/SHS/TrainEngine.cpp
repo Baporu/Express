@@ -53,6 +53,8 @@ void ATrainEngine::Tick(float DeltaTime)
 
 	if (bIsFinished) bOnAccel ? AccelModules(DeltaTime) : DecelModules(DeltaTime);
 
+	AddTrainSpeed(DeltaTime);
+
 	// 타일 위치에 도달했을 경우, 다음 타일 검색
 	if (FVector::Dist2D(GetActorLocation(), NextPos) <= 0.5) {
 		CheckNextTile();
@@ -352,6 +354,13 @@ void ATrainEngine::GetMainCamera() {
 		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Camera Fail"));
+}
+
+void ATrainEngine::AddTrainSpeed(float DeltaTime) {
+	TrainSpeed += 0.03f * DeltaTime;
+
+	for (int i = 1; i < TrainModules.Num(); ++i)
+		TrainModules[i]->ModuleSpeed = TrainSpeed;
 }
 
 void ATrainEngine::AccelModules(float DeltaTime) {

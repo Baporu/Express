@@ -81,7 +81,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Move")
 	float ModuleSpeed = 25.0f;
 	// 출발 여부 변수, 기다리다가 출발
-	UPROPERTY(VisibleAnywhere, Category = "Move")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move")
 	bool bIsStarted = false;
 
 	// 화재 로직 관련

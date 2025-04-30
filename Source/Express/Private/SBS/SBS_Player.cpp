@@ -65,6 +65,9 @@ void ASBS_Player::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    // 화살표 빌보드
+    BillboardArrow();
+
     // 게임 끝나면 상호작용 중지
     if (bIsEnded) return;
 
@@ -538,6 +541,14 @@ bool ASBS_Player::FindTrain()
         // 화물차도 제작차도 아니니까 return false
         return false;
     */}
+}
+
+void ASBS_Player::BillboardArrow() {
+    if (!IsLocallyControlled() || !MyArrowMesh) {
+        return;
+    }
+
+    MyArrowMesh->SetWorldRotation(FQuat(FRotator(0.0, 90.0, -90.0)));
 }
 
 void ASBS_Player::Server_FindTrain_Implementation(const TArray<class AItem*>& PlayerItems) {

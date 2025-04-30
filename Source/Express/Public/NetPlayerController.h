@@ -17,6 +17,7 @@ class EXPRESS_API ANetPlayerController : public APlayerController
 public:
 	UPROPERTY()
 	class AExp_GameMode* gm;
+	UPROPERTY(BlueprintReadWrite)
 	bool bIsLoaded = false;
 
 	virtual void BeginPlay() override;
