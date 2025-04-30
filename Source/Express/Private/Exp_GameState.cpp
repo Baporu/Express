@@ -84,11 +84,11 @@ void AExp_GameState::Server_CheckLoading_Implementation() {
 
 	int32 currentPlayers = gs->GetMaxPlayer();
 
-	if (PlayerArray.Num() != currentPlayers) {
-		UE_LOG(LogTrain, Warning, TEXT("PlayerArray.Num() != currentPlayers, return"));
-
-		return;
-	}
+// 	if (PlayerArray.Num() != currentPlayers) {
+// 		UE_LOG(LogTrain, Warning, TEXT("PlayerArray.Num() %d != currentPlayers %d, return"), PlayerArray.Num(), currentPlayers);
+// 
+// 		return;
+// 	}
 
 	bool bFullyLoaded = true;
 
