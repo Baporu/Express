@@ -52,6 +52,8 @@ TArray<AItem*> ATrainCrafter::GetRail()
 	Client_DetachRail(items[0]);
 	Rails.Empty();
 
+	CheckMakeRail();
+
 	return items;
 }
 
