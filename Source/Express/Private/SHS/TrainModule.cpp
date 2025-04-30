@@ -35,7 +35,7 @@ ATrainModule::ATrainModule()
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
 	if (tempMesh.Succeeded()) {
-		MeshComp->SetStaticMesh(tempMesh.Object);
+		//MeshComp->SetStaticMesh(tempMesh.Object);
 		ChainComp->SetStaticMesh(tempMesh.Object);
 	}
 

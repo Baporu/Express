@@ -57,7 +57,7 @@ public:
 	bool GetIsStarted();
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Train")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,  Category = "Train")
 	float TrainSpeed = 15.0f;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "Tile")

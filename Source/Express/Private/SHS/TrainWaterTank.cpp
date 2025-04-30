@@ -11,7 +11,7 @@
 ATrainWaterTank::ATrainWaterTank()
 {
 	ConstructorHelpers::FObjectFinder<UMaterial> tempMat(TEXT("/Script/Engine.Material'/Game/SHS/Designs/M_WaterTank.M_WaterTank'"));
-	if (tempMat.Succeeded()) MeshComp->SetMaterial(0, tempMat.Object);
+	if (tempMat.Succeeded()) MeshComp->SetMaterial(1, tempMat.Object);
 }
 
 // Called when the game starts or when spawned
@@ -19,7 +19,7 @@ void ATrainWaterTank::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TankMaterial = MeshComp->CreateDynamicMaterialInstance(0);
+	TankMaterial = MeshComp->CreateDynamicMaterialInstance(1);
 
 	AExp_GameMode* gm = Cast<AExp_GameMode>(GetWorld()->GetAuthGameMode());
 	if (gm) gm->WaterTank = this;
