@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerState.h"
 #include "NetPlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "NetGameInstance.h"
 
 void AExp_GameState::SetTrainEngine(class ATrainEngine* Engine) {
 	if (!TrainEngine) TrainEngine = Engine;
@@ -72,10 +73,27 @@ void AExp_GameState::Server_CheckLoading_Implementation() {
 
 		return;
 	}
+	
+	auto gs = Cast<UNetGameInstance>(GetGameInstance());
+	
+	if (!gs) {
+		PRINTTRAIN(TEXT("There is no game state"));
+
+		return;
+	}
+
+	int32 currentPlayers = gs->GetMaxPlayer();
+
+	if (PlayerArray.Num() != currentPlayers) {
+		UE_LOG(LogTrain, Warning, TEXT("PlayerArray.Num() != currentPlayers, return"));
+
+		return;
+	}
 
 	bool bFullyLoaded = true;
 
 	PRINTTRAIN(TEXT("Check Loading Progress"));
+
 	for (APlayerState* ps : PlayerArray) {
 		auto pc = Cast<ANetPlayerController>(ps->GetOwner());
 

@@ -73,6 +73,7 @@ void UNetGameInstance::CreateMySession(FString roomName, int32 playerCount)
 void UNetGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	PRINTLOG(TEXT("SessionName : %s, bWasSuccessful : %d"), *SessionName.ToString(), bWasSuccessful);
+	currentSessionName = SessionName;
 
 	if (bWasSuccessful == true)
 	{
@@ -255,4 +256,18 @@ FString UNetGameInstance::StringBase64Decode(const FString& str)
 	FBase64::Decode(str, arrayData);
 	std::string utf8String((char*)(arrayData.GetData()), arrayData.Num());
 	return UTF8_TO_TCHAR(utf8String.c_str());
+}
+
+int32 UNetGameInstance::GetMaxPlayer() {
+	if (auto subsys = IOnlineSubsystem::Get()) {
+		// 서브시스템으로부터 세션인터페이스 가져오기
+		sessionInterface = subsys->GetSessionInterface();
+
+		if (sessionInterface.IsValid()) {
+			if (auto session = sessionInterface->GetNamedSession(currentSessionName))
+				return session->RegisteredPlayers.Num();
+		}
+	}
+
+	return -1;
 }
