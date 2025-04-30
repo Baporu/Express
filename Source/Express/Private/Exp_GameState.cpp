@@ -67,7 +67,11 @@ void AExp_GameState::ResetInputMode() {
 }
 
 void AExp_GameState::Server_CheckLoading_Implementation() {
-	if (!TrainEngine) return;
+	if (!TrainEngine) {
+		PRINTTRAIN(TEXT("There is no engine"));
+
+		return;
+	}
 
 	bool bFullyLoaded = true;
 
