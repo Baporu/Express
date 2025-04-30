@@ -32,6 +32,8 @@ public:
 	TSubclassOf<class ATrainCargo> BP_Cargo;
 	UPROPERTY(EditDefaultsOnly, Category = "Train")
 	TSubclassOf<class ATrainCrafter> BP_Crafter;
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* Sound_TrainStart;
 
 	void Init(class AGridManager* Grid, class ATile* NextTile, int32 Row, int32 Column);
 	void SetInitTimer();

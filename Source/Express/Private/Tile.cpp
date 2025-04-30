@@ -15,6 +15,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Express/Express.h"
 #include "Exp_GameState.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -69,9 +70,22 @@ void ATile::ReduceHP()
 	}
 	CurTileHP--;
 	UpdateMeshMat();
+	if (TileType == ETileType::Wood)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound_Wood, GetActorLocation());
+	}
+	else if (TileType == ETileType::Stone)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound_Stone, GetActorLocation());
+
+	}
 	if (CurTileHP <= 0)
 	{
+		if(TileType == ETileType::Water)
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound_Water, GetActorLocation());
+
 		HarvestTile();
+		
 	}
 }
 

@@ -14,6 +14,7 @@
 #include "Camera/CameraActor.h"
 #include "EngineUtils.h"
 #include "Exp_GameState.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATrainEngine::ATrainEngine()
@@ -26,7 +27,6 @@ ATrainEngine::ATrainEngine()
 void ATrainEngine::BeginPlay()
 {
 	Super::BeginPlay();
-
 	TrainEngine = this;
 	ModuleNumber = 0;
 	MinSpeed = TrainSpeed;
@@ -66,6 +66,8 @@ void ATrainEngine::Init(AGridManager* Grid, ATile* NextTile, int32 Row, int32 Co
 	RowIndex = Row;
 	ColIndex = Column;
 
+	
+
 	NextPos = GetActorLocation();
 	
 	FVector CurPos = GetActorLocation();
@@ -86,6 +88,8 @@ void ATrainEngine::SetInitTimer() {
 																						CheckNextTile();
 																						for (int i = 0; i < TrainModules.Num(); ++i)
 																							TrainModules[i]->bIsStarted = true;
+																						UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound_TrainStart, GetActorLocation());
+
 																					}), InitTime, false);
 }
 
